@@ -5,6 +5,7 @@ import * as cx from "../lib/ccxt/jobs";
 import * as extra from "../lib/extra/jobs";
 import * as nn from "../lib/nownodes/jobs";
 import { seedWalletLabels, verifyWalletLabels } from "../lib/nownodes/wallets";
+import { runSignals } from "../lib/signals/engine";
 import { runRetention } from "../lib/retention";
 import { withDeadline } from "../lib/http";
 import os from "node:os";
@@ -85,6 +86,7 @@ const RUNNERS: Record<string, () => Promise<number | unknown>> = {
   "nn:node-status": nn.syncNodeStatus,
   "nn:holders": async () => (await nn.syncHolderConcentration()) + (await nn.syncCardanoAssets()),
   "nn:reference": syncOnchainReference,
+  "signals:scan": runSignals,
   "ccxt:backfill": () => cx.backfillCandles(7), // only fetches symbols missing history
   "cg:backfill": () => cg.backfillMarketCharts(30), // 30 days hourly; only fetches tokens missing history
   "cg:gap-fill": cg.fillMarketGaps,

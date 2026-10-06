@@ -16,6 +16,7 @@
     "ccxt": "tsx scripts/ccxt.ts",
     "report": "tsx scripts/token-report.ts",
     "nownodes": "tsx scripts/nownodes.ts",
+    "signals": "tsx scripts/signals.ts",
     "worker:supervised": "bash scripts/run-worker.sh"
   },
   "dependencies": {

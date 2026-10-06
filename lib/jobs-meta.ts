@@ -3,13 +3,14 @@ import { env } from "./env";
 // Single source of truth for the worker's schedule: the worker attaches a run function to each entry,
 // the /status dashboard uses the same entries to group jobs and compute when each should run next.
 
-export type Category = "market" | "spot" | "futures" | "onchain" | "maintenance";
+export type Category = "market" | "spot" | "futures" | "onchain" | "intelligence" | "maintenance";
 
 export const CATEGORY_LABEL: Record<Category, string> = {
   market: "Market data · CoinGecko",
   spot: "Exchange spot · CCXT",
   futures: "Futures & leverage",
   onchain: "Onchain · NOWNodes",
+  intelligence: "Signals & investigations",
   maintenance: "Maintenance",
 };
 
@@ -57,6 +58,9 @@ export const JOB_SCHEDULE: JobMeta[] = [
   { name: "nn:node-status", everySec: 300, offsetSec: 58, endpoint: "nownodes|watcher:/networks/status", category: "onchain", label: "NOWNodes node health" },
   { name: "nn:holders", everySec: 86400, offsetSec: 3000, endpoint: "nownodes|sol:getTokenLargestAccounts", category: "onchain", label: "Holder concentration · Solana" },
   { name: "nn:reference", everySec: 86400, offsetSec: 700, endpoint: "nownodes|eth:/address/{wallet}:basic", category: "onchain", label: "Contract map + wallet labels" },
+
+  // Intelligence. Signals at :50s, after the minute's prices (:40s) and candles (:05s) have landed.
+  { name: "signals:scan", everySec: 60, offsetSec: 50, category: "intelligence", label: "Signal rules over all 100 coins" },
 
   // Maintenance.
   { name: "ccxt:backfill", everySec: 3600, offsetSec: 120, category: "maintenance", label: "Candle history (missing only)" },

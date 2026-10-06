@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: "Live health of CoinGraph's data feeds, jobs, coverage and budget.",
 };
 
-const CATEGORY_ORDER: Category[] = ["market", "spot", "futures", "onchain", "maintenance"];
+const CATEGORY_ORDER: Category[] = ["market", "spot", "futures", "onchain", "intelligence", "maintenance"];
 
 const levelStyle: Record<Level, string> = {
   ok: "bg-life/15 text-life ring-life/30",
