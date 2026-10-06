@@ -1,15 +1,17 @@
 import { sql } from "../lib/db";
 import * as nn from "../lib/nownodes/jobs";
-import { seedWalletLabels, verifyWalletLabels } from "../lib/nownodes/wallets";
+import { seedWalletLabels, verifySolanaWallets, verifyWalletLabels } from "../lib/nownodes/wallets";
 
 // `npm run nownodes -- <command>` — run one NOWNodes job by hand.
 const commands: Record<string, () => Promise<unknown>> = {
   contracts: nn.syncOnchainContracts,
   wallets: async () => {
     const seeded = await seedWalletLabels();
-    const checked = (await verifyWalletLabels("eth")) + (await verifyWalletLabels("bsc")) + (await verifyWalletLabels("btc"));
+    const checked = (await verifyWalletLabels("eth")) + (await verifyWalletLabels("bsc")) + (await verifyWalletLabels("btc")) + (await verifySolanaWallets());
     return { seeded, checked };
   },
+  "sol-wallets": async () => ({ seeded: await seedWalletLabels(), checked: await verifySolanaWallets() }),
+  "sol-reserves": nn.syncSolanaReserves,
   "eth-flows": () => nn.syncTokenFlows("eth"),
   "bsc-flows": () => nn.syncTokenFlows("bsc"),
   fees: nn.syncChainFees,

@@ -233,7 +233,12 @@ export async function loadStatus() {
       select (select credits_remaining from api_calls where endpoint = '/key' and credits_remaining is not null order by id desc limit 1) as remaining,
              (select started_at from api_calls where endpoint = '/key' and credits_remaining is not null order by id desc limit 1) as checked_at,
              (select count(*) from api_calls where provider = 'coingecko' and started_at > now() - interval '24 hours')::int as used_24h,
-             (select count(*) from api_calls where provider = 'coingecko' and started_at > date_trunc('day', now()))::int as used_today`,
+             (select count(*) from api_calls where provider = 'coingecko' and started_at > date_trunc('day', now()))::int as used_today,
+             (select count(*) from api_calls where provider = 'nownodes' and endpoint not like 'watcher:%' and started_at > date_trunc('month', now()))::int as nn_month,
+             (select count(*) from api_calls where provider = 'nownodes' and endpoint not like 'watcher:%' and started_at > now() - interval '24 hours')::int as nn_24h,
+             (select jsonb_object_agg(chain, n) from (
+                select split_part(endpoint, ':', 1) as chain, count(*) as n from api_calls
+                where provider = 'nownodes' and endpoint not like 'watcher:%' and started_at > now() - interval '24 hours' group by 1) c) as nn_by_chain`,
 
     sql`select captured_at, db_size_bytes, credits_remaining, table_sizes from system_metrics where captured_at > now() - interval '7 days' order by captured_at`,
 
@@ -336,6 +341,13 @@ export async function loadStatus() {
       largest: (conn?.largest ?? {}) as Record<string, number>,
       connections: (conn?.connections as number) ?? 0,
       maxConnections: (conn?.max_connections as number) ?? 0,
+      nownodes: {
+        plan: Number(process.env.NOWNODES_MONTHLY_REQUESTS ?? 100_000),
+        usedMonth: (b?.nn_month as number) ?? 0,
+        used24h: (b?.nn_24h as number) ?? 0,
+        projectedMonth: Math.round(((b?.nn_24h as number) ?? 0) * (new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0)).getUTCDate())),
+        byChain: ((b?.nn_by_chain ?? {}) as Record<string, number>),
+      },
     },
   };
 }

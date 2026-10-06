@@ -397,6 +397,20 @@ export default async function StatusPage({ searchParams }: { searchParams: Promi
               Checked {ago(budget.checkedAt, now)}. Credits are shared by every key on the account; per-feed use is in the Feeds tables above.
             </p>
           </Card>
+          <Card title="NOWNodes requests (Start plan)" level={budget.nownodes.projectedMonth > budget.nownodes.plan * 1.5 ? "down" : budget.nownodes.projectedMonth > budget.nownodes.plan ? "late" : "ok"}>
+            <Stat label="Used this month" value={`${num(budget.nownodes.usedMonth)} / ${num(budget.nownodes.plan)}`} />
+            <Stat label="Last 24h" value={num(budget.nownodes.used24h)} />
+            <Stat label="Projected for a full month at this rate" value={num(budget.nownodes.projectedMonth)} level={budget.nownodes.projectedMonth > budget.nownodes.plan ? "late" : "ok"} />
+            <div className="mt-3">
+              <p className="mb-1 text-xs text-mist">By chain, last 24h</p>
+              <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                {Object.entries(budget.nownodes.byChain).sort((a, b) => b[1] - a[1]).map(([chain, n]) => (
+                  <li key={chain}><span className="font-mono text-bone">{chain}</span> <span className="numerals text-mist">{num(n)}</span></li>
+                ))}
+              </ul>
+            </div>
+            <p className="mt-2 text-xs text-mist">Counted from our own call log (every NOWNodes request is recorded). The plan allows 100k requests a month; we plan to upgrade after the hackathon.</p>
+          </Card>
           <Card title="Database (Supabase · Small)" level={budget.connections > budget.maxConnections * 0.8 ? "late" : "ok"}>
             <Stat label="Size" value={bytes(budget.dbBytes)} />
             <Stat label="Growth per day" value={budget.growthPerDay !== null ? bytes(budget.growthPerDay) : "measuring…"} />

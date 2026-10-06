@@ -4,7 +4,7 @@ import * as cg from "../lib/coingecko/jobs";
 import * as cx from "../lib/ccxt/jobs";
 import * as extra from "../lib/extra/jobs";
 import * as nn from "../lib/nownodes/jobs";
-import { seedWalletLabels, verifyWalletLabels } from "../lib/nownodes/wallets";
+import { seedWalletLabels, verifySolanaWallets, verifyWalletLabels } from "../lib/nownodes/wallets";
 import { runSignals } from "../lib/signals/engine";
 import { runQueuedInvestigations } from "../lib/investigations/runner";
 import { runRetention } from "../lib/retention";
@@ -46,6 +46,7 @@ async function syncOnchainReference(): Promise<number> {
   const contracts = await nn.syncOnchainContracts();
   await seedWalletLabels();
   for (const chain of ["eth", "bsc", "btc"] as const) await verifyWalletLabels(chain);
+  await verifySolanaWallets();
   await nn.syncExchangeReserves(0); // all exchange wallets once a day; the hourly job covers the largest 25
   return contracts;
 }
@@ -83,7 +84,7 @@ const RUNNERS: Record<string, () => Promise<number | unknown>> = {
   "nn:btc-blocks": () => nn.syncBtcBlocks(),
   "nn:btc-mempool": nn.syncBtcMempool,
   "nn:ada-transfers": nn.syncAdaLargeTransfers,
-  "nn:exchange-reserves": nn.syncExchangeReserves,
+  "nn:exchange-reserves": async () => (await nn.syncExchangeReserves()) + (await nn.syncSolanaReserves()),
   "nn:node-status": nn.syncNodeStatus,
   "nn:holders": async () => (await nn.syncHolderConcentration()) + (await nn.syncCardanoAssets()),
   "nn:reference": syncOnchainReference,

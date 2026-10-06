@@ -71,7 +71,8 @@ Continuous feeds (`lib/nownodes/jobs.ts`, CLI `npm run nownodes -- <cmd>`). Ever
 | 28 | Blockbook `GET /api/v2/` (best height), `GET /api/v2/block/{height}?page=n` (1,000 txs per page) | btc | each block | `btc_block_snapshots`, `onchain_transfers` (≥ $500k, outputs not returning to inputs), `onchain_flow_snapshots` |
 | 29 | `getmempoolinfo`, `estimatesmartfee` (1, 3, 6 blocks) | btc | 15 min | `btc_mempool_snapshots` |
 | 30 | GraphQL `transactions(where: {includedAt ≥ cursor, totalOutput ≥ $100k in lovelace})`; amount = outputs to addresses that were not inputs (change excluded) | ada | 15 min | `onchain_transfers` (≥ $100k), `onchain_flow_snapshots` |
-| 31 | `getTokenSupply` + `getTokenLargestAccounts` per Solana token; Blockfrost `GET /assets/{asset}` | sol, ada | daily | `token_holder_snapshots` |
+| 31 | `getTokenSupply` + `getTokenLargestAccounts` per non-stablecoin Solana token; Blockfrost `GET /assets/{asset}` | sol, ada | daily | `token_holder_snapshots` |
+| 31b | `getBalance` per known Solana exchange wallet (10 wallets, verified by balance ≥ 1,000 SOL) | sol | hourly | `exchange_reserve_snapshots` (coin `solana`) |
 | 32 | `GET watcher.nownodes.io/api/v1.0/networks/status?tickers=eth,bsc,btc,sol,ada` (public) | all | 5 min | `nownodes_node_status` |
 | 33 | Blockbook `GET /api/v2/address/{wallet}?details=basic` (verifies each seeded exchange wallet: tx count, balance; idle/invalid → inactive); `GET /api/v2/contract/{address}` for missing decimals | eth, bsc, btc | daily | `wallet_labels`, `onchain_contracts` |
 

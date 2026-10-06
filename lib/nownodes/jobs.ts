@@ -340,6 +340,26 @@ export async function syncExchangeReserves(topWallets = Number(process.env.NN_RE
   return rows.length;
 }
 
+// Solana: SOL held by known exchange wallets (one getBalance per wallet), hourly.
+export async function syncSolanaReserves(): Promise<number> {
+  const captured = minuteNow();
+  const price = (await latestPrices()).get("solana") ?? null;
+  const wallets = await sql<{ address: string; entity: string }[]>`select address, entity from wallet_labels where chain = 'sol' and kind = 'exchange' and active order by entity, address`;
+  const rows: Record<string, unknown>[] = [];
+  for (const w of wallets) {
+    try {
+      const { data, apiCallId } = await rpc<{ value: number }>("sol", "getBalance", [w.address], { params: { wallet: w.address, entity: w.entity } });
+      const sol = data.value / 1e9;
+      rows.push({ captured_at: captured, chain: "sol", wallet: w.address, entity: w.entity, coingecko_id: "solana", balance: sol, balance_usd: price !== null ? sol * price : null, api_call_id: apiCallId });
+      await recordRowCount(apiCallId, 1);
+    } catch (err) {
+      console.warn(`[reserves] sol ${w.entity} ${w.address}: ${(err as Error).message.slice(0, 120)}`);
+    }
+  }
+  await insertChunked("exchange_reserve_snapshots", rows, "on conflict do nothing");
+  return rows.length;
+}
+
 // ---------------------------------------------------------------------------
 // Bitcoin blocks: per-block totals + large transfers (outputs to addresses not among the inputs).
 // ---------------------------------------------------------------------------

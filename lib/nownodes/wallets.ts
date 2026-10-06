@@ -1,5 +1,5 @@
 import { sql } from "../db";
-import { blockbook, ZERO_ADDRESS } from "./client";
+import { blockbook, rpc, ZERO_ADDRESS } from "./client";
 
 // Known exchange wallets from public labels (Etherscan / BscScan / Arkham style labels). Seeded into
 // wallet_labels, then verified against the chain: an exchange hot wallet has a very large transaction
@@ -107,7 +107,6 @@ const BTC: Seed[] = [
   { entity: "bitfinex", label: "Bitfinex", address: "3JZq4atUahhuA9rLhXLMhhTo133J9rF97j", confidence: "medium" },
   { entity: "htx", label: "HTX cold", address: "3Cbq7aT1tY8kMxWLbitaG7yT6bPbKChq64", confidence: "medium" },
   { entity: "htx", label: "HTX", address: "1Pzaqw98PeRfyHypfqyEgg5yycJRsENrE7", confidence: "medium" },
-  { entity: "kraken", label: "Kraken", address: "36zSLdRv1jyewjmvj6cvcHRBLgR8sN2vZN", confidence: "medium" },
   { entity: "bitstamp", label: "Bitstamp", address: "3FHNBLobJnbCTFTVakh5TXmEneyf5PT61B", confidence: "medium" },
   { entity: "bitstamp", label: "Bitstamp", address: "3DVJfEsDTPkGDvqPCLC41X85L1B1DQWDyh", confidence: "medium" },
   { entity: "bittrex", label: "Bittrex", address: "1Kr6QSydW9bFQG1mXiPNNu6WpJGmUa9i1g", confidence: "medium" },
@@ -115,13 +114,47 @@ const BTC: Seed[] = [
   { entity: "okx", label: "OKX", address: "3P3QsMVK89JBNqZQv5zMAKG8FK3kJM4rjt", confidence: "medium" },
 ];
 
+// Solana exchange wallets (checked by SOL balance on seeding: each held 12k–10.6M SOL).
+const SOL: Seed[] = [
+  { entity: "binance", label: "Binance", address: "5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9" },
+  { entity: "binance", label: "Binance 2", address: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM" },
+  { entity: "coinbase", label: "Coinbase", address: "H8sMJSCQxfKiFTCfDR3DUMLPwcRbM61LGFJ8N4dK3WjS" },
+  { entity: "coinbase", label: "Coinbase 2", address: "GJRs4FwHtemZ5ZE9x3FNvJ8TMwitKTh21yxdRPqn7npE" },
+  { entity: "coinbase", label: "Coinbase 3", address: "FpwQQhQQoEaVu3WU2qZMfF1hx48YyfwsLoRgXG83E99Q" },
+  { entity: "bybit", label: "Bybit", address: "AC5RDfQFmDS1deWZos921JfqscXdByf8BKHs5ACWjtW2" },
+  { entity: "kucoin", label: "KuCoin", address: "BmFdpraQhkiDQE6SnfG5omcA1VwzqfXrwtNYBwWTymy6" },
+  { entity: "gate", label: "Gate.io", address: "u6PJ8DtQuPFnfmwHbGFULQ4u4EgjDiyYKjVEsynXq2w" },
+  { entity: "crypto.com", label: "Crypto.com", address: "AobVSwdW9BbpMdJvTqeCN4hPAmh4rHm7vwLnQ5ATSyrS" },
+  { entity: "mexc", label: "MEXC", address: "ASTyfSima4LLAdDgoFGkgqoKowG1LZFDr9fAQrg7iaJZ" },
+];
+
 const SEEDS: { chain: string; list: Seed[] }[] = [
   { chain: "eth", list: ETH },
   { chain: "bsc", list: BSC },
   { chain: "btc", list: BTC },
+  { chain: "sol", list: SOL },
 ];
 
-const norm = (chain: string, address: string) => (chain === "btc" ? address : address.toLowerCase());
+const norm = (chain: string, address: string) => (chain === "btc" || chain === "sol" ? address : address.toLowerCase());
+
+// Solana wallets are checked by balance: an exchange wallet holds thousands of SOL.
+export async function verifySolanaWallets(minSol = 1000): Promise<number> {
+  const rows = await sql<{ address: string }[]>`
+    select address from wallet_labels where chain = 'sol' and kind = 'exchange' and (verified_at is null or verified_at < now() - interval '7 days')`;
+  let checked = 0;
+  for (const { address } of rows) {
+    try {
+      const { data } = await rpc<{ value: number }>("sol", "getBalance", [address], { params: { wallet: address }, logical: "sol:getBalance:verify" });
+      const sol = data.value / 1e9;
+      await sql`update wallet_labels set balance_native = ${sol}, active = ${sol >= minSol}, verified_at = now() where chain = 'sol' and address = ${address}`;
+      checked++;
+    } catch (err) {
+      await sql`update wallet_labels set active = false, verified_at = now() where chain = 'sol' and address = ${address}`;
+      console.warn(`[wallets] sol ${address}: ${(err as Error).message.slice(0, 120)}`);
+    }
+  }
+  return checked;
+}
 
 export async function seedWalletLabels(): Promise<number> {
   let n = 0;
