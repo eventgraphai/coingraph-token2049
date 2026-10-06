@@ -61,6 +61,7 @@ export const JOB_SCHEDULE: JobMeta[] = [
 
   // Intelligence. Signals at :50s, after the minute's prices (:40s) and candles (:05s) have landed.
   { name: "signals:scan", everySec: 60, offsetSec: 50, category: "intelligence", label: "Signal rules over all 100 coins" },
+  { name: "investigations:run", everySec: 60, offsetSec: 20, category: "intelligence", label: "Evidence + Claude brief for queued coins" },
 
   // Maintenance.
   { name: "ccxt:backfill", everySec: 3600, offsetSec: 120, category: "maintenance", label: "Candle history (missing only)" },

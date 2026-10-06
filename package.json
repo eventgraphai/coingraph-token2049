@@ -17,9 +17,11 @@
     "report": "tsx scripts/token-report.ts",
     "nownodes": "tsx scripts/nownodes.ts",
     "signals": "tsx scripts/signals.ts",
+    "investigate": "tsx scripts/investigate.ts",
     "worker:supervised": "bash scripts/run-worker.sh"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
     "@supabase/storage-js": "^2.109.0",
     "ccxt": "^4.5.85",
     "dotenv": "^18.0.5",
