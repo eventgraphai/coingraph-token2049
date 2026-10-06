@@ -59,6 +59,11 @@ export const JOB_SCHEDULE: JobMeta[] = [
   { name: "nn:holders", everySec: 86400, offsetSec: 3000, endpoint: "nownodes|sol:getTokenLargestAccounts", category: "onchain", label: "Holder concentration · Solana" },
   { name: "nn:reference", everySec: 86400, offsetSec: 700, endpoint: "nownodes|eth:/address/{wallet}:basic", category: "onchain", label: "Contract map + wallet labels" },
 
+  // External context (free): news headlines, Fear & Greed, DefiLlama TVL.
+  { name: "news:rss", everySec: 900, offsetSec: 70, endpoint: "rss|cointelegraph", category: "market", label: "News headlines (4 RSS feeds)" },
+  { name: "fng:index", everySec: 86400, offsetSec: 1200, endpoint: "alternative.me|/fng", category: "market", label: "Fear & Greed index" },
+  { name: "llama:tvl", everySec: 21600, offsetSec: 1500, endpoint: "defillama|/protocols", category: "market", label: "Protocol TVL · DefiLlama" },
+
   // Intelligence. Signals at :50s, after the minute's prices (:40s) and candles (:05s) have landed.
   { name: "signals:scan", everySec: 60, offsetSec: 50, category: "intelligence", label: "Signal rules over all 100 coins" },
   { name: "investigations:run", everySec: 60, offsetSec: 20, category: "intelligence", label: "Evidence + Claude brief for queued coins" },

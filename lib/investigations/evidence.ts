@@ -237,6 +237,38 @@ export async function gatherEvidence(coingecko_id: string, windowFrom: Date, win
   add("coingecko:/coins/markets+/global", "market_context", `Market: BTC ${signed(pct(n(ctx[0]?.p_now), n(ctx[0]?.p_from)))} and ETH ${signed(pct(n(ctx[1]?.p_now), n(ctx[1]?.p_from)))} over the same window; total crypto market cap ${signed(n(glob?.mc24h) !== null ? Math.round(Number(glob.mc24h) * 100) / 100 : null)} in 24h${trending[0]?.at ? `; ${sym} is in CoinGecko's trending searches` : ""}; categories: ${(token.categories as string[] | null)?.slice(0, 4).join(", ") ?? "n/a"}`,
     { btc_window_return_pct: pct(n(ctx[0]?.p_now), n(ctx[0]?.p_from)), eth_window_return_pct: pct(n(ctx[1]?.p_now), n(ctx[1]?.p_from)), btc_change_24h_pct: n(ctx[0]?.ch24h), global_market_cap_change_24h_pct: n(glob?.mc24h), trending: Boolean(trending[0]?.at), categories: token.categories });
 
+  // --- News, market mood, fundamentals -------------------------------------------------------------------
+  const news = await sql`
+    select source, title, url, published_at from news_items where ${coingecko_id} = any(coins) and published_at > ${windowFrom} - interval '24 hours'
+    order by published_at desc limit 8`;
+  if (news.length) {
+    add("rss:coindesk+cointelegraph+decrypt+theblock", "news", `${news.length} headlines mentioning ${sym} in the last day: ${news.slice(0, 4).map((h) => `"${h.title}" (${h.source}, ${new Date(h.published_at).toISOString().slice(5, 16).replace("T", " ")})`).join("; ")}`,
+      { headlines: news.map((h) => ({ source: h.source, title: h.title, url: h.url, published_at: h.published_at })) });
+  }
+  const [fng] = await sql`select day, value, classification, (select value from market_sentiment_snapshots s2 where s2.day <= s.day - 7 order by day desc limit 1) as week_ago from market_sentiment_snapshots s order by day desc limit 1`;
+  if (fng) add("alternative.me:/fng", "market_mood", `Crypto Fear & Greed index ${fng.value} (${fng.classification}) today${fng.week_ago !== null ? `, ${fng.week_ago} a week ago` : ""}`,
+    { value: fng.value, classification: fng.classification, week_ago: fng.week_ago, day: fng.day });
+  const tvl = await sql`
+    select protocol, name, category, tvl_usd, change_1d_pct, change_7d_pct from protocol_tvl_snapshots
+    where coingecko_id = ${coingecko_id} and captured_at = (select max(captured_at) from protocol_tvl_snapshots where coingecko_id = ${coingecko_id})
+    order by tvl_usd desc limit 4`;
+  if (tvl.length) add("defillama:/protocols", "protocol_tvl", `Protocol TVL (DefiLlama): ${tvl.map((t) => `${t.name} ${usd(n(t.tvl_usd))} (${signed(n(t.change_1d_pct) !== null ? Math.round(Number(t.change_1d_pct) * 100) / 100 : null)} 1d, ${signed(n(t.change_7d_pct) !== null ? Math.round(Number(t.change_7d_pct) * 100) / 100 : null)} 7d)`).join("; ")}`,
+    { protocols: tvl.map((t) => ({ protocol: t.protocol, name: t.name, category: t.category, tvl_usd: n(t.tvl_usd), change_1d_pct: n(t.change_1d_pct), change_7d_pct: n(t.change_7d_pct) })) });
+  const [detail] = await sql`
+    select captured_at, developer_data, community_data, sentiment_votes_up_percentage, sentiment_votes_down_percentage from coin_detail_snapshots
+    where coingecko_id = ${coingecko_id} order by captured_at desc limit 1`;
+  if (detail) {
+    const dev = (detail.developer_data ?? {}) as Record<string, unknown>;
+    const com = (detail.community_data ?? {}) as Record<string, unknown>;
+    const parts = [
+      dev.commit_count_4_weeks != null ? `developer activity (4 weeks): ${dev.commit_count_4_weeks} commits, ${dev.pull_requests_merged ?? 0} PRs merged, ${dev.stars ?? 0} stars` : "developer activity: not tracked by CoinGecko for this coin",
+      com.twitter_followers != null || com.reddit_subscribers != null ? `community: ${com.twitter_followers ?? "n/a"} X followers, ${com.reddit_subscribers ?? "n/a"} Reddit subscribers` : null,
+      n(detail.sentiment_votes_up_percentage) !== null ? `CoinGecko sentiment ${n(detail.sentiment_votes_up_percentage)?.toFixed(0)}% positive` : null,
+    ].filter(Boolean);
+    add("coingecko:/coins/{id}", "dev_and_community", `${parts.join("; ")} (as of ${new Date(detail.captured_at).toISOString().slice(0, 10)})`,
+      { commits_4w: dev.commit_count_4_weeks ?? null, prs_merged: dev.pull_requests_merged ?? null, stars: dev.stars ?? null, forks: dev.forks ?? null, twitter_followers: com.twitter_followers ?? null, reddit_subscribers: com.reddit_subscribers ?? null, sentiment_up_pct: n(detail.sentiment_votes_up_percentage), as_of: detail.captured_at });
+  }
+
   // --- Triggering signals ----------------------------------------------------------------------------
   if (triggerSignalIds.length) {
     const sigs = await sql`select id, kind, direction, severity, value, baseline, ratio, event_ts, details from signals where id = any(${triggerSignalIds}) order by severity desc`;

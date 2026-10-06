@@ -37,6 +37,9 @@ const FEED_INFO: Record<string, { category: Category; venues: string }> = {
   "nn:exchange-reserves": { category: "onchain", venues: "Ethereum, BNB Chain" },
   "nn:node-status": { category: "onchain", venues: "NOWNodes" },
   "nn:holders": { category: "onchain", venues: "Solana" },
+  "news:rss": { category: "market", venues: "CoinDesk, Cointelegraph, Decrypt, The Block" },
+  "fng:index": { category: "market", venues: "alternative.me" },
+  "llama:tvl": { category: "market", venues: "DefiLlama" },
 };
 
 export type Level = "ok" | "late" | "down";
@@ -165,6 +168,9 @@ export async function loadStatus() {
         ('chain_fee_snapshots',         (select max(captured_at) from chain_fee_snapshots),        'NOWNodes · 15 min'),
         ('exchange_reserve_snapshots',  (select max(captured_at) from exchange_reserve_snapshots), 'NOWNodes · hourly'),
         ('token_holder_snapshots',      (select max(captured_at) from token_holder_snapshots),     'NOWNodes · daily'),
+        ('news_items',                  (select max(published_at) from news_items),                'RSS · 15 min'),
+        ('protocol_tvl_snapshots',      (select max(captured_at) from protocol_tvl_snapshots),     'DefiLlama · 360 min'),
+        ('market_sentiment_snapshots',  (select max(captured_at) from market_sentiment_snapshots), 'Fear & Greed · daily'),
         ('exchange_tickers',            (select max(captured_at) from exchange_tickers),           'CoinGecko · daily'),
         ('coin_detail_snapshots',       (select max(captured_at) from coin_detail_snapshots),      'CoinGecko · daily')
       ) t(name, newest, cadence)

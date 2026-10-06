@@ -18,6 +18,7 @@
     "nownodes": "tsx scripts/nownodes.ts",
     "signals": "tsx scripts/signals.ts",
     "investigate": "tsx scripts/investigate.ts",
+    "external": "tsx scripts/external.ts",
     "worker:supervised": "bash scripts/run-worker.sh"
   },
   "dependencies": {

@@ -14,12 +14,13 @@ type Options = {
   method?: "GET" | "POST";
   body?: string;
   archive?: boolean; // default true; false for very large bodies that are fully stored in tables (e.g. eth_getLogs)
+  parse?: "json" | "text"; // default json; text for RSS/XML feeds
 };
 
 // Every external API call goes through here: it is logged in api_calls (provenance),
 // retried on 429/5xx, and its raw body is archived to storage in the background.
 export async function fetchLogged<T>(opts: Options): Promise<LoggedResponse<T>> {
-  const { provider, endpoint, url, params, headers, retries = 3, timeoutMs = 60_000, method = "GET", body: reqBody, archive = true } = opts;
+  const { provider, endpoint, url, params, headers, retries = 3, timeoutMs = 60_000, method = "GET", body: reqBody, archive = true, parse = "json" } = opts;
 
   const [{ id }] = await sql<{ id: number }[]>`
     insert into api_calls (provider, endpoint, params)
@@ -50,7 +51,7 @@ export async function fetchLogged<T>(opts: Options): Promise<LoggedResponse<T>> 
       if (!res.ok) throw new Error(`${provider} ${endpoint} HTTP ${res.status}: ${body.slice(0, 200)}`);
 
       if (archive) archiveRaw(id, provider, endpoint, body);
-      return { data: JSON.parse(body) as T, apiCallId: id };
+      return { data: (parse === "text" ? body : JSON.parse(body)) as T, apiCallId: id };
     } catch (err) {
       lastError = err as Error;
       if (lastError.message.includes(" HTTP 4")) break; // client errors are not retryable

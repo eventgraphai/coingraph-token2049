@@ -191,7 +191,33 @@ async function positioningExtreme(): Promise<SignalRow[]> {
     where c.r / nullif(b.avg_r, 0) >= 1.5 or c.r / nullif(b.avg_r, 0) <= 0.67`;
 }
 
+// 10. News burst: a coin named in ≥ 2 headlines in the last 2 hours across the feeds (≥ 4 = high).
+async function newsBurst(): Promise<SignalRow[]> {
+  return sql<SignalRow[]>`
+    with recent as (select unnest(coins) as coingecko_id, title, source, published_at from news_items where published_at > now() - interval '2 hours'),
+    agg as (select coingecko_id, count(*)::int as n, max(published_at) as last, array_agg(title order by published_at desc) as titles, array_agg(source order by published_at desc) as sources
+            from recent where coingecko_id in (${COINS}) group by 1)
+    select coingecko_id, 'news_burst' as kind, 'neutral' as direction, case when n >= 4 then 3 else 2 end as severity,
+      n::numeric as value, null::numeric as baseline, null::numeric as ratio, 7200 as window_sec, last as event_ts,
+      jsonb_build_object('headlines', n, 'latest', titles[1], 'titles', titles[1:5], 'sources', sources[1:5]) as details
+    from agg where n >= 2`;
+}
+
+// 11. TVL drop: a protocol's TVL down ≥ 10% in a day (≥ 25% = high; exploits and bank runs).
+async function tvlDrop(): Promise<SignalRow[]> {
+  return sql<SignalRow[]>`
+    select distinct on (coingecko_id) coingecko_id, 'tvl_drop' as kind, 'down' as direction, case when change_1d_pct <= -25 then 3 else 2 end as severity,
+      round(tvl_usd) as value, round(tvl_usd / (1 + change_1d_pct / 100)) as baseline, round(change_1d_pct::numeric, 2) as ratio,
+      86400 as window_sec, captured_at as event_ts,
+      jsonb_build_object('protocol', protocol, 'tvl_usd', round(tvl_usd), 'change_1d_pct', round(change_1d_pct::numeric, 2), 'change_7d_pct', round(change_7d_pct::numeric, 2)) as details
+    from protocol_tvl_snapshots
+    where captured_at > now() - interval '7 hours' and change_1d_pct <= -10 and tvl_usd >= 10000000 and coingecko_id in (${COINS})
+    order by coingecko_id, change_1d_pct`;
+}
+
 const RULES: Rule[] = [
+  { kind: "news_burst", run: newsBurst },
+  { kind: "tvl_drop", run: tvlDrop },
   { kind: "price_move", run: priceMove },
   { kind: "volume_spike", run: volumeSpike },
   { kind: "oi_change", run: oiChange },
@@ -204,7 +230,7 @@ const RULES: Rule[] = [
 ];
 
 // Weights for the composite score that opens an investigation.
-const WEIGHT: Record<string, number> = { price_move: 1.5, volume_spike: 1, oi_change: 1, funding_extreme: 0.5, liquidation_cluster: 1, exchange_inflow: 1.25, exchange_outflow: 1, whale_transfer: 1, positioning_extreme: 0.5 };
+const WEIGHT: Record<string, number> = { price_move: 1.5, volume_spike: 1, oi_change: 1, funding_extreme: 0.5, liquidation_cluster: 1, exchange_inflow: 1.25, exchange_outflow: 1, whale_transfer: 1, positioning_extreme: 0.5, news_burst: 1, tvl_drop: 1.25 };
 export const INVESTIGATION_SCORE = Number(process.env.SIGNAL_INVESTIGATION_SCORE ?? 5);
 export const INVESTIGATION_SCORE_DEMO = Number(process.env.SIGNAL_INVESTIGATION_SCORE_DEMO ?? 3.5);
 const INVESTIGATION_COOLDOWN_MIN = 120;

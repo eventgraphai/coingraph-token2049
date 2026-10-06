@@ -20,6 +20,7 @@ const KIND_LABEL: Record<string, string> = {
   price_move: "Price move", volume_spike: "Volume spike", oi_change: "Open interest", funding_extreme: "Funding extreme",
   liquidation_cluster: "Liquidations", exchange_inflow: "Exchange inflow", exchange_outflow: "Exchange outflow",
   whale_transfer: "Whale transfer", stablecoin_exchange_inflow: "Stablecoins → exchanges", positioning_extreme: "Positioning",
+  news_burst: "In the news", tvl_drop: "TVL drop",
 };
 const SEVERITY = { 1: "text-mist", 2: "text-ember", 3: "text-blood" } as Record<number, string>;
 const DIRECTION = { up: "▲", down: "▼", neutral: "•" } as Record<string, string>;
@@ -47,6 +48,8 @@ function describe(s: Signal): string {
     }
     case "stablecoin_exchange_inflow": return `$${money(s.value)} of stablecoins moved onto exchanges in 1h (${s.ratio ?? "—"}× the 7-day median)`;
     case "positioning_extreme": return `top traders' long/short ${s.value} vs 7-day average ${s.baseline}`;
+    case "news_burst": return `${d.headlines} headlines in 2h — latest: "${d.latest}"`;
+    case "tvl_drop": return `${d.protocol} TVL ${Number(d.change_1d_pct).toFixed(1)}% in a day to $${money(d.tvl_usd as number)}`;
     default: return "";
   }
 }
