@@ -101,6 +101,17 @@ export async function evaluate(token: Token, opts: { size_usd?: number; policy?:
     }
     const toEx = transfers.filter((t) => t.direction === "to_exchange" && (t.usd ?? 0) >= 5_000_000);
     if (toEx.length) { rating = worst([rating, "caution"]); r.push({ text: `${toEx.length} transfer(s) ≥ $5M to exchanges in 24h (largest ${usd(toEx[0].usd)} → ${toEx[0].to_entity})`, source: "nownodes:onchain_transfers" }); }
+    // Native coins (ETH, BNB, SOL, BTC) have no token-transfer flows; rate them on exchange reserves instead.
+    const reserves = get(s.onchain, "exchange_reserves") as { total: number | null; by_exchange: { balance: number | null; change_24h_pct: number | null }[] } | "unassessed";
+    if (net24 === null && reserves !== "unassessed" && reserves?.by_exchange?.length) {
+      const now = reserves.by_exchange.reduce((a, e) => a + (e.balance ?? 0), 0);
+      const before = reserves.by_exchange.reduce((a, e) => a + (e.balance !== null && e.change_24h_pct !== null ? e.balance / (1 + e.change_24h_pct / 100) : e.balance ?? 0), 0);
+      const chg = before ? ((now / before) - 1) * 100 : null;
+      if (chg !== null) {
+        rating = chg >= 3 ? "caution" : "ok";
+        r.push({ text: `Exchange reserves ${chg >= 0 ? "+" : ""}${round(chg)}% in 24h (${chg >= 3 ? "coins arriving on exchanges" : chg <= -3 ? "coins leaving exchanges" : "stable"})`, source: "nownodes:blockbook:/address" });
+      }
+    }
     dims.onchain = { rating, reasons: r };
   }
 

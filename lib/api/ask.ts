@@ -35,10 +35,21 @@ export async function ask(token: Token, input: { question?: string; claim?: stri
     if (a < 0 || b < 0) throw new Error("ask: model returned no structured result");
     out = JSON.parse(t.slice(a, b + 1).replace(/,\s*([}\]])/g, "$1"));
   }
+  // Normalise: the response always has the full shape even if the model left a field out.
   const ids = new Set(evidence.items.map((e) => e.id));
   const clean = (pts: { text: string; evidence: string[] }[] | undefined) => (pts ?? []).map((p) => ({ ...p, evidence: (p.evidence ?? []).filter((e) => ids.has(e)) }));
-  if ("key_points" in out) out.key_points = clean(out.key_points);
-  if ("reasoning" in out) out.reasoning = clean(out.reasoning);
+  out.confidence = typeof out.confidence === "number" ? Math.max(0, Math.min(1, out.confidence)) : 0.5;
+  out.caveats = Array.isArray(out.caveats) ? out.caveats : [];
+  if (mode === "claim") {
+    const c = out as ClaimOut;
+    c.verdict = ["supported", "contradicted", "unknown"].includes(c.verdict) ? c.verdict : "unknown";
+    c.reasoning = clean(c.reasoning);
+  } else {
+    const q = out as QuestionOut;
+    q.answer = typeof q.answer === "string" ? q.answer : "";
+    q.key_points = clean(q.key_points);
+    if (!q.key_points.length && q.answer) q.key_points = q.answer.split(/(?<=\.)\s+/).slice(0, 4).map((s) => ({ text: s, evidence: [] }));
+  }
 
   const id = newId("ans");
   const data = { token: { id: token.coingecko_id, symbol: token.symbol.toUpperCase(), name: token.name }, mode, input: text, ...out, evidence: evidence.items, model: res.model };
