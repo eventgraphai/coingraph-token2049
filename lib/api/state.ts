@@ -4,7 +4,7 @@ import { num, pctChange, round, section, type Section, type Source, type Token }
 // GET /v1/state/{token}: everything known about a token right now, section by section. Each section carries
 // its own as_of and sources; missing data is reported as "unassessed" rather than omitted or guessed.
 
-export const STATE_SECTIONS = ["identity", "market", "liquidity", "derivatives", "onchain", "supply", "context", "signals", "brief"] as const;
+export const STATE_SECTIONS = ["identity", "market", "liquidity", "derivatives", "onchain", "supply", "security", "context", "signals", "brief"] as const;
 export type StateSection = (typeof STATE_SECTIONS)[number];
 
 const UNASSESSED = "unassessed" as const;
@@ -25,6 +25,7 @@ export async function buildState(token: Token, sections: StateSection[] = [...ST
   run("derivatives", () => derivatives(id));
   run("onchain", () => onchain(id));
   run("supply", () => supply(id));
+  run("security", () => security(id));
   run("context", () => context(id));
   run("signals", () => signals(id));
   run("brief", () => brief(id));
@@ -203,7 +204,9 @@ async function supply(id: string) {
       (select circulating_supply from market_snapshots p where p.coingecko_id = ${id} and p.captured_at <= now() - interval '30 days' order by captured_at desc limit 1) as circ_30d
     from market_snapshots where coingecko_id = ${id} order by captured_at desc limit 1`;
   const [res] = await sql`select sum(balance) as bal from exchange_reserve_snapshots where coingecko_id = ${id} and captured_at = (select max(captured_at) from exchange_reserve_snapshots where coingecko_id = ${id})`;
-  const [hold] = await sql`select top10_pct, top20_pct, captured_at from token_holder_snapshots where coingecko_id = ${id} order by captured_at desc limit 1`;
+  const [solHold] = await sql`select top10_pct, top20_pct, captured_at from token_holder_snapshots where coingecko_id = ${id} and top10_pct is not null order by captured_at desc limit 1`;
+  const [gpHold] = solHold ? [] : await sql`select top10_holders_pct as top10_pct, null::numeric as top20_pct, captured_at from token_security_snapshots where coingecko_id = ${id} and top10_holders_pct is not null order by captured_at desc limit 1`;
+  const hold = solHold ?? gpHold;
   const treasuries = await sql`select distinct on (entity_type) entity_type, total_holdings, total_value_usd, market_cap_dominance, holders_count, captured_at from public_treasury_snapshots where coingecko_id = ${id} order by entity_type, captured_at desc`;
   if (!m) return section({ status: UNASSESSED }, null, []);
   const circ = num(m.circulating_supply), total = num(m.total_supply), max = num(m.max_supply);
@@ -254,4 +257,30 @@ async function brief(id: string) {
   const [b] = await sql`select id, headline, brief->>'direction' as direction, brief->>'severity' as severity, brief->>'confidence' as confidence, brief->>'summary' as summary, finished_at from investigations where coingecko_id = ${id} and status = 'done' order by finished_at desc limit 1`;
   if (!b) return section({ status: "none", note: "no investigation has run for this token yet; POST /v1/explain to run one" }, null, []);
   return section({ id: b.id, headline: b.headline, direction: b.direction, severity: num(b.severity), confidence: num(b.confidence), summary: b.summary, at: b.finished_at, url: `/v1/explain/${id}/${b.id}` }, b.finished_at, [{ provider: "coingraph", endpoint: "explain", as_of: b.finished_at }]);
+}
+
+// Contract security (GoPlus): honeypot, taxes, mint/freeze/blacklist/pause powers, upgradeability, per chain.
+async function security(id: string) {
+  const rows = await sql`
+    select distinct on (chain) chain, address, captured_at, risk_level, risk_flags, is_honeypot, buy_tax_pct, sell_tax_pct, is_mintable, is_proxy, has_blacklist,
+           transfer_pausable, hidden_owner, owner_change_balance, is_open_source, freezable, trusted_token, holder_count, top10_holders_pct, owner_address
+    from token_security_snapshots where coingecko_id = ${id} order by chain, captured_at desc`;
+  if (!rows.length) return section({ status: UNASSESSED, note: "no token contract on Ethereum, BNB Chain or Solana (native coin) — contract checks do not apply" }, null, []);
+  // The token is rated on its home-chain contract (where it was issued); bridged copies are listed but don't set the rating.
+  const [t] = await sql`select asset_platform_id from tokens where coingecko_id = ${id}`;
+  const homeChain = ({ ethereum: "eth", "binance-smart-chain": "bsc", solana: "sol" } as Record<string, string>)[t?.asset_platform_id ?? ""] ?? null;
+  const order = { high: 2, medium: 1, low: 0 } as Record<string, number>;
+  const home = rows.find((r) => r.chain === homeChain);
+  const worst = rows.reduce((w, r) => (order[r.risk_level] > order[w] ? r.risk_level : w), "low" as string);
+  return section({
+    risk_level: home ? home.risk_level : worst,
+    rated_on: home ? `${home.chain} (home chain)` : "worst of all copies (no home-chain contract scanned)",
+    contracts: rows.map((r) => ({
+      chain: r.chain, home_chain: r.chain === homeChain, address: r.address, risk_level: r.risk_level, flags: r.risk_flags,
+      honeypot: r.is_honeypot, buy_tax_pct: num(r.buy_tax_pct), sell_tax_pct: num(r.sell_tax_pct), mintable: r.is_mintable, upgradeable: r.is_proxy,
+      blacklist: r.has_blacklist, pausable: r.transfer_pausable, hidden_owner: r.hidden_owner, owner_can_change_balances: r.owner_change_balance,
+      verified_source: r.is_open_source, freezable: r.freezable, on_trust_lists: r.trusted_token, holders: r.holder_count !== null ? Number(r.holder_count) : null,
+      top10_holders_pct: num(r.top10_holders_pct), owner: r.owner_address, as_of: r.captured_at,
+    })),
+  }, rows[0].captured_at, [{ provider: "goplus", endpoint: "/token_security", as_of: rows[0].captured_at }]);
 }

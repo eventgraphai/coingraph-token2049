@@ -57,10 +57,10 @@ export function buildMcpServer(forwardedFor: string | null): McpServer {
 
   server.registerTool("get_token_snapshot", {
     title: "Get token snapshot",
-    description: "Everything CoinGraph knows about a token right now, in one answer: price and market data, liquidity and order-book depth, futures (open interest, funding, long/short, liquidations), onchain flows to and from exchanges, large transfers, exchange reserves, supply, news, TVL, developer activity, open signals and the latest brief. Each part says its source and age. Pass `sections` to get only some parts.",
+    description: "Everything CoinGraph knows about a token right now, in one answer: price and market data, liquidity and order-book depth, futures (open interest, funding, long/short, liquidations), onchain flows to and from exchanges, large transfers, exchange reserves, supply, contract security (honeypot, mint/freeze powers, taxes), news, TVL, developer activity, open signals and the latest brief. Each part says its source and age. Pass `sections` to get only some parts.",
     inputSchema: {
       token: tokenArg,
-      sections: z.string().optional().describe("Optional comma list of parts: identity, market, liquidity, derivatives, onchain, supply, context, signals, brief. Default: all"),
+      sections: z.string().optional().describe("Optional comma list of parts: identity, market, liquidity, derivatives, onchain, supply, security, context, signals, brief. Default: all"),
     },
     annotations: { title: "Get token snapshot", ...READ },
   }, ({ token, sections }) => call(api.state, { path: `/state/${encodeURIComponent(token)}`, params: { token }, query: { sections } }));
@@ -142,7 +142,7 @@ export function buildMcpServer(forwardedFor: string | null): McpServer {
 
   server.registerTool("lookup_address", {
     title: "Look up an address",
-    description: "Who is behind a blockchain address? Returns its label (an exchange such as Binance, a contract, a burn address, or unlabelled), what kind of address it is (exchange, whale, new wallet…), its balances, how many transactions it has made and its recent large transfers. Read live from the chain.",
+    description: "Who is behind a blockchain address? Returns its label (an exchange such as Binance, a contract, a burn address, or unlabelled), a screening result (OFAC sanctions, scam/phishing flags), what kind of address it is (exchange, whale, new wallet…), its balances, how many transactions it has made and its recent large transfers. Read live from the chain.",
     inputSchema: {
       chain: z.enum(["eth", "bsc", "btc", "sol", "ada"]).describe("The chain: eth (Ethereum), bsc (BNB Chain), btc (Bitcoin), sol (Solana) or ada (Cardano)"),
       address: z.string().min(20).max(130).describe("The address on that chain"),

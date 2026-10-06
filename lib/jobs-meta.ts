@@ -64,6 +64,10 @@ export const JOB_SCHEDULE: JobMeta[] = [
   { name: "fng:index", everySec: 86400, offsetSec: 1200, endpoint: "alternative.me|/fng", category: "market", label: "Fear & Greed index" },
   { name: "llama:tvl", everySec: 21600, offsetSec: 1500, endpoint: "defillama|/protocols", category: "market", label: "Protocol TVL · DefiLlama" },
 
+  // Security (free): contract risk daily, OFAC sanctions list daily.
+  { name: "security:tokens", everySec: 86400, offsetSec: 3300, endpoint: "goplus|/token_security/{chain}", category: "onchain", label: "Contract security · GoPlus" },
+  { name: "security:sanctions", everySec: 86400, offsetSec: 3500, endpoint: "ofac|sanctioned_addresses_ETH", category: "onchain", label: "OFAC sanctions list" },
+
   // Intelligence. Signals at :50s, after the minute's prices (:40s) and candles (:05s) have landed.
   { name: "signals:scan", everySec: 60, offsetSec: 50, category: "intelligence", label: "Signal rules over all 100 coins" },
   { name: "investigations:run", everySec: 60, offsetSec: 20, category: "intelligence", label: "Evidence + Claude brief for queued coins" },

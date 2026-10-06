@@ -9,6 +9,7 @@ import { runSignals } from "../lib/signals/engine";
 import { runQueuedInvestigations } from "../lib/investigations/runner";
 import * as ext from "../lib/external/jobs";
 import { deliverAlerts } from "../lib/api/monitor";
+import { syncSanctions, syncTokenSecurity } from "../lib/security/jobs";
 import { runRetention } from "../lib/retention";
 import { withDeadline } from "../lib/http";
 import os from "node:os";
@@ -93,6 +94,8 @@ const RUNNERS: Record<string, () => Promise<number | unknown>> = {
   "news:rss": ext.syncNews,
   "fng:index": ext.syncFearGreed,
   "llama:tvl": ext.syncProtocolTvl,
+  "security:tokens": syncTokenSecurity,
+  "security:sanctions": syncSanctions,
   "signals:scan": runSignals,
   "investigations:run": () => runQueuedInvestigations(2),
   "alerts:deliver": deliverAlerts,

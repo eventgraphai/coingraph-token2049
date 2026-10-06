@@ -1,6 +1,7 @@
 import { sql } from "../db";
 import { buildState } from "./state";
 import { canonical, newId, num, round, sha256, BASE_URL, type Source, type Token } from "./respond";
+import { dexQuote, type DexQuote } from "../security/jobs";
 
 // Evaluate: "the check before you act". A deterministic verdict per dimension computed from the state,
 // optionally scored against the caller's order size and policy. Every evaluation is stored with its id,
@@ -17,7 +18,9 @@ const usd = (v: number | null) => (v === null ? "n/a" : `$${Intl.NumberFormat("e
 const worst = (ratings: Rating[]): Rating => (ratings.includes("avoid") ? "avoid" : ratings.includes("caution") ? "caution" : ratings.includes("ok") ? "ok" : "unassessed");
 
 export async function evaluate(token: Token, opts: { size_usd?: number; policy?: Policy; requester?: string } = {}) {
-  const state = await buildState(token, ["market", "liquidity", "derivatives", "onchain", "supply", "context", "signals"]);
+  const state = await buildState(token, ["market", "liquidity", "derivatives", "onchain", "supply", "security", "context", "signals"]);
+  // Real on-chain execution cost for the caller's size (DEX aggregator quote), when a size is given.
+  const quote: DexQuote | null = opts.size_usd && !token.is_stablecoin ? await dexQuote(token.coingecko_id, opts.size_usd, "buy").catch(() => null) : null;
   const s = state.sections as Record<string, Record<string, unknown>>;
   const dims: Record<string, Dimension> = {};
   const sources: Source[] = state.sources;
@@ -145,7 +148,34 @@ export async function evaluate(token: Token, opts: { size_usd?: number; policy?:
     dims.context = { rating, reasons: r };
   }
 
-  dims.contract = { rating: "unassessed", reasons: [{ text: "Contract security (mint, freeze, owner powers): not yet assessed", source: "coingraph" }] };
+  // Contract security (GoPlus): high-risk flags block, issuer controls caution, clean contracts pass.
+  {
+    const sec = s.security as { risk_level?: string; contracts?: { chain: string; home_chain?: boolean; risk_level: string; flags: string[] }[]; status?: string } | undefined;
+    if (!sec || sec.status === "unassessed" || !sec.contracts?.length) {
+      dims.contract = { rating: "unassessed", reasons: [{ text: "Native coin: no token contract to check", source: "coingraph" }] };
+    } else {
+      const worstC = sec.contracts.find((c) => c.home_chain) ?? sec.contracts.find((c) => c.risk_level === sec.risk_level) ?? sec.contracts[0];
+      // Upgradeability alone (common for governance-run tokens, usually behind a timelock) and expected issuer
+      // controls are reported but don't downgrade the rating; real admin powers (mint, freeze, blacklist, pause, tax) do.
+      const material = worstC.flags.filter((f) => !/^Upgradeable contract|^Issuer can change|^Issuer controls are expected/.test(f));
+      const rating: Rating = worstC.risk_level === "high" ? "avoid" : worstC.risk_level === "medium" && material.length && !token.is_stablecoin ? "caution" : "ok";
+      const reasons: Reason[] = worstC.flags.length
+        ? worstC.flags.slice(0, 3).map((f) => ({ text: `${f} (${worstC.chain.toUpperCase()})`, source: "goplus:/token_security" }))
+        : [{ text: `No contract risks found on the ${worstC.chain.toUpperCase()} contract${worstC.home_chain ? " (home chain)" : ""}`, source: "goplus:/token_security" }];
+      dims.contract = { rating, reasons };
+    }
+  }
+
+  // Execution cost from a live DEX quote for the caller's size.
+  if (quote) {
+    const impact = quote.price_impact_pct;
+    const cap = (token.market_cap_rank ?? 999) <= 20 ? 1 : 2; // pre-trade practice: ~1% on majors, ~2% on alts
+    const extra: Reason = { text: `On-chain: a ${usd(quote.size_usd)} buy via ${quote.venue} (${quote.chain.toUpperCase()}) costs ${impact}% in price impact`, source: `${quote.venue}:quote` };
+    dims.liquidity.reasons.push(extra);
+    if (impact > cap * 2) dims.liquidity.rating = "avoid";
+    else if (impact > cap) dims.liquidity.rating = worst([dims.liquidity.rating, "caution"]);
+    sizeCheck = { ...(sizeCheck ?? { order_usd: opts.size_usd }), dex_quote: quote, impact_limit_pct: cap };
+  }
 
   // Policy checks.
   let policyCheck: Record<string, unknown> | null = null;
@@ -163,7 +193,11 @@ export async function evaluate(token: Token, opts: { size_usd?: number; policy?:
       ...(p.max_funding_pct !== undefined ? { max_funding_pct: check(maxF === null ? null : maxF <= p.max_funding_pct, `limit ${p.max_funding_pct}%, actual ${maxF ?? "unassessed"}%`) } : {}),
       ...(p.max_exchange_inflow_usd !== undefined ? { max_exchange_inflow_usd: check(net24 === null ? null : net24 <= p.max_exchange_inflow_usd, `limit ${usd(p.max_exchange_inflow_usd)}, actual net ${usd(net24)} in 24h`) } : {}),
       ...(p.max_unlock_pct !== undefined ? { max_unlock_pct: check(null, "unlock schedule unassessed") } : {}),
-      ...(p.allow_mint_authority !== undefined ? { allow_mint_authority: check(null, "contract security unassessed") } : {}),
+      ...(p.allow_mint_authority !== undefined ? (() => {
+        const cs = (s.security as { contracts?: { mintable: boolean | null; freezable: boolean | null }[] } | undefined)?.contracts;
+        const canMint = cs?.length ? cs.some((c) => c.mintable === true || c.freezable === true) : null;
+        return { allow_mint_authority: check(canMint === null ? null : p.allow_mint_authority || !canMint, canMint === null ? "no token contract to check" : canMint ? "the contract can mint or freeze" : "no mint or freeze authority") };
+      })() : {}),
     };
     if (Object.values(policyCheck).some((c) => (c as { result: string }).result === "fail")) dims.policy = { rating: "avoid", reasons: [{ text: "One or more of your policy rules fail", source: "coingraph" }] };
   }

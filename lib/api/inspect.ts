@@ -1,6 +1,7 @@
 import { sql } from "../db";
 import { blockbook, blockfrost, fromUnits, rpc } from "../nownodes/client";
 import { ApiError, num, round, type Source } from "./respond";
+import { screenAddress } from "../security/jobs";
 
 // GET /v1/inspect/{chain}/{address}: who owns an address, live from the chain through NOWNodes.
 
@@ -73,8 +74,15 @@ export async function inspectAddress(chain: Chain, address: string) {
     sources.push({ provider: "nownodes", endpoint: "ada-blockfrost:/addresses/{address}", as_of: asOf });
   }
 
+  // Screening: OFAC sanctions (local list) + GoPlus scam/phishing/mixer flags (EVM) + burn addresses.
+  const screening = await screenAddress(chain, addr).catch(() => null);
+  if (screening) sources.push(...screening.sources);
   return {
-    data: { chain, address: addr, label: label ? { entity: label.entity, name: label.label, kind: label.kind, confidence: label.confidence } : "unlabelled", ...profile },
+    data: {
+      chain, address: addr, label: label ? { entity: label.entity, name: label.label, kind: label.kind, confidence: label.confidence } : "unlabelled",
+      screening: screening ? { risk: screening.risk, sanctioned: screening.sanctioned, burn_address: screening.burn, flags: screening.flags } : "unassessed",
+      ...profile,
+    },
     sources, as_of: asOf,
   };
 }

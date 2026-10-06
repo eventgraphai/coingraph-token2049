@@ -40,6 +40,8 @@ const FEED_INFO: Record<string, { category: Category; venues: string }> = {
   "news:rss": { category: "market", venues: "CoinDesk, Cointelegraph, Decrypt, The Block" },
   "fng:index": { category: "market", venues: "alternative.me" },
   "llama:tvl": { category: "market", venues: "DefiLlama" },
+  "security:tokens": { category: "onchain", venues: "GoPlus" },
+  "security:sanctions": { category: "onchain", venues: "OFAC (0xB10C)" },
 };
 
 export type Level = "ok" | "late" | "down";
