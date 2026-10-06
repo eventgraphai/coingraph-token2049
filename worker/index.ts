@@ -8,6 +8,7 @@ import { seedWalletLabels, verifySolanaWallets, verifyWalletLabels } from "../li
 import { runSignals } from "../lib/signals/engine";
 import { runQueuedInvestigations } from "../lib/investigations/runner";
 import * as ext from "../lib/external/jobs";
+import { deliverAlerts } from "../lib/api/monitor";
 import { runRetention } from "../lib/retention";
 import { withDeadline } from "../lib/http";
 import os from "node:os";
@@ -94,6 +95,7 @@ const RUNNERS: Record<string, () => Promise<number | unknown>> = {
   "llama:tvl": ext.syncProtocolTvl,
   "signals:scan": runSignals,
   "investigations:run": () => runQueuedInvestigations(2),
+  "alerts:deliver": deliverAlerts,
   "ccxt:backfill": () => cx.backfillCandles(7), // only fetches symbols missing history
   "cg:backfill": () => cg.backfillMarketCharts(30), // 30 days hourly; only fetches tokens missing history
   "cg:gap-fill": cg.fillMarketGaps,
