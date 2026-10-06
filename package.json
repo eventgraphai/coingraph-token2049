@@ -15,6 +15,7 @@
     "retention": "tsx scripts/retention.ts",
     "ccxt": "tsx scripts/ccxt.ts",
     "report": "tsx scripts/token-report.ts",
+    "nownodes": "tsx scripts/nownodes.ts",
     "worker:supervised": "bash scripts/run-worker.sh"
   },
   "dependencies": {

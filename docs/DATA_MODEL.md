@@ -58,15 +58,27 @@ Batched per-symbol calls are logged as one `api_calls` row per batch (raw respon
 
 Not used: liquidations (WebSocket only), deposit/withdraw status (needs exchange keys), options/greeks (BTC/ETH only).
 
-### NOWNodes (investigation only — never polled for all 100)
+### NOWNodes (all mainnet; header `api-key`; Start plan 100k requests/month)
 
-| # | Call | Chains | Writes to |
-|---|---|---|---|
-| 25 | `eth_getLogs` (ERC-20 `Transfer` topic, token contract, last N blocks) | eth, bsc | `onchain_transfers` |
-| 26 | `eth_getTransactionByHash` / `eth_getTransactionReceipt` (DEX trader + large tx lookups) | eth, bsc | `onchain_transfers`, `evidence` |
-| 27 | `eth_getBalance` / ERC-20 `balanceOf` (`eth_call`) for whale / exchange wallets | eth, bsc | `wallet_balance_snapshots` |
-| 28 | Blockbook address/tx API | btc | `onchain_transfers` |
-| 29 | Koios (`ada-testnet` / mainnet) address & tx endpoints | ada | `onchain_transfers` |
+Continuous feeds (`lib/nownodes/jobs.ts`, CLI `npm run nownodes -- <cmd>`). Every row keys on `coingecko_id`;
+`onchain_contracts` maps coin → (chain, contract) from CoinGecko's platform data (56 ETH, 25 BSC, 22 SOL, 1 ADA of the top 100).
+
+| # | Call | Chain | Every | Writes to |
+|---|---|---|---|---|
+| 25 | `eth_blockNumber`, `eth_getLogs` (Transfer topic, **all tracked contracts in one call**, block chunk), `eth_getBlockByNumber` (chunk edges, timestamps interpolated) | eth, bsc | 15 min | `onchain_flow_snapshots` (per coin per 15-min window), `onchain_transfers` (≥ $25k; stablecoins ≥ $250k) |
+| 26 | `eth_feeHistory` (last ~15 min of blocks, 25/50/75 percentiles) | eth, bsc | 15 min | `chain_fee_snapshots` |
+| 27 | Blockbook `GET /api/v2/address/{wallet}?details=tokenBalances` per active exchange wallet | eth, bsc | hourly | `exchange_reserve_snapshots` |
+| 28 | Blockbook `GET /api/v2/` (best height), `GET /api/v2/block/{height}?page=n` (1,000 txs per page) | btc | each block | `btc_block_snapshots`, `onchain_transfers` (≥ $500k, outputs not returning to inputs), `onchain_flow_snapshots` |
+| 29 | `getmempoolinfo`, `estimatesmartfee` (1, 3, 6 blocks) | btc | 15 min | `btc_mempool_snapshots` |
+| 30 | GraphQL `transactions(where: {includedAt ≥ cursor, totalOutput ≥ $100k in lovelace})`; amount = outputs to addresses that were not inputs (change excluded) | ada | 15 min | `onchain_transfers` (≥ $100k), `onchain_flow_snapshots` |
+| 31 | `getTokenSupply` + `getTokenLargestAccounts` per Solana token; Blockfrost `GET /assets/{asset}` | sol, ada | daily | `token_holder_snapshots` |
+| 32 | `GET watcher.nownodes.io/api/v1.0/networks/status?tickers=eth,bsc,btc,sol,ada` (public) | all | 5 min | `nownodes_node_status` |
+| 33 | Blockbook `GET /api/v2/address/{wallet}?details=basic` (verifies each seeded exchange wallet: tx count, balance; idle/invalid → inactive); `GET /api/v2/contract/{address}` for missing decimals | eth, bsc, btc | daily | `wallet_labels`, `onchain_contracts` |
+
+Scanners resume from `onchain_scan_cursors` (block height / unix seconds), so restarts leave no gaps. Transfers are tagged
+`to_exchange` / `from_exchange` / `exchange_internal` / `mint` / `burn` / `other` using `wallet_labels` (public exchange labels,
+verified on-chain). Budget ≈ 50k requests/month. Investigation-only calls (archive balances, `debug_traceTransaction`,
+wallet history, Solana signatures) are added with the signal engine.
 
 ### Additional feeds (added after the core build)
 

@@ -22,6 +22,7 @@ const SERIES: Series[] = [
   { table: "dex_pool_snapshots", partition: "network, pool_address", seriesColumn: "coingecko_id" },
   { table: "order_book_snapshots", partition: "venue, symbol", seriesColumn: "coingecko_id" },
   { table: "exchange_status", partition: "venue" },
+  { table: "nownodes_node_status", partition: "interface" },
 ];
 
 async function thinTable({ table, partition, seriesColumn, timeColumn = "captured_at" }: Series, cutoff: Date): Promise<number> {

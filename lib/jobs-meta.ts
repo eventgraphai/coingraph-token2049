@@ -46,6 +46,18 @@ export const JOB_SCHEDULE: JobMeta[] = [
   { name: "ccxt:okx-bybit-long-short", everySec: 300, offsetSec: 50, endpoint: "ccxt:okx|longShortRatio:5m", category: "futures", label: "Long/short · OKX, Bybit" },
   { name: "okx:liquidations", everySec: 300, offsetSec: 45, endpoint: "okx|/api/v5/public/liquidation-orders", category: "futures", label: "Liquidations · OKX" },
 
+  // NOWNodes (mainnet). 15-minute scans staggered; each resumes from its last scanned block.
+  { name: "nn:eth-flows", everySec: 900, offsetSec: 60, endpoint: "nownodes|eth:eth_getLogs", category: "onchain", label: "Ethereum token flows + large transfers" },
+  { name: "nn:bsc-flows", everySec: 900, offsetSec: 100, endpoint: "nownodes|bsc:eth_getLogs", category: "onchain", label: "BNB Chain token flows + large transfers" },
+  { name: "nn:fees", everySec: 900, offsetSec: 140, endpoint: "nownodes|eth:eth_feeHistory", category: "onchain", label: "Network fees · ETH, BSC" },
+  { name: "nn:btc-blocks", everySec: 600, offsetSec: 170, endpoint: "nownodes|btc:/block/{height}", category: "onchain", label: "Bitcoin blocks + large transfers" },
+  { name: "nn:btc-mempool", everySec: 900, offsetSec: 200, endpoint: "nownodes|btc:getmempoolinfo", category: "onchain", label: "Bitcoin mempool + fees" },
+  { name: "nn:ada-transfers", everySec: 900, offsetSec: 230, endpoint: "nownodes|ada:graphql:transactions", category: "onchain", label: "Cardano large transfers" },
+  { name: "nn:exchange-reserves", everySec: 3600, offsetSec: 400, endpoint: "nownodes|eth:/address/{wallet}", category: "onchain", label: "Exchange reserves · ETH, BSC" },
+  { name: "nn:node-status", everySec: 300, offsetSec: 58, endpoint: "nownodes|watcher:/networks/status", category: "onchain", label: "NOWNodes node health" },
+  { name: "nn:holders", everySec: 86400, offsetSec: 3000, endpoint: "nownodes|sol:getTokenLargestAccounts", category: "onchain", label: "Holder concentration · Solana" },
+  { name: "nn:reference", everySec: 86400, offsetSec: 700, endpoint: "nownodes|eth:/address/{wallet}:basic", category: "onchain", label: "Contract map + wallet labels" },
+
   // Maintenance.
   { name: "ccxt:backfill", everySec: 3600, offsetSec: 120, category: "maintenance", label: "Candle history (missing only)" },
   { name: "cg:backfill", everySec: 3600, category: "maintenance", label: "30-day history (missing only)" },

@@ -3,6 +3,8 @@ import { sql } from "../lib/db";
 import * as cg from "../lib/coingecko/jobs";
 import * as cx from "../lib/ccxt/jobs";
 import * as extra from "../lib/extra/jobs";
+import * as nn from "../lib/nownodes/jobs";
+import { seedWalletLabels, verifyWalletLabels } from "../lib/nownodes/wallets";
 import { runRetention } from "../lib/retention";
 import { withDeadline } from "../lib/http";
 import os from "node:os";
@@ -37,6 +39,14 @@ type Job = {
 
 const MARKETS_SLOW_SEC = 180;
 
+// Contract map (from CoinGecko platform data) and the known-wallet list, re-verified against the chain.
+async function syncOnchainReference(): Promise<number> {
+  const contracts = await nn.syncOnchainContracts();
+  await seedWalletLabels();
+  for (const chain of ["eth", "bsc", "btc"] as const) await verifyWalletLabels(chain);
+  return contracts;
+}
+
 // Run functions for each scheduled job; timing and grouping live in lib/jobs-meta.ts.
 const RUNNERS: Record<string, () => Promise<number | unknown>> = {
   "cg:markets": cg.syncMarkets,
@@ -64,6 +74,16 @@ const RUNNERS: Record<string, () => Promise<number | unknown>> = {
   "ccxt:sentiment": () => cx.syncFuturesSentiment(),
   "ccxt:okx-bybit-long-short": () => extra.syncOkxBybitLongShort(),
   "okx:liquidations": extra.syncOkxLiquidations,
+  "nn:eth-flows": () => nn.syncTokenFlows("eth"),
+  "nn:bsc-flows": () => nn.syncTokenFlows("bsc"),
+  "nn:fees": nn.syncChainFees,
+  "nn:btc-blocks": () => nn.syncBtcBlocks(),
+  "nn:btc-mempool": nn.syncBtcMempool,
+  "nn:ada-transfers": nn.syncAdaLargeTransfers,
+  "nn:exchange-reserves": nn.syncExchangeReserves,
+  "nn:node-status": nn.syncNodeStatus,
+  "nn:holders": async () => (await nn.syncHolderConcentration()) + (await nn.syncCardanoAssets()),
+  "nn:reference": syncOnchainReference,
   "ccxt:backfill": () => cx.backfillCandles(7), // only fetches symbols missing history
   "cg:backfill": () => cg.backfillMarketCharts(30), // 30 days hourly; only fetches tokens missing history
   "cg:gap-fill": cg.fillMarketGaps,
@@ -210,6 +230,8 @@ async function main() {
       await withTimeout(extra.markDemoTokens(), 60_000, "mark demo tokens");
       const [{ mapped }] = await withTimeout(sql<{ mapped: number }[]>`select count(*)::int as mapped from symbol_map`, 60_000, "symbol map check");
       if (!mapped) await tick(jobs.find((j) => j.name === "ccxt:symbol-map")!);
+      const [{ contracts }] = await withTimeout(sql<{ contracts: number }[]>`select count(*)::int as contracts from onchain_contracts`, 60_000, "contract map check");
+      if (!contracts) await tick(jobs.find((j) => j.name === "nn:reference")!);
     } catch (err) {
       console.error(`[startup] ${(err as Error).message}`);
     }

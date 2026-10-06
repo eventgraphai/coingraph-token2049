@@ -28,6 +28,15 @@ const FEED_INFO: Record<string, { category: Category; venues: string }> = {
   "ccxt:okx-bybit-ls": { category: "futures", venues: "OKX, Bybit" },
   "okx:liquidations": { category: "futures", venues: "OKX" },
   "ccxt:exchange-status": { category: "maintenance", venues: "5 venues" },
+  "nn:eth-flows": { category: "onchain", venues: "Ethereum" },
+  "nn:bsc-flows": { category: "onchain", venues: "BNB Chain" },
+  "nn:fees": { category: "onchain", venues: "Ethereum, BNB Chain" },
+  "nn:btc-blocks": { category: "onchain", venues: "Bitcoin" },
+  "nn:btc-mempool": { category: "onchain", venues: "Bitcoin" },
+  "nn:ada-transfers": { category: "onchain", venues: "Cardano" },
+  "nn:exchange-reserves": { category: "onchain", venues: "Ethereum, BNB Chain" },
+  "nn:node-status": { category: "onchain", venues: "NOWNodes" },
+  "nn:holders": { category: "onchain", venues: "Solana" },
 };
 
 export type Level = "ok" | "late" | "down";
@@ -149,6 +158,13 @@ export async function loadStatus() {
         ('trending_snapshots',          (select max(captured_at) from trending_snapshots),         'CoinGecko · 10 min'),
         ('dex_pool_snapshots',          (select max(captured_at) from dex_pool_snapshots),         'CoinGecko · 15 min'),
         ('derivatives_tickers',         (select max(captured_at) from derivatives_tickers),        'CoinGecko · 15 min'),
+        ('onchain_flow_snapshots',      (select max(window_start) from onchain_flow_snapshots),    'NOWNodes · 15 min'),
+        ('onchain_transfers',           (select max(block_ts) from onchain_transfers),             'NOWNodes · 15 min'),
+        ('btc_block_snapshots',         (select max(block_ts) from btc_block_snapshots),           'NOWNodes · per block'),
+        ('btc_mempool_snapshots',       (select max(captured_at) from btc_mempool_snapshots),      'NOWNodes · 15 min'),
+        ('chain_fee_snapshots',         (select max(captured_at) from chain_fee_snapshots),        'NOWNodes · 15 min'),
+        ('exchange_reserve_snapshots',  (select max(captured_at) from exchange_reserve_snapshots), 'NOWNodes · hourly'),
+        ('token_holder_snapshots',      (select max(captured_at) from token_holder_snapshots),     'NOWNodes · daily'),
         ('exchange_tickers',            (select max(captured_at) from exchange_tickers),           'CoinGecko · daily'),
         ('coin_detail_snapshots',       (select max(captured_at) from coin_detail_snapshots),      'CoinGecko · daily')
       ) t(name, newest, cadence)
