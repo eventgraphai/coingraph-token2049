@@ -9,22 +9,30 @@
     "lint": "eslint",
     "db:migrate": "tsx scripts/migrate.ts",
     "cg": "tsx scripts/cg.ts",
-    "worker": "tsx worker/index.ts",
-    "storage:setup": "tsx scripts/setup-storage.ts"
+    "worker": "DB_MAX_CONNECTIONS=6 tsx worker/index.ts",
+    "storage:setup": "tsx scripts/setup-storage.ts",
+    "health": "tsx scripts/health.ts",
+    "retention": "tsx scripts/retention.ts",
+    "ccxt": "tsx scripts/ccxt.ts",
+    "report": "tsx scripts/token-report.ts",
+    "worker:supervised": "bash scripts/run-worker.sh"
   },
   "dependencies": {
     "@supabase/storage-js": "^2.109.0",
+    "ccxt": "^4.5.85",
     "dotenv": "^18.0.5",
     "next": "16.3.8",
     "postgres": "^3.4.9",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "ws": "^8.22.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/ws": "^8.18.2",
     "eslint": "^9",
     "eslint-config-next": "16.3.8",
     "tailwindcss": "^4",

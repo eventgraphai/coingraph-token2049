@@ -24,6 +24,10 @@ const minuteNow = () => {
   return d;
 };
 
+// CoinGecko returns {"": ""} for native coins (no contract); store {} instead.
+const cleanPlatforms = (p: Record<string, string> | undefined) =>
+  Object.fromEntries(Object.entries(p ?? {}).filter(([chain, address]) => chain && address));
+
 // "Stablecoins" / "USD Stablecoin" / "Fiat-backed Stablecoin" mark a stablecoin;
 // "Stablecoin Issuer" (AAVE, ENA, SKY, WLFI) marks a project that issues one, which is not.
 const isStablecoinCategory = (category: string) => /^stablecoins$|\sstablecoin$/i.test(category.trim());
@@ -52,6 +56,8 @@ async function mapConcurrent<T>(items: T[], limit: number, fn: (item: T) => Prom
 // ---------------------------------------------------------------------------
 // /coins/markets — top-N universe, every minute
 // ---------------------------------------------------------------------------
+// CoinGecko refreshes each coin roughly once a minute (around :20–:30s) and occasionally skips a
+// minute; rows whose last_updated hasn't changed are skipped, so such a minute writes 0 rows.
 export async function syncMarkets(): Promise<number> {
   const { data, apiCallId } = await cg<MarketCoin[]>("/coins/markets", {
     vs_currency: "usd",
@@ -283,7 +289,7 @@ export async function syncCoinsList(): Promise<number> {
       coingecko_id: c.id,
       symbol: c.symbol,
       name: c.name,
-      platforms: sql.json((c.platforms ?? {}) as never),
+      platforms: sql.json(cleanPlatforms(c.platforms) as never),
       updated_at: now,
     })),
     "on conflict (coingecko_id) do update set symbol = excluded.symbol, name = excluded.name, platforms = excluded.platforms, updated_at = excluded.updated_at",
@@ -357,7 +363,7 @@ export async function syncCoinDetails(ids?: string[]): Promise<number> {
         web_slug = ${c.web_slug ?? null},
         asset_platform_id = ${c.asset_platform_id ?? null},
         contract_address = ${c.contract_address || null},
-        platforms = ${c.platforms ? sql.json(c.platforms) : null},
+        platforms = ${sql.json(cleanPlatforms(c.platforms))},
         detail_platforms = ${c.detail_platforms ? sql.json(c.detail_platforms as never) : null},
         block_time_in_minutes = ${int(c.block_time_in_minutes)},
         hashing_algorithm = ${c.hashing_algorithm ?? null},
@@ -446,4 +452,33 @@ export async function fetchKeyUsage(): Promise<KeyUsage> {
   const { data, apiCallId } = await cg<KeyUsage>("/key");
   await sql`update api_calls set credits_remaining = ${data.current_remaining_monthly_calls} where id = ${apiCallId}`;
   return data;
+}
+
+// Gap-fill: after an outage the per-minute /coins/markets history can't be re-fetched, so fill any
+// 5-minute bucket of the last 24h that has no snapshot with CoinGecko's 5-minute chart (days=1).
+// Only coins with gaps are fetched (1 credit each); buckets already filled are skipped.
+export async function fillMarketGaps(): Promise<number> {
+  const gaps = await sql<{ coingecko_id: string; missing: number }[]>`
+    with buckets as (
+      select generate_series(date_bin('5 minutes', now() - interval '24 hours', 'epoch'), now() - interval '15 minutes', interval '5 minutes') as b
+    ),
+    universe as (select coingecko_id, first_seen_at from tokens where in_universe),
+    covered as (
+      select coingecko_id, date_bin('5 minutes', captured_at, 'epoch') as b from market_snapshots
+      where captured_at > now() - interval '25 hours' group by 1, 2
+    ),
+    filled as (
+      select coingecko_id, date_bin('5 minutes', ts, 'epoch') as b from market_chart_points
+      where granularity = '5m' and ts > now() - interval '25 hours' group by 1, 2
+    )
+    select u.coingecko_id, count(*)::int as missing
+    from universe u cross join buckets k
+    left join covered c on c.coingecko_id = u.coingecko_id and c.b = k.b
+    left join filled f on f.coingecko_id = u.coingecko_id and f.b = k.b
+    where c.b is null and f.b is null and k.b >= u.first_seen_at - interval '1 day'
+    group by u.coingecko_id
+    having count(*) >= 2`;
+  if (!gaps.length) return 0;
+  console.log(`[gap-fill] ${gaps.length} coins with missing 5-min buckets (max ${Math.max(...gaps.map((g) => g.missing))})`);
+  return backfillMarketCharts(1, gaps.map((g) => g.coingecko_id));
 }

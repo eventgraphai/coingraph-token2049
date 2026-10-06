@@ -14,6 +14,7 @@ const commands: Record<string, (args: string[]) => Promise<unknown>> = {
   details: (args) => cg.syncCoinDetails(args.length ? args : undefined),
   backfill: (args) => cg.backfillMarketCharts(Number(args[0] ?? 7)),
   key: () => cg.fetchKeyUsage(),
+  "gap-fill": () => cg.fillMarketGaps(),
 };
 
 async function main() {

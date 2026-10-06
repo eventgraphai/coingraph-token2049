@@ -23,11 +23,18 @@ export const env = {
   databaseUrl: required("DATABASE_URL"),
   coingeckoApiKey: required("COINGECKO_API_KEY"),
   universeSize: Number(process.env.UNIVERSE_SIZE ?? 100),
+  // Demo coins get extra tracking (DEX pools, order books) and full investigation coverage.
+  demoTokens: (process.env.DEMO_TOKENS ?? "ethereum,aave,chainlink,uniswap,pancakeswap-token").split(",").map((s) => s.trim()).filter(Boolean),
 
   // Raw response archive (bronze). Optional: when unset, archiving is skipped with a warning.
   supabaseUrl: process.env.SUPABASE_URL,
   supabaseServiceKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
   rawArchiveBucket: process.env.RAW_ARCHIVE_BUCKET ?? "raw-api",
+
+  retention: {
+    minuteDays: Number(process.env.RETENTION_MINUTE_DAYS ?? 14),
+    rawArchiveDays: Number(process.env.RAW_ARCHIVE_DAYS ?? 90),
+  },
 
   // Poll intervals in seconds, matched to CoinGecko's documented cache times.
   intervals: {

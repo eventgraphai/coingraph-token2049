@@ -40,15 +40,23 @@ Locked on Basic (not used): `top_holders`, `holders_chart`, token `trades`, `top
 
 ### CCXT (free — Binance spot + USDⓈ-M futures, OKX, Coinbase)
 
+Venues: `binance` (spot), `binanceusdm` (perps), `okx` (spot + perps), `coinbase` (spot). Primary spot venue per token: Binance → OKX → Coinbase; primary perp venue: Binance → OKX.
+Coverage (Oct 2026): 64 of 83 non-stable top-100 tokens have a spot candle source, 68 a perp source. Not on these venues: tokenized RWAs and exchange-native tokens (CoinGecko only).
+Batched per-symbol calls are logged as one `api_calls` row per batch (raw responses archived together).
+
 | # | Method | Scope | Frequency | Writes to |
 |---|---|---|---|---|
-| 18 | `loadMarkets()` | all markets per exchange | daily | `exchange_markets` (upsert), `symbol_map` |
-| 19 | `fetchTickers()` | 1 call per exchange; keep universe symbols | **1 min** | `cex_ticker_snapshots` |
-| 20 | `fetchOHLCV(sym, '1m')` | universe symbols on primary exchange (Binance; fallback OKX → Coinbase) | **1 min** | `cex_ohlcv` |
-| 21 | `fetchOpenInterest(sym)` | universe perps on Binance futures | 5 min | `open_interest_snapshots` |
-| 22 | `fetchFundingRates()` | 1 call, all perps; keep universe | 15 min | `funding_rate_snapshots` |
-| 23 | `fetchOrderBook(sym, 100)` | flagged coin | per investigation | `order_book_snapshots` |
-| 24 | `fetchTrades(sym, limit=1000)` | flagged coin | per investigation | `cex_trades` |
+| 18 | `loadMarkets()` + `fetchTickers()` price check (±2% vs CoinGecko, handles `1000SHIB`-style contracts) | all venues | daily | `exchange_markets`, `symbol_map` |
+| 19 | Binance raw klines (`publicGetKlines` / `fapiPublicGetKlines`), OKX raw candles, Coinbase `fetchOHLCV` — keeps quote volume, trade count, taker-buy volume | primary spot venue per token + Binance perps | **1 min** (:05s) | `cex_ohlcv` |
+| 20 | `fetchTickers()` | 1 call per venue × type; keep mapped symbols | 5 min | `cex_ticker_snapshots` |
+| 21 | `fetchFundingRates()` | Binance + OKX, 1 call each | 5 min | `funding_rate_snapshots` |
+| 22 | Binance `openInterestHist` (5m, USD value) per symbol; OKX `fetchOpenInterests()` 1 call | perps | 5 min | `open_interest_snapshots` |
+| 23 | Binance global / top-account / top-position long-short ratios + taker buy/sell volume (5m) | Binance perps | 5 min | `futures_sentiment_snapshots` |
+| 24 | `fetchOrderBook(sym, 100)` | flagged coin | per investigation | `order_book_snapshots` |
+| 25 | `fetchTrades(sym, 1000)` | flagged coin | per investigation | `cex_trades` |
+| — | One-time backfill: 7 days of 1m klines, 2 days of OI + positioning | Binance | once (self-skipping hourly) | same tables |
+
+Not used: liquidations (WebSocket only), deposit/withdraw status (needs exchange keys), options/greeks (BTC/ETH only).
 
 ### NOWNodes (investigation only — never polled for all 100)
 
@@ -59,6 +67,34 @@ Locked on Basic (not used): `top_holders`, `holders_chart`, token `trades`, `top
 | 27 | `eth_getBalance` / ERC-20 `balanceOf` (`eth_call`) for whale / exchange wallets | eth, bsc | `wallet_balance_snapshots` |
 | 28 | Blockbook address/tx API | btc | `onchain_transfers` |
 | 29 | Koios (`ada-testnet` / mainnet) address & tx endpoints | ada | `onchain_transfers` |
+
+### Additional feeds (added after the core build)
+
+| Feed | Source | Frequency | Writes to |
+|---|---|---|---|
+| Liquidations (OKX) | OKX REST `/api/v5/public/liquidation-orders` (last 100 per contract family) | 5 min | `liquidations` |
+| Liquidations (Binance) | Binance WebSocket `!forceOrder@arr` (live) — needs a network that passes WebSocket data (works on Railway; filtered on some Wi-Fi) | live | `liquidations` |
+| OKX + Bybit open interest history | CCXT `fetchOpenInterestHistory` (5m; OKX amount = base coins via `oiCcy`) | 5 min + 2-day backfill | `open_interest_snapshots` |
+| OKX + Bybit long/short ratio | CCXT `fetchLongShortRatioHistory` (OKX) · Bybit `/v5/market/account-ratio` | 5 min + 2-day backfill | `futures_sentiment_snapshots` |
+| Demo-coin order books | CCXT `fetchOrderBook` (primary spot + perp) | 5 min | `order_book_snapshots` |
+| Exchange status | CCXT `fetchStatus` (Binance, Binance futures, OKX, Bybit, Kraken) | 5 min | `exchange_status` |
+| Demo-coin DEX pools | CoinGecko `/onchain/networks/{network}/tokens/{address}/pools` (ETH uses WETH) | 15 min | `dex_pool_snapshots` |
+| Exchange tickers, 100+ exchanges | CoinGecko `/coins/{id}/tickers?depth=true` | daily (top 100) + per investigation | `exchange_tickers` |
+| Public treasuries | CoinGecko `/{companies|governments}/public_treasury/{bitcoin|ethereum|solana}` | daily | `public_treasury_snapshots` |
+| 30-day hourly history | CoinGecko `/coins/{id}/market_chart?days=30` | once + new entrants | `market_chart_points` |
+
+Demo coins (`DEMO_TOKENS`, default `ethereum,aave,chainlink,uniswap,pancakeswap-token`) are flagged `tokens.is_demo`.
+Note: rank DEX pools by traded volume, not `reserve_in_usd` — scam pools can report huge liquidity with zero trading.
+
+**`liquidations`** | venue | symbol (exchange-native) | coingecko_id | side (SELL = long liquidated) | position_side | order_type | time_in_force | status | price | avg_price | quantity (base) | filled_qty | notional_usd | event_ts | received_at | info jsonb | UNIQUE(venue, symbol, event_ts, side, quantity) |
+
+**`dex_pool_snapshots`** | captured_at | api_call_id | investigation_id | coingecko_id | network | token_address | pool_address | name | dex_id | base/quote token ids | pool_created_at | base/quote token prices (usd, native, cross) | token_price_usd | fdv_usd | market_cap_usd | reserve_in_usd | price_change_percentage, volume_usd, transactions jsonb ({m5…h24}) | volume_usd_m15/h1/h24 | buys/sells_m15 | buys/sells/buyers/sellers_h1 | attributes, relationships jsonb |
+
+**`exchange_status`** | captured_at | api_call_id | venue | status | updated | eta | url | info |
+
+**`public_treasury_snapshots`** | captured_at | api_call_id | entity_type | coingecko_id | total_holdings | total_value_usd | market_cap_dominance | holders_count | holders jsonb |
+
+`exchange_tickers` (defined above) now also gets a daily scheduled snapshot for the top 100 (`investigation_id` null).
 
 ---
 
@@ -148,8 +184,8 @@ Locked on Basic (not used): `top_holders`, `holders_chart`, token `trades`, `top
 | info | jsonb (exchange raw) |
 | updated_at | timestamptz |
 
-**`symbol_map`** — ours: one coin ↔ its exchange symbols and onchain contracts
-| coingecko_id → tokens | exchange | spot_symbol | perp_symbol | is_primary boolean | price_check_ok boolean (exchange price within ~2% of CoinGecko) | verified_at |
+**`symbol_map`** — ours: token ↔ exchange market, price-checked
+| coingecko_id → tokens | venue | market_type (spot/swap) | symbol | market_id | base | quote | price_multiplier (1000 for 1000SHIB) | exchange_price | coingecko_price | price_deviation | price_check_ok (≤2%) | is_primary | verified_at | PK(coingecko_id, venue, market_type) |
 
 **`wallet_labels`** — ours: known exchange hot wallets, bridges, treasuries
 | chain | address | label | entity | type (`exchange`/`bridge`/`treasury`/`whale`) | source | PK(chain,address) |
@@ -246,13 +282,16 @@ Locked on Basic (not used): `top_holders`, `holders_chart`, token `trades`, `top
 | info | jsonb (exchange raw) |
 
 **`cex_ohlcv`** ← CCXT `fetchOHLCV('1m')` · every 1 min
-| exchange | symbol | coingecko_id | timeframe text (`1m`) | ts timestamptz | open | high | low | close | volume numeric | PK(exchange, symbol, timeframe, ts) |
+| venue | market_type | symbol | coingecko_id | timeframe (`1m`) | ts | close_ts | open | high | low | close | volume (base) | quote_volume | trade_count | taker_buy_base_volume | taker_buy_quote_volume | api_call_id | PK(venue, symbol, timeframe, ts) |
 
-**`open_interest_snapshots`** ← CCXT `fetchOpenInterest()` · every 5 min
-| id, captured_at, api_call_id | exchange | symbol | coingecko_id | exchange_ts | open_interest_amount numeric | open_interest_value numeric | base_volume numeric | quote_volume numeric | info jsonb |
+**`open_interest_snapshots`** ← Binance `openInterestHist` / OKX `fetchOpenInterests()` · every 5 min
+| id, captured_at, api_call_id | venue | symbol | coingecko_id | exchange_ts | open_interest_amount numeric | open_interest_value numeric (USD) | info jsonb | UNIQUE(venue, symbol, exchange_ts) |
 
 **`funding_rate_snapshots`** ← CCXT `fetchFundingRates()` · every 15 min
 | id, captured_at, api_call_id | exchange | symbol | coingecko_id | exchange_ts | mark_price | index_price | interest_rate | estimated_settle_price | funding_rate | funding_ts | next_funding_rate | next_funding_ts | previous_funding_rate | previous_funding_ts | interval text | info jsonb |
+
+**`futures_sentiment_snapshots`** ← Binance futures data endpoints · every 5 min (5m buckets)
+| venue | symbol | coingecko_id | period | ts | global_long_short_ratio / _long_account / _short_account | top_account_long_short_ratio / _long_account / _short_account | top_position_long_short_ratio / _long_account / _short_account | taker_buy_sell_ratio | taker_buy_volume | taker_sell_volume | info jsonb (raw row per endpoint) | PK(venue, symbol, period, ts) |
 
 **`wallet_balance_snapshots`** ← NOWNodes · investigations
 | id, captured_at | chain | address | token_contract (null = native) | balance_raw numeric | decimals int | balance numeric | value_usd numeric | block_number bigint |
@@ -331,10 +370,46 @@ Locked on Basic (not used): `top_holders`, `holders_chart`, token `trades`, `top
 
 ## 3. Retention
 
+Runs daily in the worker (`maintenance:retention`, or `npm run retention`). Settings: `RETENTION_MINUTE_DAYS` (default 14), `RAW_ARCHIVE_DAYS` (default 90).
+
 | Data | Keep |
 |---|---|
-| `market_snapshots`, `global_snapshots`, `cex_ticker_snapshots`, `cex_ohlcv`, `category_snapshots` | 14 days full → then 1 row/hour forever |
-| `derivatives_tickers`, `open_interest_snapshots`, `funding_rate_snapshots` | 14 days full → hourly forever |
-| `api_calls` | 30 days |
-| Reference tables, `trending_snapshots`, `coin_detail_snapshots`, `market_chart_points` | forever |
-| All investigation evidence + intelligence tables | forever (receipts depend on them) |
+| `market_snapshots`, `category_snapshots`, `derivatives_tickers` (later also `cex_ticker_snapshots`, `cex_ohlcv`, `open_interest_snapshots`, `funding_rate_snapshots`) | Every row for 14 days → then the first row per series per hour, forever |
+| Rows inside a `retention_holds` window (e.g. an investigation's time range) | Every row, forever |
+| `global_snapshots`, `trending_snapshots`, `coin_detail_snapshots`, `market_chart_points` | Forever (already low frequency) |
+| `api_calls` | Forever — retained rows reference it for provenance; ~0.5 MB/day |
+| Raw archive objects (Supabase Storage `raw-api`) | 90 days |
+| Reference tables, investigation evidence + intelligence tables | Forever (receipts depend on them) |
+
+**`retention_holds`** | id | coingecko_id (null = all coins) | from_ts | to_ts | reason (`investigation:<id>`, `demo-case`) | created_at |
+
+---
+
+## 4. Operations: tracking and the /status dashboard
+
+The worker (`npm run worker:supervised`) records every job run and a heartbeat; the web app shows them at **`/status`**
+(live, auto-refreshes every 30s; set `STATUS_TOKEN` to require `/status?token=…`).
+
+| Object | What it holds |
+|---|---|
+| `job_runs` | One row per job run: worker_id, job, started_at, finished_at, status (`running`/`ok`/`failed`/`timeout`), rows, duration_ms, error. Kept 14 days. |
+| `worker_heartbeats` | One row per worker process, `last_beat` updated every 30s, jobs currently running, memory, pool mode. Exited workers kept 2 days. |
+| `job_health` (view) | Per job: last result and error, last success, runs / failures in the last hour and 24h, avg / max duration. |
+| `ingestion_health` (view) | Per external feed: status vs expected cadence (`ok` ≤ 2×, `late` ≤ 5×, else `down`), calls, failures, rows, latency. |
+| `open_interest_usd` (view) | Open interest in USD for every venue: reported value, else amount × latest mark price (Bybit). |
+| `cex_ohlcv_usd` (view) | 1m candles with USD volume for every venue: reported quote volume, else base volume × close. |
+| `system_metrics` | Hourly snapshot (credit-guard job): database size, CoinGecko credits remaining/monthly, connections, largest tables. Drives growth/day and burn rate. |
+
+The schedule (job name, interval, offset, category, label) lives in `lib/jobs-meta.ts`; the worker attaches run functions to it
+and the dashboard uses it for grouping and "next run". Dashboard sections: summary tiles, **coverage** (top-100 freshness and
+minute coverage, primary candle series complete for the last hour, futures symbols reporting per venue, demo-coin data-age grid),
+one section per **category** (market data, exchange spot, futures & leverage, onchain, maintenance) with jobs — status, next run,
+24h success rate, typical/slow duration, time-limit use, rows last vs normal — and feeds — venue, status, calls/failures, latency,
+CoinGecko credits per feed — then **exchange & API health** per provider, **budget & capacity** (credits used, burn/day, days left,
+month-end projection; DB size, growth/day, connections, largest tables), a 60-minute run timeline, data freshness and recent failures.
+The browser tab title carries the overall status (`✓ Pipeline status` / `! n down · n late`).
+
+Reliability safeguards in the worker: session pooler (port 5432) for all DB connections, a hard deadline on every external call
+(150s per logged call, 45s for tickers, 25s per symbol), per-job time limits (4 min frequent / 20 min daily), restart on a hung job,
+a 10-minute no-progress watchdog, and a local supervisor (`scripts/run-worker.sh`) that restarts the process. 1-minute candles
+self-heal gaps from the exchange; CoinGecko gaps are back-filled hourly from `/coins/{id}/market_chart?days=1` (5-minute points).

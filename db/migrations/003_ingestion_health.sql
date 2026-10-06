@@ -1,0 +1,49 @@
+-- One row per ingestion feed: is it running on schedule, failing, or writing nothing?
+-- Status: ok (last success within 2× interval), late (within 5×), down (older or never).
+
+create view ingestion_health as
+with expected (feed, provider, endpoint, every_sec) as (
+  values
+    ('cg:markets',     'coingecko', '/coins/markets',    60),
+    ('cg:categories',  'coingecko', '/coins/categories', 300),
+    ('cg:global',      'coingecko', '/global',           600),
+    ('cg:trending',    'coingecko', '/search/trending',  600),
+    ('cg:derivatives', 'coingecko', '/derivatives',      900),
+    ('cg:key',         'coingecko', '/key',              3600),
+    ('cg:coin-details','coingecko', '/coins/{id}',       86400),
+    ('cg:coins-list',  'coingecko', '/coins/list',       86400)
+),
+stats as (
+  select a.provider, a.endpoint,
+         max(a.started_at) filter (where a.ok)                                   as last_success,
+         max(a.started_at) filter (where not a.ok)                               as last_failure,
+         count(*) filter (where a.started_at > now() - interval '1 hour')        as calls_1h,
+         count(*) filter (where not a.ok and a.started_at > now() - interval '1 hour') as failures_1h,
+         coalesce(sum(a.row_count) filter (where a.started_at > now() - interval '1 hour'), 0) as rows_1h,
+         round(avg(a.latency_ms) filter (where a.started_at > now() - interval '1 hour')) as avg_latency_ms_1h,
+         count(a.raw_path) filter (where a.started_at > now() - interval '1 hour') as archived_1h
+  from api_calls a
+  where a.started_at > now() - interval '3 days'
+  group by a.provider, a.endpoint
+)
+select e.feed, e.every_sec,
+       s.last_success,
+       extract(epoch from now() - s.last_success)::int as age_sec,
+       case
+         when s.last_success is null then 'down'
+         when now() - s.last_success <= make_interval(secs => e.every_sec * 2) then 'ok'
+         when now() - s.last_success <= make_interval(secs => e.every_sec * 5) then 'late'
+         else 'down'
+       end as status,
+       coalesce(s.calls_1h, 0)    as calls_1h,
+       coalesce(s.failures_1h, 0) as failures_1h,
+       coalesce(s.rows_1h, 0)     as rows_1h,
+       s.avg_latency_ms_1h,
+       coalesce(s.archived_1h, 0) as archived_1h,
+       s.last_failure
+from expected e
+left join stats s on s.provider = e.provider and s.endpoint = e.endpoint
+order by e.every_sec, e.feed;
+
+-- Keep it off the public Data API like every other object.
+revoke all on ingestion_health from anon, authenticated;
