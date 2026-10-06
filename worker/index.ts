@@ -44,6 +44,7 @@ async function syncOnchainReference(): Promise<number> {
   const contracts = await nn.syncOnchainContracts();
   await seedWalletLabels();
   for (const chain of ["eth", "bsc", "btc"] as const) await verifyWalletLabels(chain);
+  await nn.syncExchangeReserves(0); // all exchange wallets once a day; the hourly job covers the largest 25
   return contracts;
 }
 

@@ -17,7 +17,7 @@ const WINDOW_SEC = 900;
 
 const EVM: Record<EvmChain, { platform: string; native: string; blocksPer15m: number; chunk: number; maxBlocksPerRun: number; confirmations: number; feeBlocks: number }> = {
   eth: { platform: "ethereum", native: "ethereum", blocksPer15m: 75, chunk: 100, maxBlocksPerRun: 600, confirmations: 3, feeBlocks: 75 },
-  bsc: { platform: "binance-smart-chain", native: "binancecoin", blocksPer15m: 1200, chunk: 500, maxBlocksPerRun: 6000, confirmations: 15, feeBlocks: 1000 },
+  bsc: { platform: "binance-smart-chain", native: "binancecoin", blocksPer15m: 1200, chunk: 1300, maxBlocksPerRun: 6500, confirmations: 15, feeBlocks: 1000 },
 };
 
 const minuteNow = () => {
@@ -291,7 +291,9 @@ export async function syncChainFees(): Promise<number> {
 // ---------------------------------------------------------------------------
 type AddressTokens = { balance: string; txs: number; tokens?: { type: string; contract: string; balance?: string; decimals?: number; symbol?: string }[] };
 
-export async function syncExchangeReserves(): Promise<number> {
+// Hourly: the `topWallets` wallets holding the most value (by their latest snapshot), plus any never
+// snapshotted. Daily (topWallets = 0): every active exchange wallet. Keeps the hourly feed ~25 calls.
+export async function syncExchangeReserves(topWallets = Number(process.env.NN_RESERVES_HOURLY_WALLETS ?? 25)): Promise<number> {
   const captured = minuteNow();
   const prices = await latestPrices();
   const rows: Record<string, unknown>[] = [];
@@ -300,7 +302,16 @@ export async function syncExchangeReserves(): Promise<number> {
       (await sql<{ coingecko_id: string; address: string; decimals: number }[]>`
         select coingecko_id, address, decimals from onchain_contracts where chain = ${chain} and decimals is not null`).map((c) => [c.address, c]),
     );
-    const wallets = await sql<{ address: string; entity: string }[]>`select address, entity from wallet_labels where chain = ${chain} and kind = 'exchange' and active order by entity, address`;
+    const wallets = await sql<{ address: string; entity: string }[]>`
+      with latest as (
+        select wallet, sum(balance_usd) as usd from exchange_reserve_snapshots r
+        where chain = ${chain} and captured_at = (select max(captured_at) from exchange_reserve_snapshots where chain = ${chain} and wallet = r.wallet)
+        group by wallet),
+      ranked as (
+        select w.address, w.entity, l.usd, row_number() over (order by l.usd desc nulls last) as rank
+        from wallet_labels w left join latest l on l.wallet = w.address
+        where w.chain = ${chain} and w.kind = 'exchange' and w.active)
+      select address, entity from ranked where ${topWallets} = 0 or rank <= ${topWallets} or usd is null order by rank`;
     for (const w of wallets) {
       try {
         const { data, apiCallId } = await blockbook<AddressTokens>(chain === "eth" ? "eth-blockbook" : "bsc-blockbook",
@@ -416,7 +427,7 @@ export async function syncBtcMempool(): Promise<number> {
     const { data } = await rpc<{ feerate?: number }>("btc", "estimatesmartfee", [blocks], { params: { blocks } });
     return data.feerate !== undefined ? data.feerate * 1e5 : null; // BTC/kvB → sat/vB
   };
-  const [f1, f3, f6] = [await fee(1), await fee(3), await fee(6)];
+  const [f1, f3, f6] = [await fee(1), null, await fee(6)]; // 3-block estimate skipped to save a call per sample
   await sql`
     insert into btc_mempool_snapshots (captured_at, tx_count, bytes, total_fee_btc, min_fee_sat_vb, fee_1_block_sat_vb, fee_3_blocks_sat_vb, fee_6_blocks_sat_vb, info, api_call_id)
     values (${captured}, ${m.size}, ${m.bytes}, ${m.total_fee ?? null}, ${m.mempoolminfee !== undefined ? m.mempoolminfee * 1e5 : null}, ${f1}, ${f3}, ${f6}, ${sql.json(m as never)}, ${apiCallId})
