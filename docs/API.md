@@ -241,7 +241,7 @@ Proof of what you were told.
 
 | Input | Where | Required | Description |
 |---|---|---|---|
-| `id` | path | yes | Id of an evaluation, brief or answer. |
+| `id` | path | yes | Id of an evaluation (`eval_…`), answer (`ans_…`), agent run (`run_…`) or brief number. |
 
 **Returns** `Proof`: the canonical object, `sha256`, `issued_at`, `attestation` (Chainlink CRE: workflow id, timestamp, transaction/receipt — `pending` until attested), `provenance[]` (every source call behind the object: provider, endpoint, time, latency).
 
@@ -253,7 +253,17 @@ Proof of what you were told.
 |---|---|
 | `GET /v1/openapi.json` | OpenAPI 3.1 specification generated from this document. |
 | `GET /llms.txt` | Short agent-readable guide: what CoinGraph is, the 12 endpoints, how to pay. |
-| MCP server | The same 12 endpoints as tools: `tokens, state, history, market, inspect, evaluate, explain, ask, monitor, record, verify, status`. |
+| MCP server | The same 12 endpoints as tools, plus one `run_…` tool per agent and three prompts. See [MCP.md](MCP.md). |
+
+## Agents
+
+Ten ready-made agents built on the endpoints above. Full list, inputs and verdicts in [AGENTS.md](AGENTS.md).
+
+| Endpoint | Description |
+|---|---|
+| `GET /v1/agents` | Every agent with its input schema, verdicts, price and an example input. |
+| `GET /v1/agents/{id}` | One agent's card. |
+| `POST /v1/agents/{id}` | Run the agent. Returns `agent_run`: `verdict`, `summary`, `result`, `reasons`, `run_id`, `verify_url`. Invalid input answers `400 invalid_input`. |
 
 ## Payments (to be finalised)
 

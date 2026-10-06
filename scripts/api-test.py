@@ -121,6 +121,18 @@ call("GET", "/verify/3", check=lambda js: f"brief kind={d(js)['kind']} att={d(js
 call("GET", "/verify/eval_doesnotexist", expect=404)
 call("GET", "/verify/zzz", expect=400)
 
+# Agents: list, card, errors, then every agent with its own example input
+cat = call("GET", "/agents", check=lambda js: f"{d(js)['count']} agents")
+call("GET", "/agents/trade-gatekeeper", check=lambda js: f"{d(js)['name']} tier={d(js)['tier']}")
+call("GET", "/agents/nope", expect=404)
+call("POST", "/agents/trade-gatekeeper", {"size_usd": "abc"}, expect=400)
+call("POST", "/agents/nope", {}, expect=404)
+run = None
+for a in (d(cat)["agents"] if isinstance(cat, dict) and "data" in cat else []):
+    r = call("POST", f"/agents/{a['id']}", a["example_input"], expect=201, check=lambda js: f"{d(js)['verdict']}: {d(js)['summary'][:80]}")
+    run = run or (r if isinstance(r, dict) and "id" in r else None)
+if run: call("GET", f"/verify/{run['id']}", check=lambda js: f"{d(js)['kind']} hash ok={d(js)['hash_matches_stored']}")
+
 # Docs
 call("GET", "/openapi.json", check=lambda js: f"openapi {js['openapi']} paths={len(js['paths'])}")
 call("GET", "@/llms.txt", check=lambda js: f"{len(js)} chars")

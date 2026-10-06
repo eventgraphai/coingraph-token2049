@@ -1,7 +1,9 @@
 import { BASE_URL } from "./respond";
 import { PRICES, PRICING_NOTES } from "./pricing";
+import { AGENTS, TIER_PRICE } from "../agents/registry";
+import { z } from "zod";
 
-// OpenAPI 3.1 for the 12 endpoints, generated from the same descriptions as docs/API.md.
+// OpenAPI 3.1 for the 12 endpoints + the agents, generated from the same descriptions as docs/API.md.
 
 const envelope = (object: string, dataRef: string) => ({
   type: "object",
@@ -32,6 +34,7 @@ export function buildOpenApi() {
       { name: "Decide", description: "Ask CoinGraph to think. Creates objects with ids that go into the public record." },
       { name: "Watch", description: "Get told when something changes." },
       { name: "Trust", description: "Check CoinGraph's record and prove what you were told." },
+      { name: "Agents", description: "Ten ready-made agents built on the data above. Each returns a verdict, a plain summary, sourced reasons and a proof id." },
     ],
     paths: {
       "/tokens": { get: { tags: ["Discover"], operationId: "tokens", summary: "List the 100 tokens we track", description: "Ids, symbols, contract addresses per chain, rank, price, changes, categories, open signals, latest headline. Use `q` to search 21,000+ coins by name, symbol or contract." + paid("GET /v1/tokens"), parameters: [{ name: "q", in: "query", required: false, schema: { type: "string" }, example: "aave" }], responses: resp("token_list", "TokenList", "The tracked universe") } },
@@ -53,7 +56,15 @@ export function buildOpenApi() {
       "/monitor/{id}": { delete: { tags: ["Watch"], operationId: "monitorDelete", summary: "Stop a monitor", parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }, { name: "X-Monitor-Secret", in: "header", required: true, schema: { type: "string" } }], responses: resp("monitor", "Monitor", "Monitor") } },
       "/record": { get: { tags: ["Trust"], operationId: "record", summary: "Our public scorecard", description: "Every evaluation, signal and brief issued, what the price did 1h/24h/7d later, and whether the call was right; calibration by kind and severity.", parameters: [sinceParam, { name: "kind", in: "query", required: false, schema: { type: "string", enum: ["evaluation", "signal", "brief"] } }], responses: resp("record", "Record", "Record") } },
       "/record/{token}": { get: { tags: ["Trust"], operationId: "recordToken", summary: "The scorecard for one token", parameters: [tokenParam, sinceParam], responses: resp("record", "Record", "Record") } },
-      "/verify/{id}": { get: { tags: ["Trust"], operationId: "verify", summary: "Proof of what you were told", description: "The canonical object, its sha256, the Chainlink attestation (pending until written) and the source calls behind it.", parameters: [{ name: "id", in: "path", required: true, description: "eval_…, ans_… or a brief number", schema: { type: "string" } }], responses: resp("proof", "Proof", "Proof") } },
+      "/verify/{id}": { get: { tags: ["Trust"], operationId: "verify", summary: "Proof of what you were told", description: "The canonical object, its sha256, the Chainlink attestation (pending until written) and the source calls behind it.", parameters: [{ name: "id", in: "path", required: true, description: "eval_…, ans_…, run_… or a brief number", schema: { type: "string" } }], responses: resp("proof", "Proof", "Proof") } },
+      "/agents": { get: { tags: ["Agents"], operationId: "agents", summary: "List the agents", description: "Every agent with its input schema, verdicts, price and an example input.", responses: resp("agent_list", "AgentList", "Agents") } },
+      "/agents/{id}": { get: { tags: ["Agents"], operationId: "agent", summary: "One agent's card", parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", enum: AGENTS.map((a) => a.id) } }], responses: resp("agent", "AgentCard", "Agent") } },
+      ...Object.fromEntries(AGENTS.map((a) => [`/agents/${a.id}`, { post: {
+        tags: ["Agents"], operationId: `run_${a.id.replace(/-/g, "_")}`, summary: `${a.name}: ${a.tagline}`,
+        description: `${a.description} Verdicts: ${a.verdicts.join(" / ")}. Price: ${TIER_PRICE[a.tier].tada} tADA on testnet (${a.tier}).`,
+        requestBody: { required: true, content: { "application/json": { schema: z.toJSONSchema(a.input), example: a.example } } },
+        responses: { 201: { description: "Agent run", content: { "application/json": { schema: envelope("agent_run", "#/components/schemas/AgentRun") } } }, 400: err, 402: err, 404: err, 429: err },
+      } }])),
     },
     components: {
       schemas: {
@@ -68,6 +79,8 @@ export function buildOpenApi() {
         Brief: { type: "object", properties: { headline: { type: "string" }, direction: { type: "string" }, severity: { type: "integer" }, confidence: { type: "number" }, summary: { type: "string" }, what_happened: { type: "array" }, likely_causes: { type: "array" }, onchain: { type: "array" }, market_context: { type: "array" }, watch_next: { type: "array" }, caveats: { type: "array" }, evidence: { type: "array" }, verify_url: { type: "string" } } },
         Answer: { type: "object", additionalProperties: true },
         MonitorRequest: { type: "object", properties: { tokens: { type: "array", items: { type: "string" } }, webhook_url: { type: "string", format: "uri" }, conditions: { type: "object", properties: { kinds: { type: "array", items: { type: "string" } }, min_severity: { type: "integer", minimum: 1, maximum: 3 }, verdict_changes: { type: "boolean" }, new_briefs: { type: "boolean" } } } }, required: ["tokens", "webhook_url"] },
+        AgentList: { type: "object", additionalProperties: true }, AgentCard: { type: "object", additionalProperties: true },
+        AgentRun: { type: "object", properties: { run_id: { type: "string" }, agent: { type: "string" }, verdict: { type: "string" }, summary: { type: "string" }, result: { type: "object" }, reasons: { type: "array" }, warnings: { type: "array" }, hash: { type: "string" }, verify_url: { type: "string" } } },
         Monitor: { type: "object", additionalProperties: true }, MonitorList: { type: "object", additionalProperties: true }, Record: { type: "object", additionalProperties: true }, Proof: { type: "object", additionalProperties: true },
       },
       securitySchemes: { x402: { type: "apiKey", in: "header", name: "X-Payment", description: "x402 payment proof (Cardano). Paid endpoints answer 402 with payment details." }, pass: { type: "http", scheme: "bearer", description: "Token Pass: 24h of Decide calls on one token." } },
@@ -108,9 +121,14 @@ Every response: { object, id, as_of, data, sources }. Unmeasured values are "una
 - GET /record[/{token}] — public scorecard: every call we made and whether it was right
 - GET /verify/{id} — canonical object, sha256, Chainlink attestation, source provenance
 
+## Agents
+Ready-made agents built on the data above. POST /agents/{id} with JSON input → { verdict, summary, result, reasons, run_id, verify_url }. GET /agents lists input schemas and examples.
+${AGENTS.map((a) => `- POST /agents/${a.id} — ${a.name}: ${a.tagline} (${a.verdicts.join("/")}; ${TIER_PRICE[a.tier].tada} tADA)`).join("\n")}
+
 ## MCP
 Remote MCP server (Streamable HTTP): ${BASE_URL}/mcp — Claude Code: \`claude mcp add --transport http coingraph ${BASE_URL}/mcp\`
-Tools: search_tokens, get_token_snapshot, get_token_timeline, check_token, get_token_brief, ask_about_token, watch_tokens, get_market_overview, lookup_address, get_track_record, get_proof, get_service_status
+Tools: search_tokens, get_token_snapshot, get_token_timeline, check_token, get_token_brief, ask_about_token, watch_tokens, get_market_overview, lookup_address, get_track_record, get_proof, get_service_status, plus one run_<agent> tool per agent (e.g. run_trade_gatekeeper)
+Prompts: pre_trade_check, wallet_safety_check, token_due_diligence
 
 ## Payments
 ${PRICING_NOTES.summary} Paid endpoints answer 402 with x402 details; pay in ADA and retry with the X-Payment header.

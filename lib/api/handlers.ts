@@ -201,3 +201,28 @@ export const verify = wrap(async (_req, p) => {
   const v = await verifyObject(decodeURIComponent(p.id));
   return ok("proof", v, { id: v.id, as_of: v.issued_at, sources: v.provenance.map((x) => ({ provider: x.provider, endpoint: x.endpoint, as_of: x.at })) });
 });
+
+// --- Agents ---------------------------------------------------------------------------------------
+export const agentsList = wrap((req) => cached(req, 300, async () => {
+  const { AGENTS, catalogEntry } = await import("../agents/registry");
+  return ok("agent_list", { count: AGENTS.length, agents: AGENTS.map(catalogEntry) }, { sources: [{ provider: "coingraph", endpoint: "agents" }] });
+}));
+
+export const agentGet = wrap(async (_req, p) => {
+  const { AGENT_BY_ID, catalogEntry } = await import("../agents/registry");
+  const def = AGENT_BY_ID.get(p.id);
+  if (!def) throw new ApiError(404, "agent_not_found", `No agent "${p.id}". GET /v1/agents lists them.`);
+  return ok("agent", catalogEntry(def));
+});
+
+export const agentRun = wrap((req, p) => withSlot("agents", 6, async () => {
+  const { AGENT_BY_ID } = await import("../agents/registry");
+  const { runAgent } = await import("../agents/core");
+  const def = AGENT_BY_ID.get(p.id);
+  if (!def) throw new ApiError(404, "agent_not_found", `No agent "${p.id}". GET /v1/agents lists them.`);
+  const body = await readJson<Record<string, unknown>>(req);
+  const parsed = def.input.safeParse(body);
+  if (!parsed.success) throw new ApiError(400, "invalid_input", parsed.error.issues.map((i) => `${i.path.join(".") || "input"}: ${i.message}`).join("; "));
+  const { run, sources } = await runAgent(def, body, { requester: req.headers.get("x-payment") ? "x402" : "anonymous" });
+  return ok("agent_run", run, { id: run.run_id, as_of: run.as_of, sources, status: 201 });
+}));

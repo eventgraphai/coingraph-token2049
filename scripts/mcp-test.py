@@ -32,7 +32,11 @@ def tool(name, args, check, expect_error=False):
     secs = round(time.time() - t, 1)
     try:
         r = res["result"]
-        payload = json.loads(r["content"][0]["text"])
+        text = r["content"][0]["text"]
+        try:
+            payload = json.loads(text)
+        except ValueError:  # SDK-level input validation errors are plain text
+            payload = {"error": {"message": text}}
         ok = bool(r.get("isError")) == expect_error
         note = check(payload) if ok else payload.get("error", {}).get("message", "")[:90]
     except Exception as e:  # noqa: BLE001
@@ -67,6 +71,15 @@ tool("get_track_record", {"kind": "brief"}, lambda p: f"{d(p)['calibration']['to
 if ev:
     tool("get_proof", {"id": ev["id"]}, lambda p: f"sha256 match={d(p)['hash_matches_stored']}")
 tool("get_service_status", {}, lambda p: f"pipeline {d(p)['pipeline']}")
+gk = tool("run_trade_gatekeeper", {"token": "aave", "size_usd": 50000}, lambda p: f"{d(p)['verdict']}: {d(p)['summary'][:70]}")
+tool("run_wallet_guard", {"to_address": "0x0330070fd38ec3bb94f58fa55d40368271e9e54a", "chain": "eth"}, lambda p: f"{d(p)['verdict']} (sanctioned address)" if d(p)["verdict"] == "STOP" else 1 / 0)
+tool("run_leverage_radar", {"top": 3}, lambda p: f"{d(p)['verdict']}: {d(p)['summary'][:70]}")
+tool("run_trade_gatekeeper", {"size_usd": 5}, lambda p: "error as expected", expect_error=True)
+if gk:
+    tool("get_proof", {"id": gk["id"]}, lambda p: f"agent run sha256 match={d(p)['hash_matches_stored']}")
+status, pl = rpc("prompts/list")
+names = [x["name"] for x in pl.get("result", {}).get("prompts", [])]
+results.append(("prompts/list", "PASS" if len(names) == 3 else "FAIL", ", ".join(names), 0))
 
 # Clean up the test watch so it never fires.
 if w:

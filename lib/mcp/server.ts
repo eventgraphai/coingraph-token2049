@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import * as api from "../api/handlers";
 import { BASE_URL } from "../api/respond";
+import { AGENTS, TIER_PRICE } from "../agents/registry";
 
 // CoinGraph as an MCP server: the same capabilities as the REST API, as 12 tools. Every tool calls the API
 // handler itself (not a copy of its logic), so validation, caching, limits and pricing behave identically.
@@ -41,6 +42,7 @@ export function buildMcpServer(forwardedFor: string | null): McpServer {
         "Typical flow: search_tokens to find the token → check_token before a trade (proceed / caution / avoid, with reasons) → get_token_brief to learn why it moved → ask_about_token for anything specific.",
         "Use get_token_snapshot for everything known right now, get_token_timeline for what happened over time, and get_market_overview for the whole market.",
         "Every answer says where each number came from (sources) and when it was true (as_of). Anything not measured is \"unassessed\" — never guessed.",
+        "Ready-made agents (run_<agent> tools) answer whole jobs in one call: run_trade_gatekeeper before a trade (ALLOW / REDUCE / BLOCK), run_wallet_guard before signing (SAFE / WARN / STOP), run_due_diligence_analyst for a graded memo, and seven more. Each returns a verdict, a plain summary, sourced reasons and a proof id for get_proof.",
         "CoinGraph never trades, holds funds or gives financial advice. The caller decides.",
       ].join(" "),
     },
@@ -177,6 +179,40 @@ export function buildMcpServer(forwardedFor: string | null): McpServer {
     inputSchema: {},
     annotations: { title: "Get service status", ...READ },
   }, () => call(api.status, { path: "/status" }));
+
+  // ---- Agents: one tool per agent ------------------------------------------------------------------
+  for (const def of AGENTS) {
+    const name = `run_${def.id.replace(/-/g, "_")}`;
+    server.registerTool(name, {
+      title: def.name,
+      description: `${def.tagline} ${def.description} Returns one of: ${def.verdicts.join(" / ")}, with a plain summary, structured result, sourced reasons and a proof id. Price: ${TIER_PRICE[def.tier].tada} tADA on testnet (${def.tier}).`,
+      inputSchema: def.input,
+      annotations: { title: def.name, ...WORK },
+    }, (args: unknown) => call(api.agentRun, { path: `/agents/${def.id}`, method: "POST", params: { id: def.id }, body: args as Record<string, unknown> }));
+  }
+
+  // ---- Prompts: the flagship workflows as slash commands ------------------------------------------
+  server.registerPrompt("pre_trade_check", {
+    title: "Pre-trade check",
+    description: "Run the Trade Gatekeeper before placing a trade and explain the decision.",
+    argsSchema: { token: z.string().describe("Token, e.g. aave"), size_usd: z.string().describe("Order size in USD, e.g. 25000"), side: z.string().optional().describe("buy or sell (default buy)") },
+  }, ({ token, size_usd, side }) => ({
+    messages: [{ role: "user", content: { type: "text", text: `Before I ${side ?? "buy"} $${size_usd} of ${token}, run CoinGraph's run_trade_gatekeeper tool with token "${token}", size_usd ${Number(size_usd) || 10000} and side "${side ?? "buy"}". Then tell me the decision (ALLOW / REDUCE / BLOCK) in one line, the top 3 reasons with their sources, the safe size if it says REDUCE, and the proof link. If the check mentions a brief, call get_token_brief and summarise why the token moved.` } }],
+  }));
+  server.registerPrompt("wallet_safety_check", {
+    title: "Wallet safety check",
+    description: "Check a token swap and/or a recipient address with Wallet Guard before signing.",
+    argsSchema: { token: z.string().optional().describe("Token you are swapping into"), amount_usd: z.string().optional(), to_address: z.string().optional().describe("Recipient address"), chain: z.string().optional().describe("eth, bsc, btc, sol or ada") },
+  }, ({ token, amount_usd, to_address, chain }) => ({
+    messages: [{ role: "user", content: { type: "text", text: `Use CoinGraph's run_wallet_guard tool with ${JSON.stringify({ token, amount_usd: amount_usd ? Number(amount_usd) : undefined, to_address, chain })}. Give me SAFE / WARN / STOP first, then the reasons in plain language. If it says STOP, tell me clearly not to sign.` } }],
+  }));
+  server.registerPrompt("token_due_diligence", {
+    title: "Token due diligence",
+    description: "Produce a due-diligence memo on a token with the Due Diligence Analyst.",
+    argsSchema: { token: z.string().describe("Token, e.g. morpho") },
+  }, ({ token }) => ({
+    messages: [{ role: "user", content: { type: "text", text: `Run CoinGraph's run_due_diligence_analyst tool for "${token}". Present the overall grade, a table of the section grades with their key findings, the red flags and strengths, and the proof link. Don't add facts that aren't in the result.` } }],
+  }));
 
   return server;
 }

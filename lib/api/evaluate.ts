@@ -9,7 +9,7 @@ import { dexQuote, type DexQuote } from "../security/jobs";
 
 export type Rating = "ok" | "caution" | "avoid" | "unassessed";
 export type Policy = { max_unlock_pct?: number; min_depth_usd?: number; allow_mint_authority?: boolean; max_top10_holder_pct?: number; max_funding_pct?: number; max_exchange_inflow_usd?: number };
-type Reason = { text: string; source: string };
+type Reason = { text: string; source: string; info?: boolean }; // info = context only, never a reason for caution
 type Dimension = { rating: Rating; reasons: Reason[] };
 
 const n = (v: unknown): number | null => (typeof v === "number" ? v : v === null || v === undefined || v === "unassessed" ? null : num(v));
@@ -52,7 +52,7 @@ export async function evaluate(token: Token, opts: { size_usd?: number; policy?:
     const available = askDepth ?? moveUp;
     if (available !== null) {
       rating = available < 10_000 ? "avoid" : available < 100_000 ? "caution" : "ok";
-      r.push({ text: `${usd(available)} available within 2% of the price${askDepth !== null ? " on tracked order books" : " across exchanges (CoinGecko)"}`, source: askDepth !== null ? "ccxt:fetchOrderBook" : "coingecko:/coins/{id}/tickers" });
+      r.push({ text: `${usd(available)} available within 2% of the price${askDepth !== null ? " on tracked order books" : " across exchanges (CoinGecko)"}${rating === "ok" ? "" : " — thin"}`, source: askDepth !== null ? "ccxt:fetchOrderBook" : "coingecko:/coins/{id}/tickers", info: rating === "ok" });
     }
     if (opts.size_usd && available !== null) {
       const impact = (opts.size_usd / available) * 2; // % move if the order consumed that share of 2% depth
@@ -60,7 +60,7 @@ export async function evaluate(token: Token, opts: { size_usd?: number; policy?:
       sizeCheck = { order_usd: opts.size_usd, depth_2pct_usd: { bid: bidDepth ?? moveDown, ask: askDepth ?? moveUp }, estimated_impact_pct: round(Math.min(impact, 100)), share_of_24h_volume_pct: round(volShare, 3) };
       if (impact >= 2) { rating = "avoid"; r.push({ text: `A ${usd(opts.size_usd)} order would move the price about ${round(Math.min(impact, 100))}%`, source: "ccxt:fetchOrderBook" }); }
       else if (impact >= 0.5 || (volShare !== null && volShare >= 1)) { rating = worst([rating, "caution"]); r.push({ text: `A ${usd(opts.size_usd)} order is ${round(volShare, 2)}% of daily volume and would move the price ~${round(impact)}%`, source: "ccxt:fetchOrderBook" }); }
-      else r.push({ text: `A ${usd(opts.size_usd)} order is ${round(volShare, 3)}% of daily volume with ~${round(impact, 3)}% impact`, source: "ccxt:fetchOrderBook" });
+      else r.push({ text: `A ${usd(opts.size_usd)} order is ${round(volShare, 3)}% of daily volume with ~${round(impact, 3)}% impact`, source: "ccxt:fetchOrderBook", info: true });
     }
     const disp = n(get(s.liquidity, "price_dispersion_pct"));
     if (disp !== null && disp >= 1) { rating = worst([rating, "caution"]); r.push({ text: `Prices differ by ${disp}% across venues`, source: "ccxt:fetchTickers" }); }
@@ -100,7 +100,7 @@ export async function evaluate(token: Token, opts: { size_usd?: number; policy?:
       const share = vol24 ? Math.abs(net24) / vol24 : 0;
       if (net24 > 0 && (big || share >= 0.02)) { rating = "caution"; r.push({ text: `Net ${usd(net24)} moved onto exchanges in 24h (${Math.round(share * 100 * 10) / 10}% of daily volume) — potential sell-side supply`, source: "nownodes:eth_getLogs" }); }
       else if (net24 < 0 && (big || share >= 0.02)) r.push({ text: `Net ${usd(Math.abs(net24))} withdrawn from exchanges in 24h — holders taking custody`, source: "nownodes:eth_getLogs" });
-      else r.push({ text: `Exchange net flow ${usd(net24)} in 24h: normal`, source: "nownodes:eth_getLogs" });
+      else r.push({ text: `Exchange net flow ${usd(net24)} in 24h: normal`, source: "nownodes:eth_getLogs", info: true });
     }
     const toEx = transfers.filter((t) => t.direction === "to_exchange" && (t.usd ?? 0) >= 5_000_000);
     if (toEx.length) { rating = worst([rating, "caution"]); r.push({ text: `${toEx.length} transfer(s) ≥ $5M to exchanges in 24h (largest ${usd(toEx[0].usd)} → ${toEx[0].to_entity})`, source: "nownodes:onchain_transfers" }); }
@@ -125,10 +125,16 @@ export async function evaluate(token: Token, opts: { size_usd?: number; policy?:
     const r: Reason[] = [];
     let rating: Rating = fdv === null && top10 === null ? "unassessed" : "ok";
     if (fdv !== null && fdv >= 3) { rating = "caution"; r.push({ text: `Fully diluted value is ${fdv}× market cap — most supply is not yet circulating`, source: "coingecko:/coins/markets" }); }
-    else if (fdv !== null) r.push({ text: `FDV / market cap ${fdv}`, source: "coingecko:/coins/markets" });
-    if (top10 !== null && top10 >= 80) { rating = "avoid"; r.push({ text: `Top 10 holders own ${top10}% of supply`, source: "nownodes:getTokenLargestAccounts" }); }
-    else if (top10 !== null && top10 >= 50) { rating = worst([rating, "caution"]); r.push({ text: `Top 10 holders own ${top10}% of supply`, source: "nownodes:getTokenLargestAccounts" }); }
-    r.push({ text: "Unlock schedule: unassessed (no free source)", source: "coingraph" });
+    else if (fdv !== null) r.push({ text: `FDV / market cap ${fdv}`, source: "coingecko:/coins/markets", info: true });
+    // Top-10 includes exchange, bridge and staking wallets, so ~50% is normal for healthy tokens; it doesn't
+    // apply to stablecoins and tokenized funds, whose supply sits with the issuer by design.
+    const holderSrc = get(s.supply, "top_holders_pct.as_of") ? "goplus/nownodes holders" : "coingraph";
+    if (top10 !== null && !token.is_stablecoin) {
+      if (top10 >= 90) { rating = "avoid"; r.push({ text: `Top 10 holders own ${top10}% of supply (incl. exchange and contract wallets)`, source: holderSrc }); }
+      else if (top10 >= 65) { rating = worst([rating, "caution"]); r.push({ text: `Top 10 holders own ${top10}% of supply (incl. exchange and contract wallets)`, source: holderSrc }); }
+      else r.push({ text: `Top 10 holders own ${top10}% of supply`, source: holderSrc, info: true });
+    }
+    r.push({ text: "Unlock schedule: unassessed (no free source)", source: "coingraph", info: true });
     dims.supply = { rating, reasons: r };
   }
 
@@ -167,14 +173,21 @@ export async function evaluate(token: Token, opts: { size_usd?: number; policy?:
   }
 
   // Execution cost from a live DEX quote for the caller's size.
+  // The rating uses the cheaper of the two routes (exchange order books vs on-chain), because a caller can use either.
   if (quote) {
-    const impact = quote.price_impact_pct;
     const cap = (token.market_cap_rank ?? 999) <= 20 ? 1 : 2; // pre-trade practice: ~1% on majors, ~2% on alts
-    const extra: Reason = { text: `On-chain: a ${usd(quote.size_usd)} buy via ${quote.venue} (${quote.chain.toUpperCase()}) costs ${impact}% in price impact`, source: `${quote.venue}:quote` };
-    dims.liquidity.reasons.push(extra);
-    if (impact > cap * 2) dims.liquidity.rating = "avoid";
-    else if (impact > cap) dims.liquidity.rating = worst([dims.liquidity.rating, "caution"]);
-    sizeCheck = { ...(sizeCheck ?? { order_usd: opts.size_usd }), dex_quote: quote, impact_limit_pct: cap };
+    const cexImpact = sizeCheck ? n(sizeCheck.estimated_impact_pct) : null;
+    const best = cexImpact !== null ? Math.min(cexImpact, quote.price_impact_pct) : quote.price_impact_pct;
+    const onchainWorse = cexImpact !== null && quote.price_impact_pct > cexImpact;
+    dims.liquidity.reasons.push({ text: `On-chain: a ${usd(quote.size_usd)} buy via ${quote.venue} (${quote.chain.toUpperCase()}) costs ${quote.price_impact_pct}% in price impact${onchainWorse ? " (exchange order books are cheaper)" : ""}`, source: `${quote.venue}:quote`, info: onchainWorse || quote.price_impact_pct <= cap });
+    // Re-rate the size impact on the best route.
+    if (cexImpact !== null) {
+      const base = n(get(s.liquidity, "depth_2pct_total_usd.ask")) ?? n(get(s.liquidity, "exchanges.cost_to_move_2pct_usd.up"));
+      dims.liquidity.rating = base !== null && base < 10_000 ? "avoid" : base !== null && base < 100_000 ? "caution" : "ok";
+    }
+    if (best > cap * 2) dims.liquidity.rating = "avoid";
+    else if (best > cap) dims.liquidity.rating = worst([dims.liquidity.rating, "caution"]);
+    sizeCheck = { ...(sizeCheck ?? { order_usd: opts.size_usd }), dex_quote: quote, best_route_impact_pct: best, impact_limit_pct: cap };
   }
 
   // Policy checks.
@@ -194,7 +207,8 @@ export async function evaluate(token: Token, opts: { size_usd?: number; policy?:
       ...(p.max_exchange_inflow_usd !== undefined ? { max_exchange_inflow_usd: check(net24 === null ? null : net24 <= p.max_exchange_inflow_usd, `limit ${usd(p.max_exchange_inflow_usd)}, actual net ${usd(net24)} in 24h`) } : {}),
       ...(p.max_unlock_pct !== undefined ? { max_unlock_pct: check(null, "unlock schedule unassessed") } : {}),
       ...(p.allow_mint_authority !== undefined ? (() => {
-        const cs = (s.security as { contracts?: { mintable: boolean | null; freezable: boolean | null }[] } | undefined)?.contracts;
+        const all = (s.security as { contracts?: { home_chain?: boolean; mintable: boolean | null; freezable: boolean | null }[] } | undefined)?.contracts;
+        const cs = all?.some((c) => c.home_chain) ? all.filter((c) => c.home_chain) : all; // the issuing contract, not bridged copies
         const canMint = cs?.length ? cs.some((c) => c.mintable === true || c.freezable === true) : null;
         return { allow_mint_authority: check(canMint === null ? null : p.allow_mint_authority || !canMint, canMint === null ? "no token contract to check" : canMint ? "the contract can mint or freeze" : "no mint or freeze authority") };
       })() : {}),
@@ -206,7 +220,7 @@ export async function evaluate(token: Token, opts: { size_usd?: number; policy?:
   const verdict = ratings.includes("avoid") ? "avoid" : ratings.includes("caution") ? "caution" : "proceed";
   const assessed = ratings.filter((r) => r !== "unassessed").length;
   const confidence = round(Math.min(0.95, 0.35 + (assessed / Object.keys(dims).length) * 0.6));
-  const reasons = Object.entries(dims).filter(([, d]) => d.rating === "avoid" || d.rating === "caution").flatMap(([dim, d]) => d.reasons.map((r) => ({ dimension: dim, ...r }))).slice(0, 6);
+  const reasons = Object.entries(dims).filter(([, d]) => d.rating === "avoid" || d.rating === "caution").flatMap(([dim, d]) => d.reasons.filter((r) => !r.info).map((r) => ({ dimension: dim, ...r }))).slice(0, 6);
   if (!reasons.length) reasons.push(...Object.entries(dims).filter(([, d]) => d.rating === "ok").slice(0, 3).flatMap(([dim, d]) => d.reasons.slice(0, 1).map((r) => ({ dimension: dim, ...r }))));
   const watchNext = [
     dims.momentum.rating !== "ok" ? "Whether the move holds over the next hour or retraces" : null,
