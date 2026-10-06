@@ -480,7 +480,8 @@ export default async function StatusPage({ searchParams }: { searchParams: Promi
       <Section title="Data freshness" subtitle="Newest row per table, compared with how often it should update.">
         <Table head={["Table", "Status", "Updates", "Newest row", "Rows (approx.)"]}>
           {data.freshness.map((t) => {
-            const expectedMin = t.cadence.includes("daily") ? 1440 : Number(/(\d+)\s*min/.exec(t.cadence)?.[1] ?? 5);
+            // Bitcoin blocks are irregular (often 20+ min apart) and we scan one block behind the tip.
+            const expectedMin = t.cadence.includes("daily") ? 1440 : t.cadence.includes("hourly") ? 60 : t.cadence.includes("per block") ? 30 : Number(/(\d+)\s*min/.exec(t.cadence)?.[1] ?? 5);
             const level = ageLevel(secondsBetween(t.newest, now), expectedMin * 60);
             return (
               <tr key={t.name} className="border-t border-edge/70 hover:bg-slab-raised/60">
