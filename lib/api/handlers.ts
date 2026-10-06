@@ -12,6 +12,9 @@ import { verifyObject } from "./verify";
 import { createMonitor, deleteMonitor, listMonitors } from "./monitor";
 import { PAYMENT, PRICES, PRICING_NOTES } from "./pricing";
 import { loadStatus } from "../status";
+import { startWarmer } from "./warm";
+
+startWarmer();
 
 // One function per endpoint. Route files under app/api/v1 only parse the URL and call these.
 

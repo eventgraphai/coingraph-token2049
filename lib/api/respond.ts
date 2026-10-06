@@ -118,30 +118,61 @@ export function rateLimit(req: Request, perMinute = Number(process.env.API_RATE_
 
 // Response cache for read endpoints: identical URLs within the TTL are served from memory. Our data
 // changes once a minute at most, so a 15–30s cache removes almost all duplicate load at volume.
+// Stale-while-revalidate: within the TTL the cached copy is served; after it, a stale copy (up to STALE_SEC old)
+// is served immediately while one background refresh runs, so a popular URL never waits for a rebuild.
 type Cached = { body: string; status: number; headers: Record<string, string>; expires: number; stored: number };
 const cache = new Map<string, Cached>();
+const refreshing = new Set<string>();
 const CACHE_MAX_ENTRIES = 2000;
+const STALE_SEC = 600;
+export const cacheKey = (req: Request) => `${req.method} ${new URL(req.url).pathname}${new URL(req.url).search}`;
+
+async function store(key: string, ttlSec: number, res: Response): Promise<Cached | null> {
+  if (res.status !== 200) return null;
+  const now = Date.now();
+  const body = await res.clone().text();
+  const headers: Record<string, string> = {};
+  res.headers.forEach((v, k) => { headers[k] = v; });
+  headers["cache-control"] = `public, max-age=${ttlSec}, stale-while-revalidate=${STALE_SEC}`;
+  if (cache.size >= CACHE_MAX_ENTRIES) {
+    for (const [k, v] of cache) if (v.stored + STALE_SEC * 1000 <= now) cache.delete(k);
+    if (cache.size >= CACHE_MAX_ENTRIES) cache.delete(cache.keys().next().value as string);
+  }
+  const entry = { body, status: 200, headers, expires: now + ttlSec * 1000, stored: now };
+  cache.set(key, entry);
+  return entry;
+}
+
 export async function cached(req: Request, ttlSec: number, produce: () => Promise<Response>): Promise<Response> {
-  const key = `${req.method} ${new URL(req.url).pathname}${new URL(req.url).search}`;
+  const key = cacheKey(req);
   const now = Date.now();
   const hit = cache.get(key);
-  if (hit && hit.expires > now) {
-    return new Response(hit.body, { status: hit.status, headers: { ...hit.headers, "x-cache": "HIT", age: String(Math.round((now - hit.stored) / 1000)) } });
+  const serve = (c: Cached, tag: string) => new Response(c.body, { status: c.status, headers: { ...c.headers, "x-cache": tag, age: String(Math.round((now - c.stored) / 1000)) } });
+  if (hit && hit.expires > now) return serve(hit, "HIT");
+  if (hit && hit.stored + STALE_SEC * 1000 > now) {
+    if (!refreshing.has(key)) {
+      refreshing.add(key);
+      produce().then((res) => store(key, ttlSec, res)).catch(() => {}).finally(() => refreshing.delete(key));
+    }
+    return serve(hit, "STALE");
   }
   const res = await produce();
-  if (res.status === 200) {
-    const body = await res.clone().text();
-    const headers: Record<string, string> = {};
-    res.headers.forEach((v, k) => { headers[k] = v; });
-    headers["cache-control"] = `public, max-age=${ttlSec}`;
-    if (cache.size >= CACHE_MAX_ENTRIES) {
-      for (const [k, v] of cache) if (v.expires <= now) cache.delete(k);
-      if (cache.size >= CACHE_MAX_ENTRIES) cache.delete(cache.keys().next().value as string);
-    }
-    cache.set(key, { body, status: 200, headers, expires: now + ttlSec * 1000, stored: now });
-    return new Response(body, { status: 200, headers: { ...headers, "x-cache": "MISS" } });
+  const entry = await store(key, ttlSec, res);
+  return entry ? serve(entry, "MISS") : res;
+}
+
+// Pre-warm: build a response for a URL and store it (used for the top tokens at boot and on a timer).
+export async function prime(url: string, ttlSec: number, produce: () => Promise<Response>): Promise<void> {
+  const key = `GET ${new URL(url, "http://local").pathname}${new URL(url, "http://local").search}`;
+  if (refreshing.has(key)) return;
+  refreshing.add(key);
+  try {
+    await store(key, ttlSec, await produce());
+  } catch {
+    // best effort
+  } finally {
+    refreshing.delete(key);
   }
-  return res;
 }
 
 // Concurrency limiter for slow endpoints (live chain lookups, Claude calls): beyond `max` in flight the
