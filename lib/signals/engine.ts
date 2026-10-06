@@ -141,18 +141,21 @@ async function exchangeFlow(): Promise<SignalRow[]> {
     where abs(c.net) >= 1000000 and (b.med is null or abs(c.net) / nullif(b.med, 0) >= 3)`;
 }
 
-// 7. Whale transfer: the largest onchain transfer of the coin in the last 30 min, when it is big.
+// 7. Whale transfer: the largest onchain transfer of the coin in the last 30 min. Moves to or from an
+// exchange count from $2M; untagged wallet-to-wallet moves (often DeFi contracts) only from $10M;
+// exchanges shuffling their own wallets, mints and burns are not whale activity.
 async function whaleTransfer(): Promise<SignalRow[]> {
   return sql<SignalRow[]>`
     select distinct on (coingecko_id) coingecko_id, 'whale_transfer' as kind,
       case direction when 'to_exchange' then 'down' when 'from_exchange' then 'up' else 'neutral' end as direction,
-      case when amount_usd >= 10000000 then 3 else 2 end as severity,
+      case when (direction in ('to_exchange', 'from_exchange') and amount_usd >= 10000000) or amount_usd >= 50000000 then 3 else 2 end as severity,
       round(amount_usd) as value, null::numeric as baseline, null::numeric as ratio,
       1800 as window_sec, block_ts as event_ts,
       jsonb_build_object('chain', chain, 'tx_hash', tx_hash, 'amount', round(amount, 4), 'amount_usd', round(amount_usd), 'from', from_address, 'to', to_address,
                          'from_entity', from_entity, 'to_entity', to_entity, 'direction', direction) as details
     from onchain_transfers
-    where block_ts > now() - interval '30 minutes' and amount_usd >= 2000000 and coingecko_id in (${COINS})
+    where block_ts > now() - interval '30 minutes' and coingecko_id in (${COINS})
+      and ((direction in ('to_exchange', 'from_exchange') and amount_usd >= 2000000) or (direction = 'other' and amount_usd >= 10000000))
     order by coingecko_id, amount_usd desc`;
 }
 
