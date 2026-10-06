@@ -67,7 +67,7 @@ Continuous feeds (`lib/nownodes/jobs.ts`, CLI `npm run nownodes -- <cmd>`). Ever
 |---|---|---|---|---|
 | 25 | `eth_blockNumber`, `eth_getLogs` (Transfer topic, **all tracked contracts in one call**, block chunk), `eth_getBlockByNumber` (chunk edges, timestamps interpolated) | eth, bsc | 15 min | `onchain_flow_snapshots` (per coin per 15-min window), `onchain_transfers` (≥ $25k; stablecoins ≥ $250k) |
 | 26 | `eth_feeHistory` (last ~15 min of blocks, 25/50/75 percentiles) | eth, bsc | 15 min | `chain_fee_snapshots` |
-| 27 | Blockbook `GET /api/v2/address/{wallet}?details=tokenBalances` — hourly for the 25 exchange wallets holding the most value (`NN_RESERVES_HOURLY_WALLETS`), all ~77 active wallets daily | eth, bsc | hourly / daily | `exchange_reserve_snapshots` |
+| 27 | Blockbook `GET /api/v2/address/{wallet}?details=tokenBalances` — all ~77 active exchange wallets hourly (`NN_RESERVES_HOURLY_WALLETS=25` limits it to the largest 25) | eth, bsc | hourly | `exchange_reserve_snapshots` |
 | 28 | Blockbook `GET /api/v2/` (best height), `GET /api/v2/block/{height}?page=n` (1,000 txs per page) | btc | each block | `btc_block_snapshots`, `onchain_transfers` (≥ $500k, outputs not returning to inputs), `onchain_flow_snapshots` |
 | 29 | `getmempoolinfo`, `estimatesmartfee` (1, 3, 6 blocks) | btc | 15 min | `btc_mempool_snapshots` |
 | 30 | GraphQL `transactions(where: {includedAt ≥ cursor, totalOutput ≥ $100k in lovelace})`; amount = outputs to addresses that were not inputs (change excluded) | ada | 15 min | `onchain_transfers` (≥ $100k), `onchain_flow_snapshots` |
@@ -77,8 +77,8 @@ Continuous feeds (`lib/nownodes/jobs.ts`, CLI `npm run nownodes -- <cmd>`). Ever
 
 Scanners resume from `onchain_scan_cursors` (block height / unix seconds), so restarts leave no gaps. Transfers are tagged
 `to_exchange` / `from_exchange` / `exchange_internal` / `mint` / `burn` / `other` using `wallet_labels` (public exchange labels,
-verified on-chain). Budget ≈ 85k requests/month (ETH flows 12k, BSC flows 12k, fees 6k, BTC blocks 21k, BTC mempool 9k, ADA 3k,
-reserves 18k + 2k, node status 9k if counted, daily reference 4k). Investigation-only calls (archive balances, `debug_traceTransaction`,
+verified on-chain). Budget ≈ 120k requests/month (ETH flows 12k, BSC flows 12k, fees 6k, BTC blocks 21k, BTC mempool 9k, ADA 3k,
+reserves 55k, node status 9k if counted, daily reference 4k) — fine for the hackathon window; plan upgrade after. Investigation-only calls (archive balances, `debug_traceTransaction`,
 wallet history, Solana signatures) are added with the signal engine.
 
 ### Additional feeds (added after the core build)

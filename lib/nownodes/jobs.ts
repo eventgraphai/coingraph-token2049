@@ -292,8 +292,8 @@ export async function syncChainFees(): Promise<number> {
 type AddressTokens = { balance: string; txs: number; tokens?: { type: string; contract: string; balance?: string; decimals?: number; symbol?: string }[] };
 
 // Hourly: the `topWallets` wallets holding the most value (by their latest snapshot), plus any never
-// snapshotted. Daily (topWallets = 0): every active exchange wallet. Keeps the hourly feed ~25 calls.
-export async function syncExchangeReserves(topWallets = Number(process.env.NN_RESERVES_HOURLY_WALLETS ?? 25)): Promise<number> {
+// snapshotted. Default (0): every active exchange wallet, hourly (~77 calls; set NN_RESERVES_HOURLY_WALLETS=25 to economise).
+export async function syncExchangeReserves(topWallets = Number(process.env.NN_RESERVES_HOURLY_WALLETS ?? 0)): Promise<number> {
   const captured = minuteNow();
   const prices = await latestPrices();
   const rows: Record<string, unknown>[] = [];
