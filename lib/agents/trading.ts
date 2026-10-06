@@ -96,12 +96,12 @@ export const tradeGatekeeper = defineAgent({
     }
     if (decision === "BLOCK") maxSafe = 0;
     if (ev.data.verdict === "caution") warnings.push(...cautionReasons(ev).map((r) => r.text));
-    if (decision === "ALLOW") reasons.push({ text: `${fmtUsd(size_usd)} ${side}: ${impact ?? "n/a"}% impact on the best route (${best?.route ?? "n/a"}; limit ${cap}%), check verdict ${ev.data.verdict}`, source: quote ? `${quote.venue}:quote + ccxt:fetchOrderBook` : "coingraph:evaluate" });
+    if (decision === "ALLOW") reasons.push({ text: `${fmtUsd(size_usd)} ${side}: ${impact === null ? "n/a" : impact < 0.01 ? "under 0.01" : impact}% impact on the best route (${best?.route ?? "n/a"}; limit ${cap}%), check verdict ${ev.data.verdict}`, source: quote ? `${quote.venue}:quote + ccxt:fetchOrderBook` : "coingraph:evaluate" });
     const brief = ev.data.verdict !== "proceed" ? await latestBrief(token.coingecko_id) : null;
 
     const sym = token.symbol.toUpperCase();
     const summary = decision === "ALLOW"
-      ? `ALLOW: ${fmtUsd(size_usd)} ${side} of ${sym} fits current liquidity (${impact ?? "n/a"}% impact via ${best?.route ?? "n/a"}).${warnings.length ? ` Watch: ${warnings[0]}.` : ""}`
+      ? `ALLOW: ${fmtUsd(size_usd)} ${side} of ${sym} fits current liquidity (${impact === null ? "n/a" : impact < 0.01 ? "under 0.01" : impact}% impact via ${best?.route ?? "n/a"}).${warnings.length ? ` Watch: ${warnings[0]}.` : ""}`
       : decision === "REDUCE"
         ? `REDUCE: cut the ${sym} ${side} to about ${fmtUsd(maxSafe)} — ${reasons[reasons.length - 1]?.text.split(": ")[1]?.split(";")[0] ?? "too large for current liquidity"}.`
         : `BLOCK: do not ${side} ${sym} now — ${blockLead(ev) ?? reasons[0]?.text ?? "the check failed"}.`;

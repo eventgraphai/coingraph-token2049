@@ -200,6 +200,9 @@ export async function evaluate(token: Token, opts: { size_usd?: number; policy?:
     const maxF = Array.isArray(funding) ? funding.reduce((m, f) => Math.max(m, Math.abs(f.rate_pct ?? 0)), 0) : null;
     const net24 = n(get(s.onchain, "exchange_flows.24h.net_usd"));
     const check = (ok: boolean | null, detail: string) => ({ result: ok === null ? "unknown" : ok ? "pass" : "fail", detail });
+    const nativeCoin = p.allow_mint_authority !== undefined
+      ? Boolean((await sql<{ native: boolean }[]>`select asset_platform_id is null and coalesce(platforms, '{}'::jsonb) = '{}'::jsonb as native from tokens where coingecko_id = ${token.coingecko_id}`)[0]?.native)
+      : false;
     policyCheck = {
       ...(p.min_depth_usd !== undefined ? { min_depth_usd: check(depth === null ? null : depth >= p.min_depth_usd, `required ${usd(p.min_depth_usd)}, available ${usd(depth)}`) } : {}),
       ...(p.max_top10_holder_pct !== undefined ? { max_top10_holder_pct: check(top10 === null ? null : top10 <= p.max_top10_holder_pct, `limit ${p.max_top10_holder_pct}%, actual ${top10 ?? "unassessed"}%`) } : {}),
@@ -210,6 +213,8 @@ export async function evaluate(token: Token, opts: { size_usd?: number; policy?:
         const all = (s.security as { contracts?: { home_chain?: boolean; mintable: boolean | null; freezable: boolean | null }[] } | undefined)?.contracts;
         const cs = all?.some((c) => c.home_chain) ? all.filter((c) => c.home_chain) : all; // the issuing contract, not bridged copies
         const canMint = cs?.length ? cs.some((c) => c.mintable === true || c.freezable === true) : null;
+        // A chain's native coin (BTC, ETH, SOL, ADA…) has no token contract: no admin can mint or freeze it.
+        if (canMint === null && nativeCoin) return { allow_mint_authority: check(true, "native coin: no token contract, so no admin can mint or freeze; new supply follows the protocol's issuance rules") };
         return { allow_mint_authority: check(canMint === null ? null : p.allow_mint_authority || !canMint, canMint === null ? "no token contract to check" : canMint ? "the contract can mint or freeze" : "no mint or freeze authority") };
       })() : {}),
     };

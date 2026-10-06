@@ -195,12 +195,24 @@ export const treasurySteward = defineAgent({
     const rows = await Promise.all(assets.map(async (a) => {
       const tk = await resolveToken(a.token);
       const [ev, exit, mc] = await Promise.all([
-        evaluate(tk, { policy: checkPolicy }),
+        evaluate(tk, { policy: checkPolicy, size_usd: a.value_usd }),
         max_exit_slippage_pct !== undefined && !tk.is_stablecoin ? dexQuote(tk.coingecko_id, a.value_usd, "sell").catch(() => null) : Promise.resolve(null),
         sql`select market_cap from market_snapshots where coingecko_id = ${tk.coingecko_id} order by captured_at desc limit 1`,
       ]);
       const rules: Record<string, { result: string; detail: string }> = { ...((ev.data.policy_check ?? {}) as Record<string, { result: string; detail: string }>) };
-      if (max_exit_slippage_pct !== undefined) rules.max_exit_slippage_pct = exit ? { result: exit.price_impact_pct <= max_exit_slippage_pct ? "pass" : "fail", detail: `selling ${fmtUsd(a.value_usd)} costs ${exit.price_impact_pct}% on ${exit.venue} (limit ${max_exit_slippage_pct}%)` } : { result: tk.is_stablecoin ? "pass" : "unknown", detail: tk.is_stablecoin ? "stablecoin" : "no DEX route quoted" };
+      if (max_exit_slippage_pct !== undefined) {
+        // Best exit route: a live on-chain sell quote, or the bid side of exchange order books (2% depth).
+        const bid = n(get(ev.data.size_check ?? {}, "depth_2pct_usd.bid"));
+        const routes = [
+          ...(exit ? [{ impact: exit.price_impact_pct, where: `on ${exit.venue} (${exit.chain.toUpperCase()})` }] : []),
+          ...(bid ? [{ impact: Math.round(Math.min((a.value_usd / bid) * 2, 100) * 100) / 100, where: "on exchange order books" }] : []),
+        ].sort((x, y) => x.impact - y.impact);
+        const best = routes[0];
+        const shown = (v: number) => (v < 0.01 ? "under 0.01" : String(v));
+        rules.max_exit_slippage_pct = best
+          ? { result: best.impact <= max_exit_slippage_pct ? "pass" : "fail", detail: `selling ${fmtUsd(a.value_usd)} costs about ${shown(best.impact)}% ${best.where} (limit ${max_exit_slippage_pct}%)` }
+          : { result: tk.is_stablecoin ? "pass" : "unknown", detail: tk.is_stablecoin ? "stablecoin" : "no exit route quoted" };
+      }
       const mcap = n(mc[0]?.market_cap);
       if (max_position_pct_of_market_cap !== undefined) rules.max_position_pct_of_market_cap = mcap ? { result: (a.value_usd / mcap) * 100 <= max_position_pct_of_market_cap ? "pass" : "fail", detail: `${((a.value_usd / mcap) * 100).toFixed(3)}% of market cap (limit ${max_position_pct_of_market_cap}%)` } : { result: "unknown", detail: "market cap unknown" };
       const status = Object.values(rules).some((r) => r.result === "fail") ? "breach" : Object.values(rules).some((r) => r.result === "unknown") ? "incomplete" : "compliant";

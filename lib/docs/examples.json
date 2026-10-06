@@ -1,0 +1,3588 @@
+{
+ "captured_at": "2026-10-06T22:52:08.852Z",
+ "base": "http://localhost:3000",
+ "examples": {
+  "tokens": {
+   "request": {
+    "method": "GET",
+    "path": "/tokens?q=chainlink"
+   },
+   "response": {
+    "object": "token_list",
+    "id": null,
+    "as_of": "2026-10-06T22:48:27.771Z",
+    "data": {
+     "query": "chainlink",
+     "results": [
+      {
+       "id": "chainlink",
+       "symbol": "LINK",
+       "name": "Chainlink",
+       "tracked": true,
+       "rank": 14
+      },
+      {
+       "id": "chainlink-plenty-bridge",
+       "symbol": "LINK.E",
+       "name": "Chainlink (Plenty Bridge)",
+       "tracked": false,
+       "rank": null
+      }
+     ]
+    },
+    "sources": [
+     {
+      "provider": "coingecko",
+      "endpoint": "/coins/list",
+      "as_of": null
+     }
+    ]
+   }
+  },
+  "status": {
+   "request": {
+    "method": "GET",
+    "path": "/status"
+   },
+   "response": {
+    "object": "service_status",
+    "id": null,
+    "as_of": "2026-10-06T22:48:29.340Z",
+    "data": {
+     "pipeline": "late",
+     "worker_last_beat": "2026-10-06T22:48:26.277Z",
+     "coverage": {
+      "tokens": 100,
+      "tokens_fresh_10m": 100,
+      "candle_series": 144,
+      "chains": [
+       "eth",
+       "bsc",
+       "… 3 more"
+      ],
+      "exchanges": [
+       "binance",
+       "binanceusdm",
+       "… 5 more"
+      ],
+      "sources": [
+       "coingecko",
+       "ccxt",
+       "… 4 more"
+      ]
+     },
+     "feeds": [
+      {
+       "feed": "ccxt:binance-1m",
+       "status": "ok",
+       "last_success_sec_ago": 23,
+       "every_sec": 60,
+       "venues": "Binance"
+      },
+      {
+       "feed": "ccxt:perps-1m",
+       "status": "ok",
+       "last_success_sec_ago": 23,
+       "every_sec": 60,
+       "venues": "Binance futures"
+      },
+      "… 33 more"
+     ],
+     "freshness": {
+      "market_snapshots": {
+       "newest": "2026-10-06T22:47:00.000Z",
+       "cadence": "CoinGecko · 1 min"
+      },
+      "cex_ohlcv": {
+       "newest": "2026-10-06T22:47:00.000Z",
+       "cadence": "Exchanges · 1 min"
+      },
+      "order_book_snapshots": {
+       "newest": "2026-10-06T22:45:00.000Z",
+       "cadence": "Demo coins · 5 min"
+      },
+      "cex_ticker_snapshots": {
+       "newest": "2026-10-06T22:45:00.000Z",
+       "cadence": "Exchanges · 5 min"
+      },
+      "funding_rate_snapshots": {
+       "newest": "2026-10-06T22:45:00.000Z",
+       "cadence": "Futures · 5 min"
+      },
+      "open_interest_snapshots": {
+       "newest": "2026-10-06T22:45:00.000Z",
+       "cadence": "Futures · 5 min"
+      },
+      "futures_sentiment_snapshots": {
+       "newest": "2026-10-06T22:45:00.000Z",
+       "cadence": "Futures · 5 min"
+      },
+      "liquidations": {
+       "newest": "2026-10-06T22:37:41.445Z",
+       "cadence": "OKX · 5 min"
+      },
+      "category_snapshots": {
+       "newest": "2026-10-06T22:45:00.000Z",
+       "cadence": "CoinGecko · 5 min"
+      },
+      "global_snapshots": {
+       "newest": "2026-10-06T22:40:00.000Z",
+       "cadence": "CoinGecko · 10 min"
+      },
+      "…": "15 more fields"
+     },
+     "budgets": {
+      "coingecko_credits_remaining": 86082,
+      "nownodes_requests_this_month": 2252,
+      "nownodes_plan": 100000
+     },
+     "pricing": {
+      "phase": "hackathon",
+      "summary": "Reading CoinGraph is free. Prices for Decide calls (evaluate with size, fresh explain, ask) are being finalised and will be paid in ADA via x402; a Token Pass w…",
+      "free_rate_limit_per_minute": 60,
+      "paid_endpoints": {}
+     },
+     "payment": {
+      "network": "preprod",
+      "address": null,
+      "facilitator": "https://x402.preprod.dev.ecosyseng.cf-deployments.org",
+      "protocol": "x402"
+     },
+     "docs": {
+      "openapi": "https://token2049.coingraph.ai/api/v1/openapi.json",
+      "llms": "https://token2049.coingraph.ai/llms.txt",
+      "api_reference": "https://token2049.coingraph.ai/docs"
+     }
+    },
+    "sources": []
+   }
+  },
+  "state": {
+   "request": {
+    "method": "GET",
+    "path": "/state/chainlink?sections=market,liquidity,security"
+   },
+   "response": {
+    "object": "state",
+    "id": "st_a376d9afd451cbbe2ad8",
+    "as_of": "2026-10-06T22:47:00.000Z",
+    "data": {
+     "token": {
+      "id": "chainlink",
+      "symbol": "LINK",
+      "name": "Chainlink",
+      "rank": 14
+     },
+     "market": {
+      "price_usd": 13.92,
+      "market_cap_usd": 10416286797,
+      "fully_diluted_valuation_usd": 13923656208,
+      "volume_24h_usd": 267728342,
+      "rank": 14,
+      "change_pct": {
+       "15m": 0.22,
+       "1h": 0,
+       "4h": -0.36,
+       "24h": 0.07,
+       "7d": -5.2063,
+       "30d": 6.4017,
+       "200d": 41.344,
+       "1y": -40.593
+      },
+      "high_24h_usd": 14.11,
+      "low_24h_usd": 13.72,
+      "ath_usd": 52.7,
+      "ath_date": "2021-05-09T16:13:57.000Z",
+      "from_ath_pct": -73.58,
+      "atl_usd": 0.148183,
+      "from_atl_pct": 9296.28,
+      "volatility_24h_pct": 2.5,
+      "volume_to_market_cap": 0.0257,
+      "as_of": "2026-10-06T22:47:00.000Z",
+      "…": "1 more fields"
+     },
+     "liquidity": {
+      "order_books": [
+       {
+        "venue": "binance",
+        "symbol": "LINK/USDT",
+        "best_bid": 13.926,
+        "best_ask": 13.927,
+        "spread_pct": 0.007180555056901919,
+        "depth_2pct_bid_usd": 491309,
+        "depth_2pct_ask_usd": 420724,
+        "as_of": "2026-10-06T22:45:00.000Z"
+       },
+       {
+        "venue": "binanceusdm",
+        "symbol": "LINK/USDT:USDT",
+        "best_bid": 13.92,
+        "best_ask": 13.921,
+        "spread_pct": 0.007183650012567406,
+        "depth_2pct_bid_usd": 2607960,
+        "depth_2pct_ask_usd": 2901500,
+        "as_of": "2026-10-06T22:45:00.000Z"
+       }
+      ],
+      "depth_2pct_total_usd": {
+       "bid": 3099270,
+       "ask": 3322230,
+       "bid_ask_ratio": 0.93
+      },
+      "venues_tracked": [
+       {
+        "venue": "binance",
+        "symbol": "LINK/USDT",
+        "last": 13.925,
+        "bid": 13.924,
+        "ask": 13.925,
+        "volume_24h_quote": 17268000
+       },
+       {
+        "venue": "bybit",
+        "symbol": "LINK/USDT",
+        "last": 13.923,
+        "bid": 13.923,
+        "ask": 13.924,
+        "volume_24h_quote": 16806800
+       },
+       "… 4 more"
+      ],
+      "price_dispersion_pct": 0.022,
+      "exchanges": {
+       "count": 25,
+       "trusted_count": 0,
+       "volume_24h_usd": 238458000,
+       "median_spread_pct": 0.017,
+       "cost_to_move_2pct_usd": {
+        "up": 16773400,
+        "down": 14417600
+       },
+       "top": [
+        {
+         "exchange": "Binance",
+         "pair": "LINK/USDT",
+         "volume_24h_usd": 24386800,
+         "spread_pct": 0.017138,
+         "trust": null,
+         "anomaly": false,
+         "stale": false
+        },
+        {
+         "exchange": "BitDelta",
+         "pair": "LINK/USDT",
+         "volume_24h_usd": 24349000,
+         "spread_pct": 0.42735,
+         "trust": null,
+         "anomaly": false,
+         "stale": false
+        },
+        "… 8 more"
+       ]
+      },
+      "dex_pools": [
+       {
+        "network": "eth",
+        "dex": "uniswap_v3",
+        "pool": "AAVE / LINK 0.3%",
+        "address": "0x14243ea6bb3d64c8d54a1f47b077e23394d6528a",
+        "liquidity_usd": 359506,
+        "volume_24h_usd": 69933.3,
+        "buys_1h": 0,
+        "sells_1h": 0,
+        "buyers_1h": 0,
+        "sellers_1h": 0,
+        "price_usd": 14.0301417412315
+       },
+       {
+        "network": "eth",
+        "dex": "uniswap-v4-ethereum",
+        "pool": "1INCH / LINK 1%",
+        "address": "0x17bc62f62658a42755e4f36a20f32dfc1a88e2b75ff714640a22577802f22958",
+        "liquidity_usd": 803417,
+        "volume_24h_usd": 34187.1,
+        "buys_1h": 0,
+        "sells_1h": 0,
+        "buyers_1h": 0,
+        "sellers_1h": 0,
+        "price_usd": 14.0134883358984
+       },
+       "… 18 more"
+      ],
+      "as_of": "2026-10-06T22:45:00.000Z",
+      "sources": [
+       {
+        "provider": "ccxt",
+        "endpoint": "fetchOrderBook",
+        "as_of": "2026-10-06T22:45:00.000Z"
+       },
+       {
+        "provider": "ccxt",
+        "endpoint": "fetchTickers",
+        "as_of": "2026-10-06T22:45:00.000Z"
+       },
+       "… 2 more"
+      ]
+     },
+     "security": {
+      "risk_level": "low",
+      "rated_on": "eth (home chain)",
+      "contracts": [
+       {
+        "chain": "bsc",
+        "home_chain": false,
+        "address": "0xf8a0bf9cf54bb92f17374d9e9a321e6a111a51bd",
+        "risk_level": "medium",
+        "flags": [
+         "Supply can be increased (mint authority)",
+         "Issuer controls are expected for this kind of asset (stablecoin or tokenized fund)"
+        ],
+        "honeypot": false,
+        "buy_tax_pct": null,
+        "sell_tax_pct": null,
+        "mintable": true,
+        "upgradeable": false,
+        "blacklist": false,
+        "pausable": false,
+        "hidden_owner": false,
+        "owner_can_change_balances": false,
+        "verified_source": true,
+        "freezable": null,
+        "…": "5 more fields"
+       },
+       {
+        "chain": "eth",
+        "home_chain": true,
+        "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+        "risk_level": "low",
+        "flags": [],
+        "honeypot": false,
+        "buy_tax_pct": 0,
+        "sell_tax_pct": 0,
+        "mintable": false,
+        "upgradeable": false,
+        "blacklist": false,
+        "pausable": false,
+        "hidden_owner": false,
+        "owner_can_change_balances": false,
+        "verified_source": true,
+        "freezable": null,
+        "…": "5 more fields"
+       },
+       "… 1 more"
+      ],
+      "as_of": "2026-10-06T20:30:00.000Z",
+      "sources": [
+       {
+        "provider": "goplus",
+        "endpoint": "/token_security",
+        "as_of": "2026-10-06T20:30:00.000Z"
+       }
+      ]
+     }
+    },
+    "sources": [
+     {
+      "provider": "coingecko",
+      "endpoint": "/coins/markets",
+      "as_of": "2026-10-06T22:47:00.000Z"
+     },
+     {
+      "provider": "ccxt",
+      "endpoint": "fetchOrderBook",
+      "as_of": "2026-10-06T22:45:00.000Z"
+     },
+     "… 4 more"
+    ]
+   }
+  },
+  "history": {
+   "request": {
+    "method": "GET",
+    "path": "/history/solana?series=price,funding&since=2026-10-06T16:48:32.111Z"
+   },
+   "response": {
+    "object": "history",
+    "id": "hs_27b213c0bb9aa0455aeb",
+    "as_of": "2026-10-06T22:48:32.779Z",
+    "data": {
+     "token": {
+      "id": "solana",
+      "symbol": "SOL",
+      "name": "Solana"
+     },
+     "window": {
+      "series_from": "2026-10-06T16:48:32.111Z",
+      "events_from": "2026-10-06T16:48:32.111Z",
+      "to": "2026-10-06T22:48:32.778Z"
+     },
+     "series": {
+      "funding": {
+       "columns": [
+        "t",
+        "funding_rate_pct"
+       ],
+       "by_venue": {
+        "binanceusdm": [
+         [
+          "2026-10-06T16:50:00.000Z",
+          0.009166
+         ],
+         [
+          "2026-10-06T16:55:00.000Z",
+          0.009024
+         ],
+         [
+          "2026-10-06T17:00:00.000Z",
+          0.00881
+         ],
+         "… 70 more"
+        ],
+        "okx": [
+         [
+          "2026-10-06T16:50:00.000Z",
+          0.0018136744752
+         ],
+         [
+          "2026-10-06T16:55:00.000Z",
+          0.0017051885963900002
+         ],
+         [
+          "2026-10-06T17:00:00.000Z",
+          0.00168601660384
+         ],
+         "… 70 more"
+        ],
+        "bybit": [
+         [
+          "2026-10-06T16:50:00.000Z",
+          -0.005645000000000001
+         ],
+         [
+          "2026-10-06T16:55:00.000Z",
+          -0.006575
+         ],
+         [
+          "2026-10-06T17:00:00.000Z",
+          -0.007996
+         ],
+         "… 70 more"
+        ]
+       }
+      },
+      "price": {
+       "step": "5m (recent) / 1h (older)",
+       "points": [
+        [
+         "2026-09-06T17:00:00.000Z",
+         106.07974339265063,
+         62103855962.86717,
+         "… 1 more"
+        ],
+        [
+         "2026-09-06T18:00:00.000Z",
+         106.18709197035311,
+         62166699012.29705,
+         "… 1 more"
+        ],
+        [
+         "2026-09-06T19:00:00.000Z",
+         105.98261892858815,
+         62046987135.01789,
+         "… 1 more"
+        ],
+        "… 788 more"
+       ],
+       "columns": [
+        "t",
+        "price_usd",
+        "market_cap_usd",
+        "… 1 more"
+       ]
+      }
+     },
+     "events": {
+      "transfers": [],
+      "liquidations": [
+       {
+        "at": "2026-10-06T22:09:09.034Z",
+        "venue": "okx",
+        "side": "short",
+        "price": 121.42,
+        "quantity": 21.66,
+        "usd": 2629.9572
+       },
+       {
+        "at": "2026-10-06T22:09:03.483Z",
+        "venue": "okx",
+        "side": "short",
+        "price": 121.38,
+        "quantity": 5.02,
+        "usd": 609.3276
+       },
+       {
+        "at": "2026-10-06T22:04:15.394Z",
+        "venue": "okx",
+        "side": "short",
+        "price": 121.37,
+        "quantity": 12,
+        "usd": 1456.44
+       },
+       "… 15 more"
+      ],
+      "signals": [],
+      "headlines": [],
+      "briefs": []
+     }
+    },
+    "sources": [
+     {
+      "provider": "ccxt",
+      "endpoint": "fetchFundingRates",
+      "as_of": null
+     },
+     {
+      "provider": "nownodes",
+      "endpoint": "onchain_transfers",
+      "as_of": null
+     },
+     {
+      "provider": "okx+binance",
+      "endpoint": "liquidations",
+      "as_of": null
+     },
+     "… 3 more"
+    ]
+   }
+  },
+  "market": {
+   "request": {
+    "method": "GET",
+    "path": "/market?sections=overview,breadth,sentiment"
+   },
+   "response": {
+    "object": "market",
+    "id": "mk_fbf4279a69a5f886ebb5",
+    "as_of": "2026-10-06T22:48:34.064Z",
+    "data": {
+     "overview": {
+      "total_market_cap_usd": 2921110000000,
+      "total_volume_24h_usd": 70168400000000,
+      "market_cap_change_24h_pct": -3.28,
+      "volume_change_24h_pct": 76680.66,
+      "btc_dominance_pct": 58.7,
+      "eth_dominance_pct": 11.25,
+      "dominance": {
+       "bnb": 3.55,
+       "btc": 58.7,
+       "eth": 11.25,
+       "sol": 2.44,
+       "trx": 1.09,
+       "xrp": 3.23,
+       "usdc": 2.53,
+       "usdt": 6.29,
+       "steth": 0.9,
+       "figr_heloc": 0.84
+      },
+      "active_cryptocurrencies": 21954,
+      "markets": 1507,
+      "as_of": "2026-10-06T22:40:00.000Z",
+      "sources": [
+       {
+        "provider": "coingecko",
+        "endpoint": "/global",
+        "as_of": "2026-10-06T22:40:00.000Z"
+       }
+      ]
+     },
+     "breadth": {
+      "coins": 83,
+      "up_1h": 27,
+      "down_1h": 38,
+      "up_1h_pct": 32.5,
+      "up_24h": 27,
+      "down_24h": 54,
+      "up_24h_pct": 32.5,
+      "rising_open_interest": 22,
+      "rising_open_interest_pct": 34.4,
+      "as_of": "2026-10-06T22:47:00.000Z",
+      "sources": [
+       {
+        "provider": "coingecko",
+        "endpoint": "/coins/markets",
+        "as_of": "2026-10-06T22:47:00.000Z"
+       },
+       {
+        "provider": "binanceusdm",
+        "endpoint": "openInterestHist",
+        "as_of": null
+       }
+      ]
+     },
+     "sentiment": {
+      "fear_greed": {
+       "value": 73,
+       "label": "Greed",
+       "day": "2026-10-06T00:00:00.000Z",
+       "history_30d": [
+        [
+         "2026-10-06T00:00:00.000Z",
+         73
+        ],
+        [
+         "2026-10-05T00:00:00.000Z",
+         70
+        ],
+        "… 28 more"
+       ]
+      },
+      "trending": [
+       {
+        "position": 1,
+        "id": "orca",
+        "symbol": "ORCA",
+        "name": "Orca",
+        "rank": 194,
+        "change_24h_pct": 32.64
+       },
+       {
+        "position": 2,
+        "id": "pudgy-penguins",
+        "symbol": "PENGU",
+        "name": "Pudgy Penguins",
+        "rank": 108,
+        "change_24h_pct": -6.05
+       },
+       "… 13 more"
+      ],
+      "as_of": "2026-10-06T22:40:00.000Z",
+      "sources": [
+       {
+        "provider": "alternative.me",
+        "endpoint": "/fng",
+        "as_of": null
+       },
+       {
+        "provider": "coingecko",
+        "endpoint": "/search/trending",
+        "as_of": "2026-10-06T22:40:00.000Z"
+       }
+      ]
+     }
+    },
+    "sources": [
+     {
+      "provider": "coingecko",
+      "endpoint": "/global",
+      "as_of": "2026-10-06T22:40:00.000Z"
+     },
+     {
+      "provider": "coingecko",
+      "endpoint": "/coins/markets",
+      "as_of": "2026-10-06T22:47:00.000Z"
+     },
+     "… 3 more"
+    ]
+   }
+  },
+  "inspect": {
+   "request": {
+    "method": "GET",
+    "path": "/inspect/sol/5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9"
+   },
+   "response": {
+    "object": "address_profile",
+    "id": "ad_0c91dfd4326730756c1a",
+    "as_of": "2026-10-06T22:48:35.451Z",
+    "data": {
+     "chain": "sol",
+     "address": "5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9",
+     "label": {
+      "entity": "binance",
+      "name": "Binance",
+      "kind": "exchange",
+      "confidence": "high"
+     },
+     "screening": {
+      "risk": "none_found",
+      "sanctioned": false,
+      "burn_address": false,
+      "flags": []
+     },
+     "native": {
+      "symbol": "SOL",
+      "amount": 1152900.213547,
+      "usd": 139581628.85
+     },
+     "recent_transactions": [
+      {
+       "signature": "2EdpvDpXnTic3fUoFU351JdxeU6ppogjLTsQc2MEkEhcnx39v1cjd76JnNqqAd84U3t5NNjQqfLDcZmL61xPDvGG",
+       "at": "2026-10-06T22:48:23.000Z",
+       "failed": false
+      },
+      {
+       "signature": "UXXtWqwz4ymyFYqs8cBE2k582CHGNGLiagJu4ei5cL1Yfq4fUUwrBPBHf1th1MeUB9GXR3Uj71TjeUa4fwsdWGM",
+       "at": "2026-10-06T22:48:23.000Z",
+       "failed": false
+      },
+      "… 18 more"
+     ],
+     "type": "exchange"
+    },
+    "sources": [
+     {
+      "provider": "nownodes",
+      "endpoint": "sol:getBalance + getSignaturesForAddress",
+      "as_of": "2026-10-06T22:48:35.451Z"
+     },
+     {
+      "provider": "ofac",
+      "endpoint": "0xB10C sanctioned_addresses",
+      "as_of": null
+     }
+    ]
+   }
+  },
+  "evaluate_get": {
+   "request": {
+    "method": "GET",
+    "path": "/evaluate/chainlink"
+   },
+   "response": {
+    "object": "evaluation",
+    "id": "eval_40b847a490095eba1652",
+    "as_of": "2026-10-06T22:47:00.000Z",
+    "data": {
+     "token": {
+      "id": "chainlink",
+      "symbol": "LINK",
+      "name": "Chainlink",
+      "rank": 14
+     },
+     "verdict": "proceed",
+     "confidence": 0.95,
+     "dimensions": {
+      "momentum": {
+       "rating": "ok",
+       "reasons": [
+        {
+         "text": "1h 0%, 24h +0.07%: nothing stretched",
+         "source": "coingecko:/coins/markets"
+        }
+       ]
+      },
+      "liquidity": {
+       "rating": "ok",
+       "reasons": [
+        {
+         "text": "$3.3M available within 2% of the price on tracked order books",
+         "source": "ccxt:fetchOrderBook",
+         "info": true
+        }
+       ]
+      },
+      "leverage": {
+       "rating": "ok",
+       "reasons": [
+        {
+         "text": "Funding 0.0092% per 8h: leverage not crowded",
+         "source": "ccxt:fetchFundingRates"
+        }
+       ]
+      },
+      "onchain": {
+       "rating": "ok",
+       "reasons": [
+        {
+         "text": "Exchange net flow $-373.1K in 24h: normal",
+         "source": "nownodes:eth_getLogs",
+         "info": true
+        }
+       ]
+      },
+      "supply": {
+       "rating": "ok",
+       "reasons": [
+        {
+         "text": "FDV / market cap 1.34",
+         "source": "coingecko:/coins/markets",
+         "info": true
+        },
+        {
+         "text": "Top 10 holders own 39% of supply",
+         "source": "goplus/nownodes holders",
+         "info": true
+        },
+        "… 1 more"
+       ]
+      },
+      "context": {
+       "rating": "ok",
+       "reasons": [
+        {
+         "text": "No fundamental or mood flags",
+         "source": "coingraph"
+        }
+       ]
+      },
+      "contract": {
+       "rating": "ok",
+       "reasons": [
+        {
+         "text": "No contract risks found on the ETH contract (home chain)",
+         "source": "goplus:/token_security"
+        }
+       ]
+      }
+     },
+     "reasons": [
+      {
+       "dimension": "momentum",
+       "text": "1h 0%, 24h +0.07%: nothing stretched",
+       "source": "coingecko:/coins/markets"
+      },
+      {
+       "dimension": "liquidity",
+       "text": "$3.3M available within 2% of the price on tracked order books",
+       "source": "ccxt:fetchOrderBook",
+       "info": true
+      },
+      "… 1 more"
+     ],
+     "size_check": null,
+     "policy_check": null,
+     "watch_next": [],
+     "snapshot": {
+      "market": {
+       "price_usd": 13.92,
+       "market_cap_usd": 10416286797,
+       "fully_diluted_valuation_usd": 13923656208,
+       "volume_24h_usd": 267728342,
+       "rank": 14,
+       "change_pct": {
+        "15m": 0.22,
+        "1h": 0,
+        "4h": -0.36,
+        "24h": 0.07,
+        "7d": -5.2063,
+        "30d": 6.4017,
+        "200d": 41.344,
+        "1y": -40.593
+       },
+       "high_24h_usd": 14.11,
+       "low_24h_usd": 13.72,
+       "ath_usd": 52.7,
+       "ath_date": "2021-05-09T16:13:57.000Z",
+       "from_ath_pct": -73.58,
+       "atl_usd": 0.148183,
+       "from_atl_pct": 9296.28,
+       "volatility_24h_pct": 2.5,
+       "…": "3 more fields"
+      },
+      "liquidity_depth": {
+       "bid": 3099270,
+       "ask": 3322230,
+       "bid_ask_ratio": 0.93
+      },
+      "derivatives": {
+       "funding": [
+        {
+         "venue": "binanceusdm",
+         "symbol": "LINK/USDT:USDT",
+         "rate_pct": 0.0092,
+         "next_rate_pct": null,
+         "next_at": null,
+         "annualised_pct": 10.1,
+         "mark": 13.919,
+         "index": 13.92434712,
+         "basis_pct": -0.04
+        },
+        {
+         "venue": "bybit",
+         "symbol": "LINK/USDT:USDT",
+         "rate_pct": 0.0085,
+         "next_rate_pct": null,
+         "next_at": null,
+         "annualised_pct": 9.3,
+         "mark": 13.917,
+         "index": 13.924,
+         "basis_pct": -0.05
+        },
+        "… 1 more"
+       ],
+       "open_interest_change": {
+        "1h": -0.23,
+        "4h": -0.45,
+        "24h": -0.61
+       },
+       "liquidations_1h": {
+        "count": 0,
+        "usd": 0,
+        "longs_usd": 0,
+        "shorts_usd": 0
+       }
+      },
+      "onchain_flows_24h": {
+       "inflow_usd": 1966630,
+       "outflow_usd": 2339750,
+       "net_usd": -373120
+      },
+      "supply": {
+       "fdv_to_market_cap": 1.34,
+       "top_holders": {
+        "top10": 39,
+        "top20": 49.4,
+        "as_of": "2026-10-06T14:52:00.000Z"
+       }
+      }
+     },
+     "disclaimer": "CoinGraph never executes, custodies or advises. The caller decides.",
+     "hash": "733e04da4c9917e408b494783e6fcdc438925696cbec7967b67b7b64c8334460",
+     "verify_url": "https://token2049.coingraph.ai/api/v1/verify/eval_40b847a490095eba1652"
+    },
+    "sources": [
+     {
+      "provider": "coingecko",
+      "endpoint": "/coins/markets",
+      "as_of": "2026-10-06T22:47:00.000Z"
+     },
+     {
+      "provider": "ccxt",
+      "endpoint": "fetchOrderBook",
+      "as_of": "2026-10-06T22:45:00.000Z"
+     },
+     "… 17 more"
+    ]
+   }
+  },
+  "evaluate_post": {
+   "request": {
+    "method": "POST",
+    "path": "/evaluate",
+    "body": {
+     "token": "solana",
+     "size_usd": 250000,
+     "policy": {
+      "min_depth_usd": 1000000,
+      "max_funding_pct": 0.05,
+      "max_top10_holder_pct": 60
+     }
+    }
+   },
+   "response": {
+    "object": "evaluation",
+    "id": "eval_cfb370a57b3ff997e53d",
+    "as_of": "2026-10-06T22:48:00.000Z",
+    "data": {
+     "token": {
+      "id": "solana",
+      "symbol": "SOL",
+      "name": "Solana",
+      "rank": 7
+     },
+     "verdict": "proceed",
+     "confidence": 0.86,
+     "dimensions": {
+      "momentum": {
+       "rating": "ok",
+       "reasons": [
+        {
+         "text": "1h -0.02%, 24h -0.01%: nothing stretched",
+         "source": "coingecko:/coins/markets"
+        }
+       ]
+      },
+      "liquidity": {
+       "rating": "ok",
+       "reasons": [
+        {
+         "text": "$109.7M available within 2% of the price across exchanges (CoinGecko)",
+         "source": "coingecko:/coins/{id}/tickers",
+         "info": true
+        },
+        {
+         "text": "A $250K order is 0.01% of daily volume with ~0.005% impact",
+         "source": "ccxt:fetchOrderBook",
+         "info": true
+        }
+       ]
+      },
+      "leverage": {
+       "rating": "ok",
+       "reasons": [
+        {
+         "text": "Funding 0.01% per 8h: leverage not crowded",
+         "source": "ccxt:fetchFundingRates"
+        }
+       ]
+      },
+      "onchain": {
+       "rating": "ok",
+       "reasons": [
+        {
+         "text": "Exchange reserves +0% in 24h (stable)",
+         "source": "nownodes:blockbook:/address"
+        }
+       ]
+      },
+      "supply": {
+       "rating": "ok",
+       "reasons": [
+        {
+         "text": "FDV / market cap 1.08",
+         "source": "coingecko:/coins/markets",
+         "info": true
+        },
+        {
+         "text": "Unlock schedule: unassessed (no free source)",
+         "source": "coingraph",
+         "info": true
+        }
+       ]
+      },
+      "context": {
+       "rating": "ok",
+       "reasons": [
+        {
+         "text": "4 headline(s) in 24h",
+         "source": "rss"
+        }
+       ]
+      },
+      "contract": {
+       "rating": "unassessed",
+       "reasons": [
+        {
+         "text": "Native coin: no token contract to check",
+         "source": "coingraph"
+        }
+       ]
+      }
+     },
+     "reasons": [
+      {
+       "dimension": "momentum",
+       "text": "1h -0.02%, 24h -0.01%: nothing stretched",
+       "source": "coingecko:/coins/markets"
+      },
+      {
+       "dimension": "liquidity",
+       "text": "$109.7M available within 2% of the price across exchanges (CoinGecko)",
+       "source": "coingecko:/coins/{id}/tickers",
+       "info": true
+      },
+      {
+       "dimension": "leverage",
+       "text": "Funding 0.01% per 8h: leverage not crowded",
+       "source": "ccxt:fetchFundingRates"
+      }
+     ],
+     "size_check": {
+      "order_usd": 250000,
+      "depth_2pct_usd": {
+       "bid": 112777000,
+       "ask": 109658000
+      },
+      "estimated_impact_pct": 0,
+      "share_of_24h_volume_pct": 0.01
+     },
+     "policy_check": {
+      "min_depth_usd": {
+       "result": "pass",
+       "detail": "required $1M, available $109.7M"
+      },
+      "max_top10_holder_pct": {
+       "result": "unknown",
+       "detail": "limit 60%, actual unassessed%"
+      },
+      "max_funding_pct": {
+       "result": "pass",
+       "detail": "limit 0.05%, actual 0.01%"
+      }
+     },
+     "watch_next": [],
+     "snapshot": {
+      "market": {
+       "price_usd": 121.07,
+       "market_cap_usd": 71247421567,
+       "fully_diluted_valuation_usd": 76919573387,
+       "volume_24h_usd": 2501767533,
+       "rank": 7,
+       "change_pct": {
+        "15m": -0.05,
+        "1h": -0.02,
+        "4h": 0.14,
+        "24h": -0.01,
+        "7d": 1.6465,
+        "30d": 14.4591,
+        "200d": 35.6607,
+        "1y": -48.3394
+       },
+       "high_24h_usd": 121.91,
+       "low_24h_usd": 119,
+       "ath_usd": 293.31,
+       "ath_date": "2025-01-19T03:15:27.000Z",
+       "from_ath_pct": -58.72,
+       "atl_usd": 0.500801,
+       "from_atl_pct": 24076.25,
+       "volatility_24h_pct": 2.26,
+       "…": "3 more fields"
+      },
+      "liquidity_depth": "unassessed",
+      "derivatives": {
+       "funding": [
+        {
+         "venue": "binanceusdm",
+         "symbol": "SOL/USDT:USDT",
+         "rate_pct": 0.01,
+         "next_rate_pct": null,
+         "next_at": null,
+         "annualised_pct": 11,
+         "mark": 121.04527392,
+         "index": 121.09469924,
+         "basis_pct": -0.04
+        },
+        {
+         "venue": "bybit",
+         "symbol": "SOL/USDT:USDT",
+         "rate_pct": 0.01,
+         "next_rate_pct": null,
+         "next_at": null,
+         "annualised_pct": 11,
+         "mark": 121.053,
+         "index": 121.093,
+         "basis_pct": -0.03
+        },
+        {
+         "venue": "okx",
+         "symbol": "SOL/USDT:USDT",
+         "rate_pct": 0.01,
+         "next_rate_pct": null,
+         "next_at": "2026-10-07T08:00:00.000Z",
+         "annualised_pct": 11,
+         "mark": null,
+         "index": null,
+         "basis_pct": null
+        }
+       ],
+       "open_interest_change": {
+        "1h": 0.51,
+        "4h": 0.41,
+        "24h": -0.3
+       },
+       "liquidations_1h": {
+        "count": 4,
+        "usd": 37916.2,
+        "longs_usd": 0,
+        "shorts_usd": 37916.2
+       }
+      },
+      "supply": {
+       "fdv_to_market_cap": 1.08,
+       "top_holders": "unassessed"
+      }
+     },
+     "disclaimer": "CoinGraph never executes, custodies or advises. The caller decides.",
+     "hash": "3e272b2bbcacdb353953fdd163b3be2141e8c5a61db1c6495cce901b835fa1c9",
+     "verify_url": "https://token2049.coingraph.ai/api/v1/verify/eval_cfb370a57b3ff997e53d"
+    },
+    "sources": [
+     {
+      "provider": "coingecko",
+      "endpoint": "/coins/markets",
+      "as_of": "2026-10-06T22:48:00.000Z"
+     },
+     {
+      "provider": "ccxt",
+      "endpoint": "fetchTickers",
+      "as_of": "2026-10-06T22:45:00.000Z"
+     },
+     {
+      "provider": "coingecko",
+      "endpoint": "/coins/{id}/tickers",
+      "as_of": "2026-10-06T12:41:24.814Z"
+     },
+     "… 11 more"
+    ]
+   }
+  },
+  "explain": {
+   "request": {
+    "method": "GET",
+    "path": "/explain/chainlink"
+   },
+   "response": {
+    "object": "brief",
+    "id": "46",
+    "as_of": "2026-10-06T21:29:43.130Z",
+    "data": {
+     "token": {
+      "id": "chainlink",
+      "symbol": "LINK",
+      "name": "Chainlink"
+     },
+     "id": 46,
+     "headline": "LINK flat at $13.94 (+0.22%) in a $13.91–13.99 range; thin volume, small net outflow from exchanges",
+     "caveats": [
+      "Taker buy/sell data was unavailable (E5), so aggressive flow direction cannot be confirmed.",
+      "Onchain flows cover Ethereum only, and exchange labels are incomplete. The purpose of the multi-hop 138.6K LINK chain is unknown.",
+      "… 3 more"
+     ],
+     "onchain": [
+      {
+       "text": "Ethereum saw 1,257 LINK transfers worth $14.7M. $224.8K went onto exchanges and $765K left them, a net outflow of $540.2K. The typical absolute net flow per 15 minutes is $5.7K.",
+       "evidence": [
+        "E7"
+       ]
+      },
+      {
+       "text": "The largest transfer was a $4.7M (334.9K LINK) move between two Binance wallets at 20:22. It is internal and says nothing about direction.",
+       "evidence": [
+        "E8"
+       ]
+      },
+      "… 2 more"
+     ],
+     "summary": "Nothing much happened to LINK in this window. Price rose 0.22% to $13.94 and stayed inside an $0.08 range. Spot volume ran at about 0.6× a normal hour, and derivatives positioning barely changed. On Ethereum, about $540K more LINK left exchanges than arrived. …",
+     "severity": 1,
+     "direction": "neutral",
+     "confidence": 0.75,
+     "watch_next": [
+      "A break of the $13.91–13.99 range on volume above the ~$780K typical hourly Binance spot level",
+      "Whether the 138.6K LINK now at 0x4a4a… moves to an exchange",
+      "… 2 more"
+     ],
+     "likely_causes": [
+      {
+       "cause": "No clear catalyst. Price drifted with the wider market in thin trading: LINK +0.22% vs BTC +0.09% and ETH +0.43% over the same window.",
+       "evidence": [
+        "E1",
+        "E15",
+        "… 1 more"
+       ],
+       "confidence": 0.6
+      },
+      {
+       "cause": "The net exchange outflow on Ethereum ($540K) may have added slight support, but it is too small to explain much price action.",
+       "evidence": [
+        "E7"
+       ],
+       "confidence": 0.25
+      }
+     ],
+     "what_happened": [
+      {
+       "text": "LINK traded between $13.91 and $13.99 and ended at $13.94, up 0.22% for the window. It peaked near $13.99 around 20:30 and slipped back, so it is down 0.43% over the last hour and flat (0.00%) over 24h.",
+       "evidence": [
+        "E1"
+       ]
+      },
+      {
+       "text": "Binance spot LINK/USDT traded $491.9K in the last hour, against a typical hour of $779.8K (0.63×). The busiest minute was 20:02 with $507.1K traded and a -0.079% move, which was absorbed without a lasting price impact.",
+       "evidence": [
+        "E2"
+       ]
+      },
+      "… 1 more"
+     ],
+     "market_context": [
+      {
+       "text": "Funding is mildly positive and below the ~0.01% norm: 0.0058% on Binance, 0.0050% on Bybit, 0.0048% on OKX. Long demand is modest.",
+       "evidence": [
+        "E4"
+       ]
+      },
+      {
+       "text": "Binance accounts lean long: the all-account long/short ratio is 1.62 and top traders by position are at 2.42. The order book is balanced, with $3.0M of bids vs $2.9M of asks within 2% (ratio 1.05).",
+       "evidence": [
+        "E5",
+        "E6"
+       ]
+      },
+      "… 2 more"
+     ],
+     "window": {
+      "from": "2026-10-06T19:24:48.234Z",
+      "to": "2026-10-06T21:24:48.234Z"
+     },
+     "evidence": [
+      {
+       "id": "E1",
+       "data": {
+        "ath": 52.7,
+        "low": 13.91,
+        "high": 13.99,
+        "rank": 14,
+        "as_of": "2026-10-06T21:24:00.000Z",
+        "price": 13.94,
+        "path_15m": [
+         {
+          "t": "2026-10-06T19:15:00.000Z",
+          "price": 13.91
+         },
+         {
+          "t": "2026-10-06T19:30:00.000Z",
+          "price": 13.92
+         },
+         "… 7 more"
+        ],
+        "market_cap": 10426766059,
+        "volume_24h": 262880858,
+        "change_1h_pct": -0.42857142857142855,
+        "change_7d_pct": null,
+        "change_24h_pct": -0.0035,
+        "window_return_pct": 0.22
+       },
+       "kind": "price",
+       "source": "coingecko:/coins/markets",
+       "summary": "LINK $13.9 now; +0.22% over the window (high $14, low $13.9); 1h -0.43%, 24h 0%, 7d n/a; rank #14, market cap $10.4B, 24h volume $262.9M"
+      },
+      {
+       "id": "E2",
+       "data": {
+        "ratio": 0.6307732224873728,
+        "venue": "binance",
+        "symbol": "LINK/USDT",
+        "volume_1h_usd": 491862.45149,
+        "busiest_minutes": [
+         {
+          "v": "507051.06719",
+          "ts": "2026-10-06T20:02:00.000Z",
+          "ret": "-0.079",
+          "close": "13.954"
+         },
+         {
+          "v": "158475.92763",
+          "ts": "2026-10-06T20:06:00.000Z",
+          "ret": "-0.093",
+          "close": "13.973"
+         },
+         "… 3 more"
+        ],
+        "volume_window_usd": 1528455.39943,
+        "median_hourly_24h_usd": 779777.0006
+       },
+       "kind": "spot_volume",
+       "source": "binance:klines:1m",
+       "summary": "binance LINK/USDT: $491.9K traded in the last hour vs a typical hour of $779.8K (0.6×); busiest minutes: 20:02 $507.1K (-0.079%), 20:06 $158.5K (-0.093%), 20:27 $87.1K (-0.043%), 21:13 $49.7K (-0.036%), 20:03 $48.6K (+0.108%)"
+      },
+      "… 16 more"
+     ],
+     "model": "claude-opus-5-5",
+     "score": null,
+     "verify_url": "https://token2049.coingraph.ai/api/v1/verify/46"
+    },
+    "sources": [
+     {
+      "provider": "coingecko",
+      "endpoint": "coingecko:/coins/markets",
+      "as_of": null
+     },
+     {
+      "provider": "binance",
+      "endpoint": "binance:klines:1m",
+      "as_of": null
+     },
+     "… 13 more"
+    ]
+   }
+  },
+  "ask_question": {
+   "request": {
+    "method": "POST",
+    "path": "/ask",
+    "body": {
+     "token": "cardano",
+     "question": "Are large holders moving ADA onto exchanges today?"
+    }
+   },
+   "response": {
+    "object": "answer",
+    "id": "ans_2a3b1ffb520f973baa77",
+    "as_of": "2026-10-06T22:49:27.142Z",
+    "data": {
+     "token": {
+      "id": "cardano",
+      "symbol": "ADA",
+      "name": "Cardano"
+     },
+     "mode": "question",
+     "input": "Are large holders moving ADA onto exchanges today?",
+     "answer": "Unknown, leaning no. The tracker found no ADA moving onto exchanges in the last 4 hours, but that zero probably isn't reliable. It recorded $0 in exchange inflows and $0 in outflows (E7), and none of the large senders or receivers is labeled as an exchange (E8). However, its normal 15-minute exchange flow over the past…",
+     "key_points": [
+      {
+       "text": "No exchange flows were detected in the window: $0 inflow, $0 outflow, $0 net. The 7-day typical 15-minute net flow is also $0.",
+       "evidence": [
+        "E7"
+       ]
+      },
+      {
+       "text": "The tracker counted 45 large transfers totaling $31.8M. Its typical 15-minute transfer volume over 7 days is about $254K.",
+       "evidence": [
+        "E7"
+       ]
+      },
+      {
+       "text": "All of the largest transfers are tagged 'other', and none of their addresses is labeled as an exchange. The two biggest ($5.6M each, 22:26) move the same 20,883,096 ADA to one address and then straight back out within seconds.",
+       "evidence": [
+        "E8"
+       ]
+      },
+      "… 1 more"
+     ],
+     "confidence": 0.35,
+     "caveats": [
+      "The evidence covers only the last 4 hours, not the full day.",
+      "No exchange wallet labels show up in the ADA transfer data, and the 7-day exchange-flow typical value is $0. The $0 inflow may therefore reflect missing coverage, not real absence of deposits.",
+      "The transfer list shown in E8 is cut off, so only the first few of the 12 largest transfers could be checked.",
+      "… 1 more"
+     ],
+     "evidence": [
+      {
+       "id": "E1",
+       "source": "coingecko:/coins/markets",
+       "kind": "price",
+       "summary": "ADA $0.3 now; -1.45% over the window (high $0.3, low $0.3); 1h -0.35%, 24h -1.8%, 7d n/a; rank #17, market cap $10.1B, 24h volume $682.4M",
+       "data": {
+        "price": 0.267736,
+        "window_return_pct": -1.45,
+        "high": 0.271825,
+        "low": 0.267797,
+        "change_1h_pct": -0.3513473276760459,
+        "change_24h_pct": -1.79983,
+        "change_7d_pct": null,
+        "rank": 17,
+        "market_cap": 10052613660,
+        "volume_24h": 682437626,
+        "ath": 3.09,
+        "as_of": "2026-10-06T22:48:00.000Z",
+        "path_15m": [
+         {
+          "t": "2026-10-06T18:45:00.000Z",
+          "price": 0.271679
+         },
+         {
+          "t": "2026-10-06T19:00:00.000Z",
+          "price": 0.271825
+         },
+         {
+          "t": "2026-10-06T19:15:00.000Z",
+          "price": 0.270828
+         },
+         "… 14 more"
+        ]
+       }
+      },
+      {
+       "id": "E2",
+       "source": "binance:klines:1m",
+       "kind": "spot_volume",
+       "summary": "binance ADA/USDT: $1.4M traded in the last hour vs a typical hour of $2M (0.7×); busiest minutes: 19:18 $261.6K (-0.222%), 21:50 $185.6K (-0.186%), 21:28 $129.5K (-0.222%), 20:04 $119.8K (-0.148%), 19:06 $113.8K (-0.074%)",
+       "data": {
+        "venue": "binance",
+        "symbol": "ADA/USDT",
+        "volume_1h_usd": 1442379.54311,
+        "median_hourly_24h_usd": 2006504.06373,
+        "ratio": 0.7188520418088173,
+        "volume_window_usd": 4913572.69713,
+        "busiest_minutes": [
+         {
+          "ts": "2026-10-06T19:18:00.000Z",
+          "close": "0.27",
+          "v": "261570.3888",
+          "ret": "-0.222"
+         },
+         {
+          "ts": "2026-10-06T21:50:00.000Z",
+          "close": "0.2681",
+          "v": "185608.4233",
+          "ret": "-0.186"
+         },
+         {
+          "ts": "2026-10-06T21:28:00.000Z",
+          "close": "0.2695",
+          "v": "129548.1525",
+          "ret": "-0.222"
+         },
+         "… 2 more"
+        ]
+       }
+      },
+      {
+       "id": "E3",
+       "source": "binanceusdm:openInterestHist:5m",
+       "kind": "open_interest",
+       "summary": "Binance futures open interest $122.1M: -0.69% vs 1h ago, -2.9% vs 4h ago",
+       "data": {
+        "open_interest_usd": 122072609.8272,
+        "change_1h_pct": -0.69,
+        "change_4h_pct": -2.9,
+        "as_of": "2026-10-06T22:40:00.000Z"
+       }
+      },
+      "… 9 more"
+     ],
+     "model": "claude-opus-5-5",
+     "hash": "321f7d3e5941904beb36fbe5b2b832966df6e49e5205d698ee95fda423154bd5",
+     "verify_url": "https://token2049.coingraph.ai/api/v1/verify/ans_2a3b1ffb520f973baa77"
+    },
+    "sources": [
+     {
+      "provider": "coingecko",
+      "endpoint": "coingecko:/coins/markets",
+      "as_of": null
+     },
+     {
+      "provider": "binance",
+      "endpoint": "binance:klines:1m",
+      "as_of": null
+     },
+     {
+      "provider": "binanceusdm",
+      "endpoint": "binanceusdm:openInterestHist:5m",
+      "as_of": null
+     },
+     "… 9 more"
+    ]
+   }
+  },
+  "ask_claim": {
+   "request": {
+    "method": "POST",
+    "path": "/ask",
+    "body": {
+     "token": "solana",
+     "claim": "SOL futures are heavily crowded on the long side right now"
+    }
+   },
+   "response": {
+    "object": "answer",
+    "id": "ans_c3e39f93522b100f1b95",
+    "as_of": "2026-10-06T22:49:54.523Z",
+    "data": {
+     "token": {
+      "id": "solana",
+      "symbol": "SOL",
+      "name": "Solana"
+     },
+     "mode": "claim",
+     "input": "SOL futures are heavily crowded on the long side right now",
+     "verdict": "contradicted",
+     "reasoning": [
+      {
+       "text": "Funding, the main sign of crowding, is at the normal baseline. It is 0.0100% per 8h on Binance, Bybit and OKX, the level the source calls normal. If longs were heavily crowded, they would usually be paying more than that.",
+       "evidence": [
+        "E4"
+       ]
+      },
+      {
+       "text": "Open interest is about $1B and has barely moved: +0.51% vs 1h ago and +0.41% vs 4h ago. There is no sign of a fast build-up of leveraged positions.",
+       "evidence": [
+        "E3"
+       ]
+      },
+      {
+       "text": "Liquidations were small and hit shorts more than longs: $38K of shorts vs $19.4K of longs, $57.4K in total. That does not look like an overextended long side being flushed out.",
+       "evidence": [
+        "E6"
+       ]
+      },
+      "… 2 more"
+     ],
+     "confidence": 0.65,
+     "caveats": [
+      "The all-accounts long/short ratio of 1.62 does tilt long, so positioning is somewhat long-leaning, just not 'heavily crowded' (E5).",
+      "Top-trader positioning and taker buy/sell data are missing, which limits how firm this verdict can be (E5).",
+      "Open interest covers Binance only, and funding is a single snapshot (E3, E4)."
+     ],
+     "evidence": [
+      {
+       "id": "E1",
+       "source": "coingecko:/coins/markets",
+       "kind": "price",
+       "summary": "SOL $121.1 now; +0.18% over the window (high $121.3, low $120.5); 1h -0.02%, 24h -0.01%, 7d n/a; rank #7, market cap $71.2B, 24h volume $2.5B",
+       "data": {
+        "price": 121.07,
+        "window_return_pct": 0.18,
+        "high": 121.33,
+        "low": 120.49,
+        "change_1h_pct": -0.016516640515319186,
+        "change_24h_pct": -0.01478,
+        "change_7d_pct": null,
+        "rank": 7,
+        "market_cap": 71247421567,
+        "volume_24h": 2501767533,
+        "ath": 293.31,
+        "as_of": "2026-10-06T22:48:00.000Z",
+        "path_15m": [
+         {
+          "t": "2026-10-06T18:45:00.000Z",
+          "price": 120.85
+         },
+         {
+          "t": "2026-10-06T19:00:00.000Z",
+          "price": 120.82
+         },
+         {
+          "t": "2026-10-06T19:15:00.000Z",
+          "price": 120.59
+         },
+         "… 14 more"
+        ]
+       }
+      },
+      {
+       "id": "E2",
+       "source": "binance:klines:1m",
+       "kind": "spot_volume",
+       "summary": "binance SOL/USDT: $4.4M traded in the last hour vs a typical hour of $5.2M (0.8×); busiest minutes: 21:38 $852.9K (-0.074%), 21:37 $666.8K (-0.074%), 22:04 $603.7K (+0.074%), 21:42 $460.2K (+0.008%), 20:39 $413.3K (+0.116%)",
+       "data": {
+        "venue": "binance",
+        "symbol": "SOL/USDT",
+        "volume_1h_usd": 4418244.46053,
+        "median_hourly_24h_usd": 5221832.78705,
+        "ratio": 0.8461099082849077,
+        "volume_window_usd": 18423936.01862,
+        "busiest_minutes": [
+         {
+          "ts": "2026-10-06T21:38:00.000Z",
+          "close": "120.99",
+          "v": "852880.31294",
+          "ret": "-0.074"
+         },
+         {
+          "ts": "2026-10-06T21:37:00.000Z",
+          "close": "121.09",
+          "v": "666803.46785",
+          "ret": "-0.074"
+         },
+         {
+          "ts": "2026-10-06T22:04:00.000Z",
+          "close": "121.28",
+          "v": "603740.74749",
+          "ret": "0.074"
+         },
+         "… 2 more"
+        ]
+       }
+      },
+      {
+       "id": "E3",
+       "source": "binanceusdm:openInterestHist:5m",
+       "kind": "open_interest",
+       "summary": "Binance futures open interest $1B: +0.51% vs 1h ago, +0.41% vs 4h ago",
+       "data": {
+        "open_interest_usd": 1006092681.7309725,
+        "change_1h_pct": 0.51,
+        "change_4h_pct": 0.41,
+        "as_of": "2026-10-06T22:40:00.000Z"
+       }
+      },
+      "… 9 more"
+     ],
+     "model": "claude-opus-5-5",
+     "hash": "3c407e933de70babce2b895e58f5832193956e816751e02fce5427f15cace99b",
+     "verify_url": "https://token2049.coingraph.ai/api/v1/verify/ans_c3e39f93522b100f1b95"
+    },
+    "sources": [
+     {
+      "provider": "coingecko",
+      "endpoint": "coingecko:/coins/markets",
+      "as_of": null
+     },
+     {
+      "provider": "binance",
+      "endpoint": "binance:klines:1m",
+      "as_of": null
+     },
+     {
+      "provider": "binanceusdm",
+      "endpoint": "binanceusdm:openInterestHist:5m",
+      "as_of": null
+     },
+     "… 9 more"
+    ]
+   }
+  },
+  "monitor": {
+   "request": {
+    "method": "POST",
+    "path": "/monitor",
+    "body": {
+     "tokens": [
+      "cardano",
+      "chainlink",
+      "solana"
+     ],
+     "webhook_url": "https://example.com/hooks/coingraph",
+     "conditions": {
+      "min_severity": 2,
+      "new_briefs": true
+     }
+    }
+   },
+   "response": {
+    "object": "monitor",
+    "id": null,
+    "as_of": "2026-10-06T22:49:56.206Z",
+    "data": {
+     "id": "mon_77eae5206e68afec1085",
+     "secret": "whsec_••••••••••••••••",
+     "tokens": [
+      "cardano",
+      "chainlink",
+      "… 1 more"
+     ],
+     "conditions": {
+      "min_severity": 2,
+      "verdict_changes": true,
+      "new_briefs": true
+     },
+     "webhook_url": "https://example.com/hooks/coingraph",
+     "created_at": "2026-10-06T22:49:56.206Z",
+     "note": "Keep the secret: it is shown once and used to sign every webhook (X-CoinGraph-Signature = HMAC-SHA256 of the body)."
+    },
+    "sources": []
+   }
+  },
+  "record": {
+   "request": {
+    "method": "GET",
+    "path": "/record/solana?kind=signal"
+   },
+   "response": {
+    "object": "record",
+    "id": null,
+    "as_of": "2026-10-06T22:49:58.921Z",
+    "data": {
+     "scope": "solana",
+     "since": "2026-09-29T22:49:58.797Z",
+     "calibration": {
+      "total_calls": 3,
+      "graded": 1,
+      "hit_rate_pct": 100,
+      "by_kind": {
+       "signal": {
+        "calls": 3,
+        "graded": 1,
+        "right": 1,
+        "hit_rate_pct": 100
+       }
+      },
+      "by_severity": {
+       "2": {
+        "graded": 1,
+        "right": 1,
+        "hit_rate_pct": 100
+       }
+      },
+      "method": "Directional calls (up/down) are graded on the 24h return (1h if 24h is not yet available). 'caution' is right when the asset moved ≥2% either way. Neutral calls are listed but not graded."
+     },
+     "ledger": [
+      {
+       "kind": "signal",
+       "id": "393",
+       "token": "solana",
+       "symbol": "SOL",
+       "at": "2026-10-06T16:15:51.077Z",
+       "said": "volume_spike",
+       "direction": "neutral",
+       "severity": 2,
+       "price_at": 120.98,
+       "return_after_pct": {
+        "1h": -0.6,
+        "24h": null,
+        "7d": null
+       },
+       "graded_on": "1h",
+       "outcome": null
+      },
+      {
+       "kind": "signal",
+       "id": "351",
+       "token": "solana",
+       "symbol": "SOL",
+       "at": "2026-10-06T16:14:51.066Z",
+       "said": "volume_spike",
+       "direction": "neutral",
+       "severity": 2,
+       "price_at": 120.93,
+       "return_after_pct": {
+        "1h": -0.58,
+        "24h": null,
+        "7d": null
+       },
+       "graded_on": "1h",
+       "outcome": null
+      },
+      "… 1 more"
+     ]
+    },
+    "sources": [
+     {
+      "provider": "coingraph",
+      "endpoint": "evaluations, signals, briefs",
+      "as_of": null
+     },
+     {
+      "provider": "coingecko",
+      "endpoint": "/coins/markets",
+      "as_of": null
+     }
+    ]
+   }
+  },
+  "verify": {
+   "request": {
+    "method": "GET",
+    "path": "/verify/eval_40b847a490095eba1652"
+   },
+   "response": {
+    "object": "proof",
+    "id": "eval_40b847a490095eba1652",
+    "as_of": "2026-10-06T22:48:42.700Z",
+    "data": {
+     "id": "eval_40b847a490095eba1652",
+     "kind": "evaluation",
+     "token": "chainlink",
+     "issued_at": "2026-10-06T22:48:42.700Z",
+     "sha256": "733e04da4c9917e408b494783e6fcdc438925696cbec7967b67b7b64c8334460",
+     "hash_matches_stored": true,
+     "canonical_bytes": 3264,
+     "attestation": {
+      "status": "pending",
+      "note": "Chainlink CRE attestation is written after the workflow runs; until then the hash above is the commitment."
+     },
+     "object": {
+      "token": {
+       "id": "chainlink",
+       "name": "Chainlink",
+       "rank": 14,
+       "symbol": "LINK"
+      },
+      "reasons": [
+       {
+        "text": "1h 0%, 24h +0.07%: nothing stretched",
+        "source": "coingecko:/coins/markets",
+        "dimension": "momentum"
+       },
+       {
+        "info": true,
+        "text": "$3.3M available within 2% of the price on tracked order books",
+        "source": "ccxt:fetchOrderBook",
+        "dimension": "liquidity"
+       },
+       "… 1 more"
+      ],
+      "verdict": "proceed",
+      "snapshot": {
+       "market": {
+        "rank": 14,
+        "as_of": "2026-10-06T22:47:00.000Z",
+        "ath_usd": 52.7,
+        "atl_usd": 0.148183,
+        "sources": [
+         {
+          "as_of": "2026-10-06T22:47:00.000Z",
+          "endpoint": "/coins/markets",
+          "provider": "coingecko"
+         }
+        ],
+        "ath_date": "2021-05-09T16:13:57.000Z",
+        "price_usd": 13.92,
+        "change_pct": {
+         "1h": 0,
+         "1y": -40.593,
+         "4h": -0.36,
+         "7d": -5.2063,
+         "15m": 0.22,
+         "24h": 0.07,
+         "30d": 6.4017,
+         "200d": 41.344
+        },
+        "low_24h_usd": 13.72,
+        "from_ath_pct": -73.58,
+        "from_atl_pct": 9296.28,
+        "high_24h_usd": 14.11,
+        "…": "5 more fields"
+       },
+       "supply": {
+        "top_holders": {
+         "as_of": "2026-10-06T14:52:00.000Z",
+         "top10": 39,
+         "top20": 49.4
+        },
+        "fdv_to_market_cap": 1.34
+       },
+       "derivatives": {
+        "funding": [
+         {
+          "mark": 13.919,
+          "index": 13.92434712,
+          "venue": "binanceusdm",
+          "symbol": "LINK/USDT:USDT",
+          "next_at": null,
+          "rate_pct": 0.0092,
+          "basis_pct": -0.04,
+          "next_rate_pct": null,
+          "annualised_pct": 10.1
+         },
+         {
+          "mark": 13.917,
+          "index": 13.924,
+          "venue": "bybit",
+          "symbol": "LINK/USDT:USDT",
+          "next_at": null,
+          "rate_pct": 0.0085,
+          "basis_pct": -0.05,
+          "next_rate_pct": null,
+          "annualised_pct": 9.3
+         },
+         "… 1 more"
+        ],
+        "liquidations_1h": {
+         "usd": 0,
+         "count": 0,
+         "longs_usd": 0,
+         "shorts_usd": 0
+        },
+        "open_interest_change": {
+         "1h": -0.23,
+         "4h": -0.45,
+         "24h": -0.61
+        }
+       },
+       "liquidity_depth": {
+        "ask": 3322230,
+        "bid": 3099270,
+        "bid_ask_ratio": 0.93
+       },
+       "onchain_flows_24h": {
+        "net_usd": -373120,
+        "inflow_usd": 1966630,
+        "outflow_usd": 2339750
+       }
+      },
+      "confidence": 0.95,
+      "dimensions": {
+       "supply": {
+        "rating": "ok",
+        "reasons": [
+         {
+          "info": true,
+          "text": "FDV / market cap 1.34",
+          "source": "coingecko:/coins/markets"
+         },
+         {
+          "info": true,
+          "text": "Top 10 holders own 39% of supply",
+          "source": "goplus/nownodes holders"
+         },
+         "… 1 more"
+        ]
+       },
+       "context": {
+        "rating": "ok",
+        "reasons": [
+         {
+          "text": "No fundamental or mood flags",
+          "source": "coingraph"
+         }
+        ]
+       },
+       "onchain": {
+        "rating": "ok",
+        "reasons": [
+         {
+          "info": true,
+          "text": "Exchange net flow $-373.1K in 24h: normal",
+          "source": "nownodes:eth_getLogs"
+         }
+        ]
+       },
+       "contract": {
+        "rating": "ok",
+        "reasons": [
+         {
+          "text": "No contract risks found on the ETH contract (home chain)",
+          "source": "goplus:/token_security"
+         }
+        ]
+       },
+       "leverage": {
+        "rating": "ok",
+        "reasons": [
+         {
+          "text": "Funding 0.0092% per 8h: leverage not crowded",
+          "source": "ccxt:fetchFundingRates"
+         }
+        ]
+       },
+       "momentum": {
+        "rating": "ok",
+        "reasons": [
+         {
+          "text": "1h 0%, 24h +0.07%: nothing stretched",
+          "source": "coingecko:/coins/markets"
+         }
+        ]
+       },
+       "liquidity": {
+        "rating": "ok",
+        "reasons": [
+         {
+          "info": true,
+          "text": "$3.3M available within 2% of the price on tracked order books",
+          "source": "ccxt:fetchOrderBook"
+         }
+        ]
+       }
+      },
+      "disclaimer": "CoinGraph never executes, custodies or advises. The caller decides.",
+      "size_check": null,
+      "watch_next": [],
+      "policy_check": null
+     },
+     "provenance": [
+      {
+       "call_id": 13422,
+       "provider": "coingecko",
+       "endpoint": "/coins/markets",
+       "at": "2026-10-06T22:48:41.321Z",
+       "latency_ms": 419,
+       "ok": true,
+       "rows": 100
+      },
+      {
+       "call_id": 13421,
+       "provider": "nownodes",
+       "endpoint": "sol:getSignaturesForAddress:inspect",
+       "at": "2026-10-06T22:48:36.383Z",
+       "latency_ms": 495,
+       "ok": true,
+       "rows": null
+      },
+      "… 58 more"
+     ]
+    },
+    "sources": [
+     {
+      "provider": "coingecko",
+      "endpoint": "/coins/markets",
+      "as_of": "2026-10-06T22:48:41.321Z"
+     },
+     {
+      "provider": "nownodes",
+      "endpoint": "sol:getSignaturesForAddress:inspect",
+      "as_of": "2026-10-06T22:48:36.383Z"
+     },
+     "… 16 more"
+    ]
+   }
+  },
+  "agent:trade-gatekeeper": {
+   "request": {
+    "method": "POST",
+    "path": "/agents/trade-gatekeeper",
+    "body": {
+     "token": "solana",
+     "size_usd": 250000,
+     "side": "buy"
+    }
+   },
+   "response": {
+    "object": "agent_run",
+    "id": "run_54cd46bcdabebcbce6f3",
+    "as_of": "2026-10-06T22:50:03.438Z",
+    "data": {
+     "run_id": "run_54cd46bcdabebcbce6f3",
+     "agent": "trade-gatekeeper",
+     "agent_version": "1.0.0",
+     "as_of": "2026-10-06T22:50:03.438Z",
+     "verdict": "ALLOW",
+     "summary": "ALLOW: $250K buy of SOL fits current liquidity (under 0.01% impact via exchange order books).",
+     "result": {
+      "token": {
+       "id": "solana",
+       "symbol": "SOL"
+      },
+      "side": "buy",
+      "size": {
+       "requested_usd": 250000,
+       "max_safe_usd": 250000
+      },
+      "impact": {
+       "best_route": "exchange order books",
+       "best_pct": 0,
+       "routes": [
+        {
+         "route": "exchange order books",
+         "impact": 0
+        }
+       ],
+       "limit_pct": 1,
+       "share_of_daily_volume_pct": 0.01
+      },
+      "check": {
+       "verdict": "proceed",
+       "confidence": 0.86,
+       "dimensions": {
+        "momentum": "ok",
+        "liquidity": "ok",
+        "leverage": "ok",
+        "onchain": "ok",
+        "supply": "ok",
+        "context": "ok",
+        "contract": "unassessed"
+       },
+       "evaluation_id": "eval_3d141ae48c4e72e05151"
+      },
+      "policy": null,
+      "latest_brief": null
+     },
+     "reasons": [
+      {
+       "text": "$250K buy: under 0.01% impact on the best route (exchange order books; limit 1%), check verdict proceed",
+       "source": "coingraph:evaluate"
+      }
+     ],
+     "warnings": [],
+     "links": {
+      "proof": "/api/v1/verify/eval_3d141ae48c4e72e05151"
+     },
+     "disclaimer": "CoinGraph never trades, holds funds or gives financial advice. The caller decides.",
+     "hash": "80c297cef297e507e416f531c56bae08c8603aebf08d381ddaa62f79ac03bf0f",
+     "verify_url": "https://token2049.coingraph.ai/api/v1/verify/run_54cd46bcdabebcbce6f3"
+    },
+    "sources": []
+   }
+  },
+  "agent:wallet-guard": {
+   "request": {
+    "method": "POST",
+    "path": "/agents/wallet-guard",
+    "body": {
+     "token": "chainlink",
+     "amount_usd": 20000,
+     "to_address": "0x28c6c06298d514db089934071355e5743bf21d60",
+     "chain": "eth"
+    }
+   },
+   "response": {
+    "object": "agent_run",
+    "id": "run_df24aea96e25813dafc7",
+    "as_of": "2026-10-06T22:50:18.674Z",
+    "data": {
+     "run_id": "run_df24aea96e25813dafc7",
+     "agent": "wallet-guard",
+     "agent_version": "1.0.0",
+     "as_of": "2026-10-06T22:50:18.674Z",
+     "verdict": "SAFE",
+     "summary": "SAFE: nothing risky found. LINK contract: No contract risks found on the ETH contract (home chain).",
+     "result": {
+      "token": {
+       "id": "chainlink",
+       "symbol": "LINK",
+       "check": "proceed",
+       "contract": "ok",
+       "price_impact_pct": 0.356,
+       "evaluation_id": "eval_ba7432aa0104e6533a48"
+      },
+      "recipient": {
+       "chain": "eth",
+       "address": "0x28c6c06298d514db089934071355e5743bf21d60",
+       "label": {
+        "entity": "binance",
+        "name": "Binance 14",
+        "kind": "exchange",
+        "confidence": "high"
+       },
+       "type": "exchange",
+       "tx_count": 58279359,
+       "screening": {
+        "risk": "none_found",
+        "sanctioned": false,
+        "burn_address": false,
+        "flags": []
+       },
+       "lookalike_of": null
+      }
+     },
+     "reasons": [
+      {
+       "text": "LINK contract: No contract risks found on the ETH contract (home chain)",
+       "source": "goplus:/token_security"
+      },
+      {
+       "text": "Recipient is a known Binance 14 exchange wallet",
+       "source": "coingraph:wallet_labels"
+      }
+     ],
+     "warnings": [],
+     "links": {},
+     "disclaimer": "CoinGraph never trades, holds funds or gives financial advice. The caller decides.",
+     "hash": "c78bb5853b88fbc63b5c427c144955508917ed9211076886c4168a8bd555f163",
+     "verify_url": "https://token2049.coingraph.ai/api/v1/verify/run_df24aea96e25813dafc7"
+    },
+    "sources": []
+   }
+  },
+  "agent:due-diligence-analyst": {
+   "request": {
+    "method": "POST",
+    "path": "/agents/due-diligence-analyst",
+    "body": {
+     "token": "cardano"
+    }
+   },
+   "response": {
+    "object": "agent_run",
+    "id": "run_8871767f7d51ec72b9ce",
+    "as_of": "2026-10-06T22:50:30.711Z",
+    "data": {
+     "run_id": "run_8871767f7d51ec72b9ce",
+     "agent": "due-diligence-analyst",
+     "agent_version": "1.0.0",
+     "as_of": "2026-10-06T22:50:30.711Z",
+     "verdict": "B",
+     "summary": "Cardano (ADA) receives an overall grade of B. The current verdict is proceed, with no red flags. Liquidity is its main strength (A): $70.9M sits within 2% of price across 25 markets, though CoinGecko rates none as trustworthy. Supply (B) is 83.4% issued, but the unlock schedule is unassessed. As a native coin, ADA has …",
+     "result": {
+      "token": {
+       "id": "cardano",
+       "symbol": "ADA",
+       "name": "Cardano",
+       "rank": 17
+      },
+      "overall": {
+       "grade": "B",
+       "score": 74
+      },
+      "sections": [
+       {
+        "name": "Liquidity & markets",
+        "score": 85,
+        "findings": [
+         "$70.9M available within 2% of the price",
+         "25 exchange markets, 0 rated trustworthy by CoinGecko",
+         "24h volume $683.2M (6.8% of market cap)"
+        ],
+        "sources": [
+         "ccxt:fetchOrderBook",
+         "coingecko:/coins/{id}/tickers"
+        ],
+        "grade": "A"
+       },
+       {
+        "name": "Supply & concentration",
+        "score": 80,
+        "findings": [
+         "Fully diluted value is 1.2× market cap (83.4% of max supply issued)",
+         "Unlock schedule: unassessed (no free source)"
+        ],
+        "sources": [
+         "coingecko:/coins/markets",
+         "goplus:/token_security",
+         "nownodes"
+        ],
+        "grade": "B"
+       },
+       {
+        "name": "Contract & admin powers",
+        "score": 75,
+        "findings": [
+         "Native coin: no token contract to review"
+        ],
+        "sources": [
+         "goplus:/token_security"
+        ],
+        "grade": "B"
+       },
+       "… 3 more"
+      ],
+      "red_flags": [],
+      "strengths": [
+       "Deep liquidity across venues"
+      ],
+      "current_check": {
+       "verdict": "proceed",
+       "evaluation_id": "eval_890a546a81377087a19a"
+      },
+      "recent_news": [],
+      "latest_brief": null,
+      "coingraph_track_record_30d": {
+       "calls": 12,
+       "hit_rate_pct": null
+      },
+      "method": "Weighted: liquidity 25%, supply 20%, contract 20%, onchain 10%, derivatives 10%, development & usage 15%. Three or more red flags cap the grade at D."
+     },
+     "reasons": [
+      {
+       "text": "Strength: Deep liquidity across venues",
+       "source": "coingraph"
+      }
+     ],
+     "warnings": [],
+     "links": {
+      "proof": "/api/v1/verify/eval_890a546a81377087a19a"
+     },
+     "disclaimer": "CoinGraph never trades, holds funds or gives financial advice. The caller decides.",
+     "hash": "ba794e763a05dde6d3210309c6581833084573778044c8c78e62c847a9f54771",
+     "verify_url": "https://token2049.coingraph.ai/api/v1/verify/run_8871767f7d51ec72b9ce"
+    },
+    "sources": []
+   }
+  },
+  "agent:opportunity-scout": {
+   "request": {
+    "method": "POST",
+    "path": "/agents/opportunity-scout",
+    "body": {
+     "limit": 3
+    }
+   },
+   "response": {
+    "object": "agent_run",
+    "id": "run_a2c6ac5bfce528f57abe",
+    "as_of": "2026-10-06T22:50:48.517Z",
+    "data": {
+     "run_id": "run_a2c6ac5bfce528f57abe",
+     "agent": "opportunity-scout",
+     "agent_version": "1.0.0",
+     "as_of": "2026-10-06T22:50:48.517Z",
+     "verdict": "SETUPS_FOUND",
+     "summary": "3 setups passed the check: INJ, BCH, APT. 2 movers dropped for failing it.",
+     "result": {
+      "setups": [
+       {
+        "token": {
+         "id": "injective-protocol",
+         "symbol": "INJ"
+        },
+        "price_usd": 8.14,
+        "why": [
+         "volume spike",
+         "price move",
+         "oi change"
+        ],
+        "check": "caution",
+        "evaluation_id": "eval_8b0afd8db0118dbad0e3",
+        "risks": [
+         "supply: Top 10 holders own 71.2% of supply (incl. exchange and contract wallets)"
+        ],
+        "invalidation_usd": 7.81,
+        "horizon": "4–24 hours",
+        "direction": "long"
+       },
+       {
+        "token": {
+         "id": "bitcoin-cash",
+         "symbol": "BCH"
+        },
+        "price_usd": 310.98,
+        "why": [
+         "volume spike"
+        ],
+        "check": "proceed",
+        "evaluation_id": "eval_dee2bf35729603d70be6",
+        "risks": [
+         "momentum: 1h -1.23%, 24h -1.62%: nothing stretched",
+         "liquidity: $17M available within 2% of the price across exchanges (CoinGecko)",
+         "leverage: Funding 0.01% per 8h: leverage not crowded"
+        ],
+        "invalidation_usd": 301.651,
+        "horizon": "4–24 hours",
+        "direction": "long"
+       },
+       {
+        "token": {
+         "id": "aptos",
+         "symbol": "APT"
+        },
+        "price_usd": 0.827528,
+        "why": [
+         "volume spike"
+        ],
+        "check": "proceed",
+        "evaluation_id": "eval_17c6049f5d3e228ef78e",
+        "risks": [
+         "momentum: 1h -0.92%, 24h -2.37%: nothing stretched",
+         "liquidity: $5.1M available within 2% of the price across exchanges (CoinGecko)",
+         "leverage: Funding 0.01% per 8h: leverage not crowded"
+        ],
+        "invalidation_usd": 0.802702,
+        "horizon": "4–24 hours",
+        "direction": "long"
+       }
+      ],
+      "dropped": [
+       {
+        "token": "NIGHT",
+        "why": "supply: Top 10 holders own 89.3% of supply (incl. exchange and contract wallets)"
+       },
+       {
+        "token": "BTW",
+        "why": "supply: Fully diluted value is 3.69× market cap — most supply is not yet circulating"
+       }
+      ],
+      "scanned": 10
+     },
+     "reasons": [
+      {
+       "text": "INJ: volume spike, price move, oi change",
+       "source": "coingecko+ccxt+nownodes signals, coingraph:evaluate"
+      },
+      {
+       "text": "BCH: volume spike",
+       "source": "coingecko+ccxt+nownodes signals, coingraph:evaluate"
+      },
+      {
+       "text": "APT: volume spike",
+       "source": "coingecko+ccxt+nownodes signals, coingraph:evaluate"
+      }
+     ],
+     "warnings": [],
+     "links": {
+      "proof_INJ": "/api/v1/verify/eval_8b0afd8db0118dbad0e3",
+      "proof_BCH": "/api/v1/verify/eval_dee2bf35729603d70be6",
+      "proof_APT": "/api/v1/verify/eval_17c6049f5d3e228ef78e"
+     },
+     "disclaimer": "CoinGraph never trades, holds funds or gives financial advice. The caller decides.",
+     "hash": "02796de875c9cb753638d3026563ab0ed57c008e81a0b133840ea33e4d7febe0",
+     "verify_url": "https://token2049.coingraph.ai/api/v1/verify/run_a2c6ac5bfce528f57abe"
+    },
+    "sources": []
+   }
+  },
+  "agent:leverage-radar": {
+   "request": {
+    "method": "POST",
+    "path": "/agents/leverage-radar",
+    "body": {
+     "tokens": [
+      "solana",
+      "cardano",
+      "chainlink"
+     ]
+    }
+   },
+   "response": {
+    "object": "agent_run",
+    "id": "run_87f25fb1eabec1270255",
+    "as_of": "2026-10-06T22:50:51.713Z",
+    "data": {
+     "run_id": "run_87f25fb1eabec1270255",
+     "agent": "leverage-radar",
+     "agent_version": "1.0.0",
+     "as_of": "2026-10-06T22:50:51.713Z",
+     "verdict": "BALANCED",
+     "summary": "No crowded markets. Most stretched: ADA at 24/100 (balanced).",
+     "result": {
+      "scored": 3,
+      "markets": [
+       {
+        "id": "cardano",
+        "symbol": "ADA",
+        "score": 24,
+        "side": "neither",
+        "regime": "balanced",
+        "funding_pct": -0.0009,
+        "funding_pctile": 1,
+        "oi_usd": 121908274.85331175,
+        "oi_24h_pct": -3.96,
+        "oi_to_mcap_pct": 1.21,
+        "top_traders_ls": 2.2343,
+        "ls_vs_7d": 1.01,
+        "liq_24h_usd": 408198.931,
+        "liq_long_share_pct": 20,
+        "…": "2 more fields"
+       },
+       {
+        "id": "solana",
+        "symbol": "SOL",
+        "score": 24,
+        "side": "neither",
+        "regime": "balanced",
+        "funding_pct": 0.01,
+        "funding_pctile": 100,
+        "oi_usd": 1006669712.979,
+        "oi_24h_pct": -0.13,
+        "oi_to_mcap_pct": 1.41,
+        "top_traders_ls": 2.1717,
+        "ls_vs_7d": 0.94,
+        "liq_24h_usd": 1164767.6324,
+        "liq_long_share_pct": 70,
+        "…": "2 more fields"
+       },
+       {
+        "id": "chainlink",
+        "symbol": "LINK",
+        "score": 12,
+        "side": "neither",
+        "regime": "balanced",
+        "funding_pct": 0.0096,
+        "funding_pctile": 67,
+        "oi_usd": 127258923.82872,
+        "oi_24h_pct": -0.63,
+        "oi_to_mcap_pct": 1.22,
+        "top_traders_ls": 2.4285,
+        "ls_vs_7d": 1.07,
+        "liq_24h_usd": 56823.1281,
+        "liq_long_share_pct": 99,
+        "…": "2 more fields"
+       }
+      ]
+     },
+     "reasons": [
+      {
+       "text": "ADA: Funding -0.0009%/8h, 1th percentile of 14 days",
+       "source": "binanceusdm:funding+openInterest+positioning, okx+binance:liquidations"
+      },
+      {
+       "text": "SOL: Funding 0.0100%/8h, 100th percentile of 14 days",
+       "source": "binanceusdm:funding+openInterest+positioning, okx+binance:liquidations"
+      },
+      {
+       "text": "SOL: $1.2M liquidated in 24h (70% longs)",
+       "source": "binanceusdm:funding+openInterest+positioning, okx+binance:liquidations"
+      }
+     ],
+     "warnings": [],
+     "links": {},
+     "disclaimer": "CoinGraph never trades, holds funds or gives financial advice. The caller decides.",
+     "hash": "8fc8e944e3d1e0ccae594c39acf9ab5b5c6d9bcf3cdc3665f63ce04b0c0e5cfe",
+     "verify_url": "https://token2049.coingraph.ai/api/v1/verify/run_87f25fb1eabec1270255"
+    },
+    "sources": []
+   }
+  },
+  "agent:whale-watch": {
+   "request": {
+    "method": "POST",
+    "path": "/agents/whale-watch",
+    "body": {
+     "token": "chainlink"
+    }
+   },
+   "response": {
+    "object": "agent_run",
+    "id": "run_aebebf710c7f56216266",
+    "as_of": "2026-10-06T22:51:15.096Z",
+    "data": {
+     "run_id": "run_aebebf710c7f56216266",
+     "agent": "whale-watch",
+     "agent_version": "1.0.0",
+     "as_of": "2026-10-06T22:51:15.096Z",
+     "verdict": "NEUTRAL",
+     "summary": "LINK: no unusual whale behaviour; exchange flows are within the normal range.",
+     "result": {
+      "token": {
+       "id": "chainlink",
+       "symbol": "LINK"
+      },
+      "exchange_flows": {
+       "1h": {
+        "inflow_usd": 174695,
+        "outflow_usd": 124444,
+        "net_usd": 50250.9
+       },
+       "24h": {
+        "inflow_usd": 1966630,
+        "outflow_usd": 2339750,
+        "net_usd": -373120
+       },
+       "7d": {
+        "inflow_usd": 1966630,
+        "outflow_usd": 2339750,
+        "net_usd": -373120
+       },
+       "typical_15m_abs_net_usd": 5071.39,
+       "note": "positive net = coins arriving on exchanges (sell-side supply)"
+      },
+      "net_24h_zscore": null,
+      "daily_net_7d": [
+       {
+        "day": "2026-10-06T00:00:00.000Z",
+        "net_usd": -373120.04821745155
+       }
+      ],
+      "reserves_7d_change_pct": 0,
+      "deposits": [
+       {
+        "chain": "eth",
+        "tx": "0xa0423df53fb86396d790da00e7b828afeef65d96562b9fdc554bc4d87c042629",
+        "at": "2026-10-06T16:31:23.000Z",
+        "from": "0xd8009f850a4626b501185216a5de7b2507a8e1fa",
+        "to": "0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+        "amount": 30855.5,
+        "usd": 429200,
+        "from_entity": null,
+        "to_entity": "gate",
+        "direction": "to_exchange"
+       },
+       {
+        "chain": "eth",
+        "tx": "0xb6762d014bfbf0ec3317e9232cfc87646a46f3cd2abbbde71b1d81316170aee3",
+        "at": "2026-10-06T15:12:11.000Z",
+        "from": "0x55a116ecb13d4cd1a47afe03c58ba6ede362dcbe",
+        "to": "0xa9d1e08c7793af67e9d92fe308d5697fb81d3e43",
+        "amount": 16941,
+        "usd": 239037,
+        "from_entity": null,
+        "to_entity": "coinbase",
+        "direction": "to_exchange"
+       }
+      ],
+      "withdrawals": [
+       {
+        "chain": "eth",
+        "tx": "0x8009c29870273a899e9eeeb4b40f0f4b3c34c0a786fa1bb069a140b1b1e94ec4",
+        "at": "2026-10-06T15:01:11.000Z",
+        "from": "0xa9d1e08c7793af67e9d92fe308d5697fb81d3e43",
+        "to": "0xa47445f9170c17b64dee893463563fd3ee2b7fa9",
+        "amount": 16941,
+        "usd": 239037,
+        "from_entity": "coinbase",
+        "to_entity": null,
+        "direction": "from_exchange"
+       },
+       {
+        "chain": "eth",
+        "tx": "0xf458eda96a71ec35d5064dab2633bda520aab8fd661ca25a2a5a49b3819c3c7e",
+        "at": "2026-10-06T17:08:11.000Z",
+        "from": "0xa9d1e08c7793af67e9d92fe308d5697fb81d3e43",
+        "to": "0xf64d262b2ace1e11f7cfa7a41b54fc23d26cf492",
+        "amount": 16525.1,
+        "usd": 228873,
+        "from_entity": "coinbase",
+        "to_entity": null,
+        "direction": "from_exchange"
+       },
+       {
+        "chain": "eth",
+        "tx": "0xd562d5ee81942b64f473852e51bd396ccf192a92ac0da390e1f9f1bbf6766313",
+        "at": "2026-10-06T20:22:47.000Z",
+        "from": "0xa9d1e08c7793af67e9d92fe308d5697fb81d3e43",
+        "to": "0xf64d262b2ace1e11f7cfa7a41b54fc23d26cf492",
+        "amount": 11385.2,
+        "usd": 159280,
+        "from_entity": "coinbase",
+        "to_entity": null,
+        "direction": "from_exchange"
+       }
+      ],
+      "other_large_moves": [
+       {
+        "chain": "eth",
+        "tx": "0xebd8f46d5ef99ca6a1a3d9d226eb789350aaca7aa08adaedf3c6026b770869c1",
+        "at": "2026-10-06T20:16:59.000Z",
+        "from": "0x000000000004444c5dc75cb358380d2e3de08a90",
+        "to": "0x72655b3926db3afbe914a53b0604905af7ce11a5",
+        "amount": 138615,
+        "usd": 1939230,
+        "from_entity": null,
+        "to_entity": null,
+        "direction": "other"
+       },
+       {
+        "chain": "eth",
+        "tx": "0x50b0589c576dd17086bf74cf0b43b5a9f2dea2d3a341aa46dd8f4da79103348f",
+        "at": "2026-10-06T20:38:11.000Z",
+        "from": "0x99b23f1b1e66eca4d0fbedb5ce9eb77a3c8ed56c",
+        "to": "0x4a4aaa0155237881fbd5c34bfae16e985a7b068d",
+        "amount": 138615,
+        "usd": 1937840,
+        "from_entity": null,
+        "to_entity": null,
+        "direction": "other"
+       },
+       {
+        "chain": "eth",
+        "tx": "0xb620cc4dce7197af7ab4f25cfa7bb8ce0ad50162fe0525f0cebd2db199c5915a",
+        "at": "2026-10-06T20:37:47.000Z",
+        "from": "0x72655b3926db3afbe914a53b0604905af7ce11a5",
+        "to": "0x99b23f1b1e66eca4d0fbedb5ce9eb77a3c8ed56c",
+        "amount": 138614,
+        "usd": 1937830,
+        "from_entity": null,
+        "to_entity": null,
+        "direction": "other"
+       },
+       "… 2 more"
+      ],
+      "wallet_profiles": [
+       {
+        "address": "0x99b23f1b1e66eca4d0fbedb5ce9eb77a3c8ed56c",
+        "chain": "eth",
+        "role": "sender",
+        "type": "established wallet",
+        "tx_count": 66,
+        "label": "unlabelled"
+       }
+      ]
+     },
+     "reasons": [
+      {
+       "text": "Net $373.1K withdrawn from exchanges in 24h",
+       "source": "nownodes:eth_getLogs"
+      },
+      {
+       "text": "Exchange reserves 0% over 7 days",
+       "source": "nownodes:blockbook:/address"
+      },
+      {
+       "text": "Largest deposit: $429.2K → gate",
+       "source": "nownodes:onchain_transfers"
+      },
+      "… 1 more"
+     ],
+     "warnings": [],
+     "links": {},
+     "disclaimer": "CoinGraph never trades, holds funds or gives financial advice. The caller decides.",
+     "hash": "373b984fb64218cacb3d153f100734b46c1ccb4942de4bfb4e18d75441e2e57a",
+     "verify_url": "https://token2049.coingraph.ai/api/v1/verify/run_aebebf710c7f56216266"
+    },
+    "sources": []
+   }
+  },
+  "agent:portfolio-checkup": {
+   "request": {
+    "method": "POST",
+    "path": "/agents/portfolio-checkup",
+    "body": {
+     "chain": "eth",
+     "address": "0x9fc3da866e7df3a1c57ade1a97c9f00a70f010c8"
+    }
+   },
+   "response": {
+    "object": "agent_run",
+    "id": "run_834b79b56de639780334",
+    "as_of": "2026-10-06T22:51:35.329Z",
+    "data": {
+     "run_id": "run_834b79b56de639780334",
+     "agent": "portfolio-checkup",
+     "agent_version": "1.0.0",
+     "as_of": "2026-10-06T22:51:35.329Z",
+     "verdict": "A",
+     "summary": "Grade A (88/100) for $107.4K across 2 holdings. Top fix: 100% of the non-stablecoin value is in ETH. Concentrated, but in the most liquid asset in crypto.",
+     "result": {
+      "chain": "eth",
+      "address": "0x9fc3da866e7df3a1c57ade1a97c9f00a70f010c8",
+      "label": "unlabelled",
+      "total_usd": 107358,
+      "score": 88,
+      "grade": "A",
+      "concentration_hhi": 1,
+      "stablecoin_share_pct": 0,
+      "positions": [
+       {
+        "symbol": "ETH",
+        "id": "ethereum",
+        "usd": 107308.37,
+        "share_pct": 100,
+        "check": "proceed",
+        "contract": "unassessed",
+        "exit_days": 0,
+        "evaluation_id": "eval_5a441ddea0507864a333",
+        "concern": null
+       },
+       {
+        "symbol": "USDT",
+        "id": "tether",
+        "usd": 50.02,
+        "share_pct": 0,
+        "check": "caution",
+        "contract": "ok",
+        "exit_days": 0,
+        "evaluation_id": "eval_6a58131215d95dc35ab1",
+        "concern": "4 transfer(s) ≥ $5M to exchanges in 24h (largest $20M → binance)"
+       }
+      ],
+      "other_positions": [],
+      "fixes": [
+       "100% of the non-stablecoin value is in ETH. Concentrated, but in the most liquid asset in crypto.",
+       "USDT is rated caution: 4 transfer(s) ≥ $5M to exchanges in 24h (largest $20M → binance)"
+      ]
+     },
+     "reasons": [
+      {
+       "text": "100% of the non-stablecoin value is in ETH. Concentrated, but in the most liquid asset in crypto.",
+       "source": "coingraph:evaluate + nownodes"
+      },
+      {
+       "text": "USDT is rated caution: 4 transfer(s) ≥ $5M to exchanges in 24h (largest $20M → binance)",
+       "source": "coingraph:evaluate + nownodes"
+      }
+     ],
+     "warnings": [],
+     "links": {},
+     "disclaimer": "CoinGraph never trades, holds funds or gives financial advice. The caller decides.",
+     "hash": "df780ac6c8d4315b9ed5608e82ca12d299cde4502117d3ed9c0c40946dbdbcc9",
+     "verify_url": "https://token2049.coingraph.ai/api/v1/verify/run_834b79b56de639780334"
+    },
+    "sources": []
+   }
+  },
+  "agent:treasury-steward": {
+   "request": {
+    "method": "POST",
+    "path": "/agents/treasury-steward",
+    "body": {
+     "assets": [
+      {
+       "token": "cardano",
+       "value_usd": 1500000
+      },
+      {
+       "token": "chainlink",
+       "value_usd": 750000
+      },
+      {
+       "token": "solana",
+       "value_usd": 500000
+      }
+     ],
+     "policy": {
+      "min_depth_usd": 500000,
+      "max_exit_slippage_pct": 2,
+      "allow_mint_authority": false,
+      "max_position_pct_of_market_cap": 0.5
+     }
+    }
+   },
+   "response": {
+    "object": "agent_run",
+    "id": "run_4968a600ecde829099e5",
+    "as_of": "2026-10-06T22:51:48.606Z",
+    "data": {
+     "run_id": "run_4968a600ecde829099e5",
+     "agent": "treasury-steward",
+     "agent_version": "1.0.0",
+     "as_of": "2026-10-06T22:51:48.606Z",
+     "verdict": "COMPLIANT",
+     "summary": "All 3 assets ($2.8M) comply with the policy.",
+     "result": {
+      "assets": [
+       {
+        "token": {
+         "id": "cardano",
+         "symbol": "ADA"
+        },
+        "value_usd": 1500000,
+        "status": "compliant",
+        "rules": {
+         "min_depth_usd": {
+          "result": "pass",
+          "detail": "required $500K, available $70.9M"
+         },
+         "allow_mint_authority": {
+          "result": "pass",
+          "detail": "native coin: no token contract, so no admin can mint or freeze; new supply follows the protocol's issuance rules"
+         },
+         "max_exit_slippage_pct": {
+          "result": "pass",
+          "detail": "selling $1.5M costs about 0.04% on exchange order books (limit 2%)"
+         },
+         "max_position_pct_of_market_cap": {
+          "result": "pass",
+          "detail": "0.015% of market cap (limit 0.5%)"
+         }
+        },
+        "check": "proceed",
+        "proof_id": "eval_f2663aaa2c68af803c0a"
+       },
+       {
+        "token": {
+         "id": "chainlink",
+         "symbol": "LINK"
+        },
+        "value_usd": 750000,
+        "status": "compliant",
+        "rules": {
+         "min_depth_usd": {
+          "result": "pass",
+          "detail": "required $500K, available $3.3M"
+         },
+         "allow_mint_authority": {
+          "result": "pass",
+          "detail": "no mint or freeze authority"
+         },
+         "max_exit_slippage_pct": {
+          "result": "pass",
+          "detail": "selling $750K costs about 0.47% on exchange order books (limit 2%)"
+         },
+         "max_position_pct_of_market_cap": {
+          "result": "pass",
+          "detail": "0.007% of market cap (limit 0.5%)"
+         }
+        },
+        "check": "proceed",
+        "proof_id": "eval_1ec6215d9bb8d225ffc4"
+       },
+       {
+        "token": {
+         "id": "solana",
+         "symbol": "SOL"
+        },
+        "value_usd": 500000,
+        "status": "compliant",
+        "rules": {
+         "min_depth_usd": {
+          "result": "pass",
+          "detail": "required $500K, available $109.7M"
+         },
+         "allow_mint_authority": {
+          "result": "pass",
+          "detail": "native coin: no token contract, so no admin can mint or freeze; new supply follows the protocol's issuance rules"
+         },
+         "max_exit_slippage_pct": {
+          "result": "pass",
+          "detail": "selling $500K costs about 0.01% on exchange order books (limit 2%)"
+         },
+         "max_position_pct_of_market_cap": {
+          "result": "pass",
+          "detail": "0.001% of market cap (limit 0.5%)"
+         }
+        },
+        "check": "proceed",
+        "proof_id": "eval_85e54239538dddcdcdc3"
+       }
+      ],
+      "policy": {
+       "min_depth_usd": 500000,
+       "allow_mint_authority": false,
+       "max_exit_slippage_pct": 2,
+       "max_position_pct_of_market_cap": 0.5
+      },
+      "total_usd": 2750000
+     },
+     "reasons": [],
+     "warnings": [],
+     "links": {
+      "proof_ADA": "/api/v1/verify/eval_f2663aaa2c68af803c0a",
+      "proof_LINK": "/api/v1/verify/eval_1ec6215d9bb8d225ffc4",
+      "proof_SOL": "/api/v1/verify/eval_85e54239538dddcdcdc3"
+     },
+     "disclaimer": "CoinGraph never trades, holds funds or gives financial advice. The caller decides.",
+     "hash": "8f5ba506b8ff44035364754f6797b46d4b500a6e8b0a09c1505a655caf6cf7fd",
+     "verify_url": "https://token2049.coingraph.ai/api/v1/verify/run_4968a600ecde829099e5"
+    },
+    "sources": []
+   }
+  },
+  "agent:alert-watchtower": {
+   "request": {
+    "method": "POST",
+    "path": "/agents/alert-watchtower",
+    "body": {
+     "tokens": [
+      "cardano",
+      "chainlink",
+      "solana"
+     ],
+     "min_severity": 2
+    }
+   },
+   "response": {
+    "object": "agent_run",
+    "id": "run_8aadfba348360f382cf7",
+    "as_of": "2026-10-06T22:51:51.687Z",
+    "data": {
+     "run_id": "run_8aadfba348360f382cf7",
+     "agent": "alert-watchtower",
+     "agent_version": "1.0.0",
+     "as_of": "2026-10-06T22:51:51.687Z",
+     "verdict": "ACTIVE",
+     "summary": "7 alerts in the last 24h on 3 of 3 tokens; latest: LINK volume spike.",
+     "result": {
+      "tokens": [
+       "cardano",
+       "chainlink",
+       "solana"
+      ],
+      "alerts": [
+       {
+        "at": "2026-10-06T20:15:51.450Z",
+        "token": "LINK",
+        "kind": "volume_spike",
+        "direction": "neutral",
+        "severity": 2,
+        "explained_by": null,
+        "details": {
+         "median_15m_24h": 170380,
+         "volume_usd_15m": 817977
+        }
+       },
+       {
+        "at": "2026-10-06T20:13:51.562Z",
+        "token": "LINK",
+        "kind": "volume_spike",
+        "direction": "neutral",
+        "severity": 2,
+        "explained_by": null,
+        "details": {
+         "median_15m_24h": 169891,
+         "volume_usd_15m": 812684
+        }
+       },
+       {
+        "at": "2026-10-06T16:45:52.401Z",
+        "token": "ADA",
+        "kind": "volume_spike",
+        "direction": "neutral",
+        "severity": 2,
+        "explained_by": null,
+        "details": {
+         "median_15m_24h": 461710,
+         "volume_usd_15m": 2646548
+        }
+       },
+       "… 4 more"
+      ],
+      "per_token": [
+       {
+        "token": "cardano",
+        "alerts": 2
+       },
+       {
+        "token": "chainlink",
+        "alerts": 2
+       },
+       {
+        "token": "solana",
+        "alerts": 3
+       }
+      ],
+      "watch": null
+     },
+     "reasons": [
+      {
+       "text": "LINK: volume spike (neutral, severity 2)",
+       "source": "coingraph:signals"
+      },
+      {
+       "text": "LINK: volume spike (neutral, severity 2)",
+       "source": "coingraph:signals"
+      },
+      {
+       "text": "ADA: volume spike (neutral, severity 2)",
+       "source": "coingraph:signals"
+      },
+      "… 2 more"
+     ],
+     "warnings": [],
+     "links": {},
+     "disclaimer": "CoinGraph never trades, holds funds or gives financial advice. The caller decides.",
+     "hash": "dca34691660541bf0595bbfbbb809ebff5d47df6d52a611d4e25e0774bc4c3c8",
+     "verify_url": "https://token2049.coingraph.ai/api/v1/verify/run_8aadfba348360f382cf7"
+    },
+    "sources": []
+   }
+  },
+  "agent:daily-market-brief": {
+   "request": {
+    "method": "POST",
+    "path": "/agents/daily-market-brief",
+    "body": {
+     "holdings": [
+      "cardano",
+      "chainlink",
+      "solana"
+     ]
+    }
+   },
+   "response": {
+    "object": "agent_run",
+    "id": "run_54535128b2c439960c15",
+    "as_of": "2026-10-06T22:51:56.501Z",
+    "data": {
+     "run_id": "run_54535128b2c439960c15",
+     "agent": "daily-market-brief",
+     "agent_version": "1.0.0",
+     "as_of": "2026-10-06T22:51:56.501Z",
+     "verdict": "RISK_OFF",
+     "summary": "Market risk-off: cap -3.25% in 24h, 32.5% of the top 100 up, Fear & Greed 73. Most crowded: LIT (42/100).",
+     "result": {
+      "markdown": "# CoinGraph Daily Market Brief — 2026-10-06\n\n## Yesterday's calls, graded\n74 of 277 graded calls were right (27%). Every call is public: /api/v1/record.\n\n## Regime: risk-off\n- Total market cap -3.25% in 24h; 32.5% of the top 100 are up.\n- Fear & Greed: 73 (Greed).\n- Stablecoins to exchanges (24h): +$9.4M — buying power…",
+      "regime": "RISK_OFF",
+      "overview": {
+       "total_market_cap_usd": 2923070000000,
+       "total_volume_24h_usd": 69803400000000,
+       "market_cap_change_24h_pct": -3.25,
+       "volume_change_24h_pct": 76280.64,
+       "btc_dominance_pct": 58.72,
+       "eth_dominance_pct": 11.25,
+       "dominance": {
+        "bnb": 3.55,
+        "btc": 58.72,
+        "eth": 11.25,
+        "sol": 2.43,
+        "trx": 1.09,
+        "xrp": 3.23,
+        "usdc": 2.53,
+        "usdt": 6.29,
+        "steth": 0.9,
+        "figr_heloc": 0.84
+       },
+       "active_cryptocurrencies": 21954,
+       "markets": 1507,
+       "as_of": "2026-10-06T22:50:00.000Z",
+       "sources": [
+        {
+         "provider": "coingecko",
+         "endpoint": "/global",
+         "as_of": "2026-10-06T22:50:00.000Z"
+        }
+       ]
+      },
+      "breadth": {
+       "coins": 83,
+       "up_1h": 34,
+       "down_1h": 33,
+       "up_1h_pct": 41,
+       "up_24h": 27,
+       "down_24h": 54,
+       "up_24h_pct": 32.5,
+       "rising_open_interest": 28,
+       "rising_open_interest_pct": 43.8,
+       "as_of": "2026-10-06T22:51:00.000Z",
+       "sources": [
+        {
+         "provider": "coingecko",
+         "endpoint": "/coins/markets",
+         "as_of": "2026-10-06T22:51:00.000Z"
+        },
+        {
+         "provider": "binanceusdm",
+         "endpoint": "openInterestHist",
+         "as_of": null
+        }
+       ]
+      },
+      "sentiment": {
+       "value": 73,
+       "label": "Greed",
+       "day": "2026-10-06T00:00:00.000Z",
+       "history_30d": [
+        [
+         "2026-10-06T00:00:00.000Z",
+         73
+        ],
+        [
+         "2026-10-05T00:00:00.000Z",
+         70
+        ],
+        [
+         "2026-10-04T00:00:00.000Z",
+         65
+        ],
+        "… 27 more"
+       ]
+      },
+      "flows": {
+       "stablecoins_to_exchanges": {
+        "net_1h_usd": 5504220,
+        "net_24h_usd": 9422330,
+        "inflow_24h_usd": 843873000,
+        "outflow_24h_usd": 834451000,
+        "note": "positive = stablecoins arriving on exchanges (buying power)"
+       },
+       "all_tokens_net_to_exchanges": {
+        "net_1h_usd": 821776,
+        "net_24h_usd": 46083500,
+        "note": "positive = coins arriving on exchanges (sell-side supply)"
+       },
+       "largest_inflows_24h": [
+        {
+         "id": "bitcoin",
+         "symbol": "BTC",
+         "net_usd": 35144200
+        },
+        {
+         "id": "ethena",
+         "symbol": "ENA",
+         "net_usd": 2954410
+        },
+        {
+         "id": "pax-gold",
+         "symbol": "PAXG",
+         "net_usd": 1937840
+        },
+        "… 7 more"
+       ],
+       "largest_outflows_24h": [
+        {
+         "id": "lighter",
+         "symbol": "LIT",
+         "net_usd": -669624
+        },
+        {
+         "id": "chainlink",
+         "symbol": "LINK",
+         "net_usd": -373120
+        },
+        {
+         "id": "quant-network",
+         "symbol": "QNT",
+         "net_usd": -80075.7
+        },
+        "… 7 more"
+       ],
+       "as_of": "2026-10-06T22:45:00.000Z",
+       "sources": [
+        {
+         "provider": "nownodes",
+         "endpoint": "eth_getLogs",
+         "as_of": "2026-10-06T22:45:00.000Z"
+        }
+       ]
+      },
+      "crowded": [
+       {
+        "id": "lighter",
+        "symbol": "LIT",
+        "score": 42,
+        "side": "neither",
+        "regime": "balanced",
+        "funding_pct": 0.005,
+        "funding_pctile": 100,
+        "oi_usd": 63575310.414,
+        "oi_24h_pct": -9.67,
+        "oi_to_mcap_pct": 6.78,
+        "top_traders_ls": 3.4136,
+        "ls_vs_7d": 0.97,
+        "liq_24h_usd": 151448.8373,
+        "liq_long_share_pct": 83,
+        "…": "2 more fields"
+       },
+       {
+        "id": "layerzero",
+        "symbol": "ZRO",
+        "score": 38,
+        "side": "neither",
+        "regime": "balanced",
+        "funding_pct": 0.005,
+        "funding_pctile": 100,
+        "oi_usd": 56194332.70485,
+        "oi_24h_pct": 2.09,
+        "oi_to_mcap_pct": 6.23,
+        "top_traders_ls": 3.8034,
+        "ls_vs_7d": 0.88,
+        "liq_24h_usd": 23534.8645,
+        "liq_long_share_pct": 2,
+        "…": "2 more fields"
+       },
+       {
+        "id": "world-liberty-financial",
+        "symbol": "WLFI",
+        "score": 37,
+        "side": "neither",
+        "regime": "balanced",
+        "funding_pct": 0.005,
+        "funding_pctile": 100,
+        "oi_usd": 138404121.2918528,
+        "oi_24h_pct": 2.8,
+        "oi_to_mcap_pct": 7.73,
+        "top_traders_ls": 1.4869,
+        "ls_vs_7d": 0.99,
+        "liq_24h_usd": 1542.9619,
+        "liq_long_share_pct": 95,
+        "…": "2 more fields"
+       }
+      ],
+      "graded_calls": {
+       "graded": 277,
+       "right": 74
+      },
+      "holdings": [
+       {
+        "token": "ADA",
+        "change_24h_pct": -1.71,
+        "check": "proceed",
+        "note": null
+       },
+       {
+        "token": "LINK",
+        "change_24h_pct": -0.03,
+        "check": "proceed",
+        "note": null
+       },
+       {
+        "token": "SOL",
+        "change_24h_pct": 0.02,
+        "check": "proceed",
+        "note": null
+       }
+      ],
+      "headlines": [
+       {
+        "at": "2026-10-06T22:16:03.000Z",
+        "source": "decrypt",
+        "title": "Circle Welcomes DJ Khaled to 'Team USDC' and Crypto Twitter Is Furious",
+        "url": "https://decrypt.co/380240/circle-dj-khaled-team-usdc-crypto-twitter-furious",
+        "tokens": [
+         "usd-coin"
+        ]
+       },
+       {
+        "at": "2026-10-06T22:00:19.000Z",
+        "source": "decrypt",
+        "title": "Someone Scraped 5.6 Billion TikTok Videos and Put the Data on Hugging Face for Free",
+        "url": "https://decrypt.co/380229/someone-scraped-5-billion-tiktok-videos-posted-data-hugging-face",
+        "tokens": []
+       },
+       {
+        "at": "2026-10-06T21:00:44.000Z",
+        "source": "cointelegraph",
+        "title": "Conduit sues Tether over allegedly freezing $2.8M without explanation",
+        "url": "https://cointelegraph.com/news/conduit-lawsuit-tether-usdt-freeze?utm_source=rss_feed&utm_medium=rss&utm_campaign=rss_partner_inbound",
+        "tokens": [
+         "tether"
+        ]
+       },
+       "… 2 more"
+      ]
+     },
+     "reasons": [
+      {
+       "text": "Breadth 32.5% up, market cap -3.25%",
+       "source": "coingecko:/global + /coins/markets"
+      }
+     ],
+     "warnings": [],
+     "links": {},
+     "disclaimer": "CoinGraph never trades, holds funds or gives financial advice. The caller decides.",
+     "hash": "2ffdc8aa135437d862428b033cb278b0c85c2472cac44988e66c845a8835423b",
+     "verify_url": "https://token2049.coingraph.ai/api/v1/verify/run_54535128b2c439960c15"
+    },
+    "sources": []
+   }
+  },
+  "agent:trade-gatekeeper:reduce": {
+   "request": {
+    "method": "POST",
+    "path": "/agents/trade-gatekeeper",
+    "body": {
+     "token": "cardano",
+     "size_usd": 20000000,
+     "side": "buy"
+    }
+   },
+   "response": {
+    "object": "agent_run",
+    "id": "run_75f6c759bffe1743246f",
+    "as_of": "2026-10-06T22:51:59.559Z",
+    "data": {
+     "run_id": "run_75f6c759bffe1743246f",
+     "agent": "trade-gatekeeper",
+     "agent_version": "1.0.0",
+     "as_of": "2026-10-06T22:51:59.559Z",
+     "verdict": "REDUCE",
+     "summary": "REDUCE: cut the ADA buy to about $6.8M — 2.931% of the token's daily volume (keep single orders under 1%).",
+     "result": {
+      "token": {
+       "id": "cardano",
+       "symbol": "ADA"
+      },
+      "side": "buy",
+      "size": {
+       "requested_usd": 20000000,
+       "max_safe_usd": 6823609
+      },
+      "impact": {
+       "best_route": "exchange order books",
+       "best_pct": 0.56,
+       "routes": [
+        {
+         "route": "exchange order books",
+         "impact": 0.56
+        }
+       ],
+       "limit_pct": 1,
+       "share_of_daily_volume_pct": 2.931
+      },
+      "check": {
+       "verdict": "caution",
+       "confidence": 0.86,
+       "dimensions": {
+        "momentum": "ok",
+        "liquidity": "caution",
+        "leverage": "ok",
+        "onchain": "ok",
+        "supply": "ok",
+        "context": "ok",
+        "contract": "unassessed"
+       },
+       "evaluation_id": "eval_4f94c93bcb3033e3f564"
+      },
+      "policy": null,
+      "latest_brief": null
+     },
+     "reasons": [
+      {
+       "text": "$20M is too large: 2.931% of the token's daily volume (keep single orders under 1%); about $6.8M fits",
+       "source": "ccxt:fetchOrderBook"
+      }
+     ],
+     "warnings": [
+      "liquidity: A $20M order is 2.93% of daily volume and would move the price ~0.56%"
+     ],
+     "links": {
+      "proof": "/api/v1/verify/eval_4f94c93bcb3033e3f564"
+     },
+     "disclaimer": "CoinGraph never trades, holds funds or gives financial advice. The caller decides.",
+     "hash": "36e7cfc2b73fcea5b52324f9e5ea94bb53db917a239306f0fe3b470787beb850",
+     "verify_url": "https://token2049.coingraph.ai/api/v1/verify/run_75f6c759bffe1743246f"
+    },
+    "sources": []
+   }
+  },
+  "agent:trade-gatekeeper:block": {
+   "request": {
+    "method": "POST",
+    "path": "/agents/trade-gatekeeper",
+    "body": {
+     "token": "chainlink",
+     "size_usd": 5000000,
+     "side": "sell"
+    }
+   },
+   "response": {
+    "object": "agent_run",
+    "id": "run_864fa38cda772e44f2e9",
+    "as_of": "2026-10-06T22:52:04.600Z",
+    "data": {
+     "run_id": "run_864fa38cda772e44f2e9",
+     "agent": "trade-gatekeeper",
+     "agent_version": "1.0.0",
+     "as_of": "2026-10-06T22:52:04.600Z",
+     "verdict": "BLOCK",
+     "summary": "BLOCK: do not sell LINK now — liquidity: A $5M order would move the price about 3.02%.",
+     "result": {
+      "token": {
+       "id": "chainlink",
+       "symbol": "LINK"
+      },
+      "side": "sell",
+      "size": {
+       "requested_usd": 5000000,
+       "max_safe_usd": 0
+      },
+      "impact": {
+       "best_route": "exchange order books",
+       "best_pct": 3.11,
+       "routes": [
+        {
+         "route": "exchange order books",
+         "impact": 3.11
+        },
+        {
+         "route": "on-chain via paraswap (ETH)",
+         "impact": 8.651
+        }
+       ],
+       "limit_pct": 1,
+       "share_of_daily_volume_pct": 1.869
+      },
+      "check": {
+       "verdict": "avoid",
+       "confidence": 0.95,
+       "dimensions": {
+        "momentum": "ok",
+        "liquidity": "avoid",
+        "leverage": "ok",
+        "onchain": "ok",
+        "supply": "ok",
+        "context": "ok",
+        "contract": "ok"
+       },
+       "evaluation_id": "eval_f19e518536211469b393"
+      },
+      "policy": null,
+      "latest_brief": {
+       "id": 46,
+       "headline": "LINK flat at $13.94 (+0.22%) in a $13.91–13.99 range; thin volume, small net outflow from exchanges",
+       "at": "2026-10-06T21:29:43.130Z"
+      }
+     },
+     "reasons": [
+      {
+       "text": "liquidity: A $5M order would move the price about 3.02%",
+       "source": "coingraph:evaluate"
+      },
+      {
+       "text": "Even the best route (exchange order books) would move the price about 3.11% for $5M (limit 1%)",
+       "source": "paraswap:quote + ccxt:fetchOrderBook"
+      }
+     ],
+     "warnings": [],
+     "links": {
+      "proof": "/api/v1/verify/eval_f19e518536211469b393",
+      "brief": "/investigations/46"
+     },
+     "disclaimer": "CoinGraph never trades, holds funds or gives financial advice. The caller decides.",
+     "hash": "eb6de7337264c045b2acdfeeba1cf85d3ac5dbdab1c6510d275cbcb8d21635ac",
+     "verify_url": "https://token2049.coingraph.ai/api/v1/verify/run_864fa38cda772e44f2e9"
+    },
+    "sources": []
+   }
+  },
+  "agent:wallet-guard:stop": {
+   "request": {
+    "method": "POST",
+    "path": "/agents/wallet-guard",
+    "body": {
+     "to_address": "0x0330070fd38ec3bb94f58fa55d40368271e9e54a",
+     "chain": "eth"
+    }
+   },
+   "response": {
+    "object": "agent_run",
+    "id": "run_e5cbc96061181b97c3bf",
+    "as_of": "2026-10-06T22:52:07.614Z",
+    "data": {
+     "run_id": "run_e5cbc96061181b97c3bf",
+     "agent": "wallet-guard",
+     "agent_version": "1.0.0",
+     "as_of": "2026-10-06T22:52:07.614Z",
+     "verdict": "STOP",
+     "summary": "STOP: Recipient is on the OFAC sanctions list.",
+     "result": {
+      "recipient": {
+       "chain": "eth",
+       "address": "0x0330070fd38ec3bb94f58fa55d40368271e9e54a",
+       "label": "unlabelled",
+       "type": "new or rarely used wallet",
+       "tx_count": 8,
+       "screening": {
+        "risk": "high",
+        "sanctioned": true,
+        "burn_address": false,
+        "flags": [
+         "On the OFAC sanctions list (ETH)",
+         "stealing attack"
+        ]
+       },
+       "lookalike_of": null
+      }
+     },
+     "reasons": [
+      {
+       "text": "Recipient is on the OFAC sanctions list",
+       "source": "ofac"
+      },
+      {
+       "text": "Recipient flagged: stealing attack",
+       "source": "goplus:/address_security"
+      }
+     ],
+     "warnings": [],
+     "links": {},
+     "disclaimer": "CoinGraph never trades, holds funds or gives financial advice. The caller decides.",
+     "hash": "9fcd74ae636d39aa0b527f9d56452c80da1b8112bfc07044fb61861a72665527",
+     "verify_url": "https://token2049.coingraph.ai/api/v1/verify/run_e5cbc96061181b97c3bf"
+    },
+    "sources": []
+   }
+  }
+ }
+}

@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 export const GITHUB_URL = "https://github.com/eventgraphai/coingraph-token2049";
-export const DOCS_URL = `${GITHUB_URL}/tree/main/docs`;
+export const DOCS_URL = "/docs";
 
 const NAV: [string, string][] = [
   ["Product", "/#product"],

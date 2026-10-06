@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,9 +31,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       data-theme="dark"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-void font-sans text-bone">{children}</body>
+      <body className="min-h-full bg-void font-sans text-bone">
+        {children}
+        {/* Docs reading theme: applied before hydration so a dark preference doesn't flash white. */}
+        <Script id="docs-theme" strategy="beforeInteractive">{`try{if(localStorage.getItem("cg-docs-theme")==="dark")document.documentElement.dataset.docsTheme="dark"}catch(e){}`}</Script>
+      </body>
     </html>
   );
 }

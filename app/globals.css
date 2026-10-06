@@ -67,7 +67,8 @@ html {
    agent panels kept dark (see `.instrument` below) — devices sitting on the
    desk, the one place the lime still glows. The market strip stays dark for
    the same reason: a ticker is an instrument. */
-:root[data-theme="light"] {
+:root[data-theme="light"],
+.theme-light {
   color-scheme: light;
 
   /* Pure white ground, black ink, one vivid accent — the classic product-site
@@ -97,7 +98,8 @@ html {
    utilities resolve through these variables, so re-declaring them on the
    container re-themes everything inside it — no component knows the
    difference. In dark mode this is a no-op. */
-.instrument {
+.instrument,
+html[data-docs-theme="dark"] #docs-root {
   --color-void: #0b0e15;
   --color-ink: #0d1119;
   --color-slab: #141924;
@@ -113,7 +115,8 @@ html {
   color-scheme: dark;
   color: var(--color-bone);
 }
-:root[data-theme="light"] .instrument {
+:root[data-theme="light"] .instrument,
+.theme-light .instrument {
   background: var(--color-void);
   box-shadow:
     0 1px 2px rgba(11, 16, 32, 0.12),
@@ -122,7 +125,8 @@ html {
 
 /* White stays white: the wash is a hint of lime behind the headline, not a
    colour field, and the lattice is barely there. */
-:root[data-theme="light"] .hero-glow {
+:root[data-theme="light"] .hero-glow,
+.theme-light .hero-glow {
   background:
     radial-gradient(
       52% 44% at 50% -8%,
@@ -135,24 +139,31 @@ html {
       transparent 70%
     );
 }
-:root[data-theme="light"] .dot-grid {
+:root[data-theme="light"] .dot-grid,
+.theme-light .dot-grid {
   background-image: radial-gradient(circle, #d5dbe4 1px, transparent 1.5px);
 }
-:root[data-theme="light"] .tick {
+:root[data-theme="light"] .tick,
+.theme-light .tick {
   opacity: 0.7;
 }
 
 /* Cards cast a shadow on paper. Dark surfaces separate by luminance; white on
    near-white cannot, so every bordered card gets the same soft lift. */
 :root[data-theme="light"] .bg-slab.rounded-xl,
+.theme-light .bg-slab.rounded-xl,
 :root[data-theme="light"] .bg-slab.rounded-2xl,
+.theme-light .bg-slab.rounded-2xl,
 :root[data-theme="light"] .bg-ink.rounded-xl,
-:root[data-theme="light"] .bg-ink.rounded-2xl {
+.theme-light .bg-ink.rounded-xl,
+:root[data-theme="light"] .bg-ink.rounded-2xl,
+.theme-light .bg-ink.rounded-2xl {
   box-shadow:
     0 1px 2px rgba(11, 15, 23, 0.04),
     0 12px 32px -20px rgba(11, 15, 23, 0.16);
 }
-:root[data-theme="light"] .instrument {
+:root[data-theme="light"] .instrument,
+.theme-light .instrument {
   background: #14181f;
   box-shadow:
     0 1px 2px rgba(11, 15, 23, 0.1),
@@ -253,7 +264,8 @@ html {
 }
 
 /* Primary actions on paper: the lime glow becomes a crisp green shadow. */
-:root[data-theme="light"] .btn-glow {
+:root[data-theme="light"] .btn-glow,
+.theme-light .btn-glow {
   box-shadow: 0 8px 24px -10px color-mix(in oklab, var(--color-brand) 55%, transparent);
 }
 
@@ -717,3 +729,26 @@ body {
 * {
   scrollbar-color: var(--color-edge) transparent;
 }
+
+/* ---- Docs ---------------------------------------------------------------
+   The reading surface: white by default (.theme-light), dark on request. Code blocks are instruments
+   and stay dark either way. */
+.docs-prose p { line-height: 1.7; }
+.docs-prose :not(pre) > code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  padding: 0.12em 0.38em;
+  border-radius: 6px;
+  background: var(--color-slab);
+  border: 1px solid var(--color-edge);
+  color: var(--color-bone);
+}
+.docs-prose a:not(.no-u) { color: var(--color-brand); text-underline-offset: 3px; }
+.docs-prose a:not(.no-u):hover { text-decoration: underline; }
+.docs-anchor { opacity: 0; transition: opacity 0.15s; }
+h2:hover .docs-anchor, h3:hover .docs-anchor { opacity: 1; }
+.j-key { color: #b4de6d; }
+.j-str { color: #e8ecf2; }
+.j-num { color: #2fd98c; }
+.j-lit { color: #ff9540; }
+.j-pun { color: #858da0; }
