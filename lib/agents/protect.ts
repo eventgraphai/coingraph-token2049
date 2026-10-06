@@ -87,7 +87,7 @@ export const walletGuard = defineAgent({
 
     const verdict = stop.length ? "STOP" : warn.length ? "WARN" : "SAFE";
     const lead = (stop[0] ?? warn[0] ?? ok[0])?.text;
-    const summary = verdict === "STOP" ? `STOP: ${lead}.` : verdict === "WARN" ? `WARN: ${lead}. You can continue, but check this first.` : `SAFE: nothing risky found${lead ? ` — ${lead.charAt(0).toLowerCase()}${lead.slice(1)}` : ""}.`;
+    const summary = verdict === "STOP" ? `STOP: ${lead}.` : verdict === "WARN" ? `WARN: ${lead}. You can continue, but check this first.` : `SAFE: nothing risky found${lead ? `. ${lead.replace(/\.$/, "")}` : ""}.`;
     return { verdict, summary, result, reasons: [...stop, ...warn, ...ok], tokens };
   },
 });

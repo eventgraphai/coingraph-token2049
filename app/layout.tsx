@@ -13,9 +13,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CoinGraph — verifiable crypto signals for AI agents",
+  metadataBase: new URL(process.env.COINGRAPH_PUBLIC_URL ?? "https://token2049.coingraph.ai"),
+  title: "CoinGraph — the check before AI agents act",
   description:
-    "CoinGraph turns fragmented market and onchain data into evidence-backed signals that AI agents can discover, purchase, verify and use.",
+    "Verified crypto intelligence for agents, apps and people. One call checks a token across market, liquidity, leverage, onchain, supply, contract and context, with every number sourced, timed and fingerprinted.",
+  openGraph: {
+    title: "CoinGraph — the check before AI agents act",
+    description: "Fragmented crypto data in. One verifiable answer out. Ten ready-made agents, a REST API and an MCP server.",
+    siteName: "CoinGraph",
+    type: "website",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

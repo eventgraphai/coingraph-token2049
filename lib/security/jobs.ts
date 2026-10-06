@@ -48,7 +48,11 @@ export function assessContract(chain: string, x: Record<string, unknown>, isStab
     metadata_mutable: evm ? null : statusFlag(x.metadata_mutable),
     trusted_token: flag(x.trust_list ?? x.trusted_token),
   };
-  if (f.is_honeypot) high.push("Honeypot: buyers cannot sell");
+  // GoPlus tests for honeypots by simulating a DEX swap. When every DEX pool is thin, a failed simulation says more
+  // about the pool than the contract (e.g. exchange-traded LEO), so it is reported as a caution, not a block.
+  const dexLiquidity = Array.isArray(x.dex) ? Math.max(0, ...(x.dex as { liquidity?: unknown }[]).map((d) => Number(d.liquidity) || 0)) : null;
+  const thinDex = dexLiquidity !== null && dexLiquidity < 50_000;
+  if (f.is_honeypot) (thinDex ? medium : high).push(thinDex ? `Honeypot test failed, but its largest DEX pool holds only $${Math.round(dexLiquidity ?? 0).toLocaleString("en")}: confirm before buying on-chain` : "Honeypot: buyers cannot sell");
   if (f.cannot_sell_all) high.push("Holders cannot sell their full balance");
   if (sellTax !== null && sellTax > 10) high.push(`Sell tax ${sellTax}%`);
   if (buyTax !== null && buyTax > 10) high.push(`Buy tax ${buyTax}%`);
