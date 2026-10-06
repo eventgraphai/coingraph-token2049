@@ -82,6 +82,17 @@ verified on-chain). Budget ≈ 120k requests/month (ETH flows 12k, BSC flows 12k
 reserves 55k, node status 9k if counted, daily reference 4k) — fine for the hackathon window; plan upgrade after. Investigation-only calls (archive balances, `debug_traceTransaction`,
 wallet history, Solana signatures) are added with the signal engine.
 
+### External context (free)
+
+| Feed | Source | Every | Writes to |
+|---|---|---|---|
+| News headlines | CoinDesk, Cointelegraph, Decrypt, The Block public RSS (title + link + time only; coins tagged by name/symbol in the title) | 15 min | `news_items` |
+| Fear & Greed index | alternative.me `/fng` | daily | `market_sentiment_snapshots` |
+| Protocol TVL | DefiLlama `/protocols` + `/lite/protocols2` (parent protocol → CoinGecko id, so Aave V3 etc. attach to their coin) | 6 h | `protocol_tvl_snapshots` |
+
+Not available on free tiers, so not used: DefiLlama token unlocks (paid API), Etherscan holder lists (Pro), X / LunarCrush sentiment.
+Developer and community data (commits, stars, followers, sentiment votes) already come from CoinGecko's daily coin details.
+
 ### Additional feeds (added after the core build)
 
 | Feed | Source | Frequency | Writes to |
