@@ -44,7 +44,7 @@ export const dueDiligenceAnalyst = defineAgent({
   masumi: true,
   verdicts: ["A", "B", "C", "D", "F"],
   input: z.object({ token: tokenField }),
-  example: { token: "morpho" },
+  example: { token: "cardano" },
   async run({ token: t }) {
     const token = await resolveToken(t);
     const [st, ev, rec, brief] = await Promise.all([
@@ -169,7 +169,7 @@ export const alertWatchtower = defineAgent({
     min_severity: z.number().int().min(1).max(3).default(2),
     hours: z.number().int().min(1).max(48).default(24),
   }),
-  example: { tokens: ["bitcoin", "ethereum", "aave"], min_severity: 2 },
+  example: { tokens: ["cardano", "chainlink", "solana"], min_severity: 2 },
   async run({ tokens, webhook_url, min_severity, hours }) {
     const ids = (await Promise.all(tokens.map((t) => resolveToken(t)))).map((t) => t.coingecko_id);
     const rows = await sql`
@@ -206,7 +206,7 @@ export const dailyMarketBrief = defineAgent({
   masumi: false,
   verdicts: ["RISK_ON", "RISK_OFF", "NEUTRAL"],
   input: z.object({ holdings: z.array(tokenField).max(20).optional().describe("Optional tokens you hold, for a personal section") }),
-  example: { holdings: ["bitcoin", "ethereum", "aave"] },
+  example: { holdings: ["cardano", "chainlink", "solana"] },
   async run({ holdings }) {
     const [m, rec, crowd] = await Promise.all([
       buildMarket(["overview", "breadth", "sentiment", "flows", "rankings", "events"]),

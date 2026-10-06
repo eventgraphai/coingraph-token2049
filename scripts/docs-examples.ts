@@ -67,7 +67,7 @@ async function main() {
 
   // Decide
   const ev = await grab("evaluate_get", "GET", "/evaluate/chainlink", undefined, { arr: 2, keys: 14, str: 220, depth: 8 });
-  await grab("evaluate_post", "POST", "/evaluate", { token: "solana", size_usd: 250000, policy: { min_depth_usd: 1000000, max_funding_pct: 0.05, max_top10_holder_pct: 60 } }, { arr: 3, keys: 14, str: 220, depth: 8 });
+  await grab("evaluate_post", "POST", "/evaluate", { token: "solana", size_usd: 5000, policy: { min_depth_usd: 1000000, max_funding_pct: 0.05, max_top10_holder_pct: 60 } }, { arr: 3, keys: 14, str: 220, depth: 8 });
   await grab("explain", "GET", "/explain/chainlink", undefined, { arr: 2, keys: 18, str: 260, depth: 8 });
   await grab("ask_question", "POST", "/ask", { token: "cardano", question: "Are large holders moving ADA onto exchanges today?" }, { arr: 3, keys: 14, str: 320, depth: 8 });
   await grab("ask_claim", "POST", "/ask", { token: "solana", claim: "SOL futures are heavily crowded on the long side right now" }, { arr: 3, keys: 14, str: 320, depth: 8 });
@@ -87,21 +87,21 @@ async function main() {
 
   // Agents
   const agents: [string, Record<string, unknown>][] = [
-    ["trade-gatekeeper", { token: "solana", size_usd: 250000, side: "buy" }],
-    ["wallet-guard", { token: "chainlink", amount_usd: 20000, to_address: "0x28c6c06298d514db089934071355e5743bf21d60", chain: "eth" }],
+    ["trade-gatekeeper", { token: "solana", size_usd: 5000, side: "buy" }],
+    ["wallet-guard", { token: "chainlink", amount_usd: 5000, to_address: "0x28c6c06298d514db089934071355e5743bf21d60", chain: "eth" }],
     ["due-diligence-analyst", { token: "cardano" }],
     ["opportunity-scout", { limit: 3 }],
     ["leverage-radar", { tokens: ["solana", "cardano", "chainlink"] }],
     ["whale-watch", { token: "chainlink" }],
     ["portfolio-checkup", { chain: "eth", address: "0x9fc3da866e7df3a1c57ade1a97c9f00a70f010c8" }],
-    ["treasury-steward", { assets: [{ token: "cardano", value_usd: 1500000 }, { token: "chainlink", value_usd: 750000 }, { token: "solana", value_usd: 500000 }], policy: { min_depth_usd: 500000, max_exit_slippage_pct: 2, allow_mint_authority: false, max_position_pct_of_market_cap: 0.5 } }],
+    ["treasury-steward", { assets: [{ token: "cardano", value_usd: 9000 }, { token: "chainlink", value_usd: 6000 }, { token: "solana", value_usd: 5000 }], policy: { min_depth_usd: 500000, max_exit_slippage_pct: 1, allow_mint_authority: false, max_position_pct_of_market_cap: 0.5 } }],
     ["alert-watchtower", { tokens: ["cardano", "chainlink", "solana"], min_severity: 2 }],
     ["daily-market-brief", { holdings: ["cardano", "chainlink", "solana"] }],
   ];
   for (const [id, body] of agents) await grab(`agent:${id}`, "POST", `/agents/${id}`, body, { arr: 3, keys: 14, str: 320, depth: 8 });
   // One example of each Trade Gatekeeper decision.
-  await grab("agent:trade-gatekeeper:reduce", "POST", "/agents/trade-gatekeeper", { token: "cardano", size_usd: 20000000, side: "buy" }, { arr: 3, keys: 14, str: 320, depth: 8 });
-  await grab("agent:trade-gatekeeper:block", "POST", "/agents/trade-gatekeeper", { token: "chainlink", size_usd: 5000000, side: "sell" }, { arr: 3, keys: 14, str: 320, depth: 8 });
+  await grab("agent:trade-gatekeeper:reduce", "POST", "/agents/trade-gatekeeper", { token: "rain", size_usd: 10000, side: "buy", max_impact_pct: 0.25 }, { arr: 3, keys: 14, str: 320, depth: 8 });
+  await grab("agent:trade-gatekeeper:block", "POST", "/agents/trade-gatekeeper", { token: "leo-token", size_usd: 10000, side: "buy" }, { arr: 3, keys: 14, str: 320, depth: 8 });
   // A STOP from Wallet Guard: a recipient on the OFAC sanctions list.
   await grab("agent:wallet-guard:stop", "POST", "/agents/wallet-guard", { to_address: "0x0330070fd38ec3bb94f58fa55d40368271e9e54a", chain: "eth" }, { arr: 3, keys: 14, str: 320, depth: 8 });
 

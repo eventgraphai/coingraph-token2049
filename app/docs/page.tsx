@@ -20,7 +20,7 @@ export default function Intro() {
 
       <H2>What CoinGraph does</H2>
       <P>
-        An agent about to buy $250K of SOL needs more than a price. It needs to know whether the order book can absorb the order, whether futures are crowded, whether coins are flowing onto exchanges, whether the contract has admin powers, and whether something in the news explains the move. That means stitching together exchanges, nodes, security scanners and news feeds, continuously.
+        An agent about to buy $5K of SOL needs more than a price. It needs to know whether the order book can absorb the order, whether futures are crowded, whether coins are flowing onto exchanges, whether the contract has admin powers, and whether something in the news explains the move. That means stitching together exchanges, nodes, security scanners and news feeds, continuously.
       </P>
       <P>
         CoinGraph does that work once and returns one answer. It watches the top 100 tokens around the clock, on Ethereum, BNB Chain, Bitcoin, Solana and Cardano, and answers on demand for any address or contract.
@@ -30,7 +30,7 @@ export default function Intro() {
       <Table
         head={["Channel", "Best for", "Example"]}
         rows={[
-          [<strong key="a">MCP server</strong>, "People and assistants: Claude, Claude Code, Cursor", "“Is it safe to buy $50K of LINK right now?”"],
+          [<strong key="a">MCP server</strong>, "People and assistants: Claude, Claude Code, Cursor", "“Is it safe to buy $5K of LINK right now?”"],
           [<strong key="b">REST API</strong>, "Apps, bots and backends that need data and verdicts", <C key="c">GET /v1/evaluate/cardano</C>],
           [<strong key="d">Agents</strong>, "Whole jobs in one call, over REST or MCP", <C key="e">POST /v1/agents/trade-gatekeeper</C>],
         ]}

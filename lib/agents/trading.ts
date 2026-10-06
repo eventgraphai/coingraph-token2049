@@ -50,7 +50,7 @@ export const tradeGatekeeper = defineAgent({
       max_exchange_inflow_usd: z.number().optional(), allow_mint_authority: z.boolean().optional(),
     }).optional(),
   }),
-  example: { token: "uniswap", size_usd: 250_000, side: "buy" },
+  example: { token: "solana", size_usd: 5_000, side: "buy" },
   async run({ token: t, size_usd, side, max_impact_pct, policy }) {
     const token = await resolveToken(t);
     const ev = await evaluate(token, { size_usd, policy });
@@ -221,7 +221,7 @@ export const whaleWatch = defineAgent({
   masumi: false,
   verdicts: ["ACCUMULATING", "DISTRIBUTING", "NEUTRAL", "NO_DATA"],
   input: z.object({ token: tokenField }),
-  example: { token: "aave" },
+  example: { token: "chainlink" },
   async run({ token: t }) {
     const token = await resolveToken(t);
     const st = await buildState(token, ["onchain", "market"]);

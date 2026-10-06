@@ -191,14 +191,14 @@ export default async function Home() {
         <section className="mx-auto max-w-6xl px-4 py-24 sm:px-8">
           <SectionHead id="developers" eyebrow="For builders" title="One engine," accent="three ways in." lede="The same verified answer, whether a person asks in Claude, an app calls the API, or an agent hires an agent." />
           <div className="mt-12 grid gap-4 lg:grid-cols-3">
-            <Way title="MCP server" badge="22 tools · 3 prompts" text="Add CoinGraph to Claude, Claude Code or Cursor and ask in plain words: “Can I safely buy $50K of AAVE?”">
+            <Way title="MCP server" badge="22 tools · 3 prompts" text="Add CoinGraph to Claude, Claude Code or Cursor and ask in plain words: “Can I safely buy $5K of LINK?”">
               <Snippet title="Claude Code" code={`claude mcp add --transport http coingraph ${MCP_URL}`} />
             </Way>
             <Way title="REST API" badge="12 endpoints · OpenAPI" text="Discover, understand, decide, watch, trust. Every response: { object, id, as_of, data, sources }. No key needed to start.">
-              <Snippet title="Check a token" code={`curl ${BASE_URL}/api/v1/evaluate/aave`} />
+              <Snippet title="Check a token" code={`curl ${BASE_URL}/api/v1/evaluate/chainlink`} />
             </Way>
             <Way title="Agents" badge="10 agents · REST + MCP" text="Whole jobs in one call: pre-trade checks, wallet safety, due diligence, crowding, whales, treasury rules.">
-              <Snippet title="Trade Gatekeeper" code={`curl -X POST ${BASE_URL}/api/v1/agents/trade-gatekeeper \\\n  -H 'content-type: application/json' \\\n  -d '{"token":"aave","size_usd":50000}'`} />
+              <Snippet title="Trade Gatekeeper" code={`curl -X POST ${BASE_URL}/api/v1/agents/trade-gatekeeper \\\n  -H 'content-type: application/json' \\\n  -d '{"token":"solana","size_usd":5000}'`} />
             </Way>
           </div>
           <div className="mt-6 flex flex-wrap gap-2 text-[13px]">

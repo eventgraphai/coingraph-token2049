@@ -1,5 +1,7 @@
 # CoinGraph MCP server
 
+> The full, current documentation with real examples is at **https://token2049.coingraph.ai/docs**. This file is a summary kept with the code.
+
 CoinGraph is available as a remote MCP server, so Claude, Cursor and any MCP-compatible agent can use it as a set of tools.
 
 **URL:** `https://token2049.coingraph.ai/mcp`

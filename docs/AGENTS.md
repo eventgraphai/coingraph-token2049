@@ -1,5 +1,7 @@
 # CoinGraph agents
 
+> The full, current documentation with real examples is at **https://token2049.coingraph.ai/docs**. This file is a summary kept with the code.
+
 Ten ready-made agents built on the CoinGraph data. Each one does a whole job in one call and returns the same shape:
 
 ```json
@@ -31,16 +33,16 @@ Every run is stored and hashed. `GET /v1/verify/{run_id}` returns the exact obje
 
 | Agent | What it does | Verdicts | Example input | Tier |
 |---|---|---|---|---|
-| **Trade Gatekeeper** `trade-gatekeeper` | The check every trade passes before it is placed. Compares your size with exchange order books and the best on-chain route, then applies contract, supply, leverage and flow checks and your own rules. | ALLOW / REDUCE / BLOCK | `{"token":"uniswap","size_usd":250000,"side":"buy"}` | Premium |
-| **Wallet Guard** `wallet-guard` | Checks a swap or a send before you sign it: token contract risks, price impact, and the recipient (OFAC sanctions, scam flags, look-alike address poisoning, brand-new wallets). | SAFE / WARN / STOP | `{"token":"pepe","amount_usd":5000,"to_address":"0x28c6…1d60","chain":"eth"}` | Premium |
-| **Due Diligence Analyst** `due-diligence-analyst` | A full due-diligence memo on any token in one run: six graded sections, red flags, strengths and a short written summary. | A–F | `{"token":"morpho"}` | Pro |
+| **Trade Gatekeeper** `trade-gatekeeper` | The check every trade passes before it is placed. Compares your size with exchange order books and the best on-chain route, then applies contract, supply, leverage and flow checks and your own rules. | ALLOW / REDUCE / BLOCK | `{"token":"solana","size_usd":5000,"side":"buy"}` | Premium |
+| **Wallet Guard** `wallet-guard` | Checks a swap or a send before you sign it: token contract risks, price impact, and the recipient (OFAC sanctions, scam flags, look-alike address poisoning, brand-new wallets). | SAFE / WARN / STOP | `{"token":"chainlink","amount_usd":5000,"to_address":"0x28c6…1d60","chain":"eth"}` | Premium |
+| **Due Diligence Analyst** `due-diligence-analyst` | A full due-diligence memo on any token in one run: six graded sections, red flags, strengths and a short written summary. | A–F | `{"token":"cardano"}` | Pro |
 | **Opportunity Scout** `opportunity-scout` | Finds what's moving, runs the full check on each, drops anything rated avoid, and gives the level that would prove the idea wrong. | SETUPS_FOUND / NOTHING_CLEAN | `{"limit":5}` | Pro |
 | **Leverage Radar** `leverage-radar` | Scores every futures market 0–100 for crowding: funding against its own history, open-interest growth, top-trader positioning, open interest versus market cap, liquidations. | CROWDED / ELEVATED / BALANCED | `{"top":5}` | Premium |
-| **Whale Watch** `whale-watch` | Shows what the big wallets are doing: exchange net flows against their normal range, exchange reserves, large transfers with live wallet profiles. | ACCUMULATING / DISTRIBUTING / NEUTRAL / NO_DATA | `{"token":"aave"}` | Premium |
+| **Whale Watch** `whale-watch` | Shows what the big wallets are doing: exchange net flows against their normal range, exchange reserves, large transfers with live wallet profiles. | ACCUMULATING / DISTRIBUTING / NEUTRAL / NO_DATA | `{"token":"chainlink"}` | Premium |
 | **Portfolio Checkup** `portfolio-checkup` | A health check for everything in a wallet: concentration, how easy each position is to exit, contract risks, and a grade. | A–F | `{"chain":"eth","address":"0x9fc3…10c8"}` | Pro |
 | **Treasury Steward** `treasury-steward` | Enforces a treasury's rules (depth, exit slippage, mint authority, share of market cap) asset by asset, with proof. | COMPLIANT / BREACH / INCOMPLETE | see `GET /api/v1/agents/treasury-steward` | Pro |
-| **Alert Watchtower** `alert-watchtower` | Watches your tokens and explains every alert with its brief; optional signed webhook. | ACTIVE / QUIET | `{"tokens":["bitcoin","ethereum","aave"],"min_severity":2}` | Premium |
-| **Daily Market Brief** `daily-market-brief` | The whole market on one readable page: risk mood, graded calls, crowded trades, movers, headlines and your holdings. | RISK_ON / RISK_OFF / NEUTRAL | `{"holdings":["bitcoin","ethereum","aave"]}` | Premium |
+| **Alert Watchtower** `alert-watchtower` | Watches your tokens and explains every alert with its brief; optional signed webhook. | ACTIVE / QUIET | `{"tokens":["cardano","chainlink","solana"],"min_severity":2}` | Premium |
+| **Daily Market Brief** `daily-market-brief` | The whole market on one readable page: risk mood, graded calls, crowded trades, movers, headlines and your holdings. | RISK_ON / RISK_OFF / NEUTRAL | `{"holdings":["cardano","chainlink","solana"]}` | Premium |
 
 ## Pricing
 

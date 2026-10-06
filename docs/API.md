@@ -1,8 +1,10 @@
 # CoinGraph API v1
 
+> The full, current documentation with real examples is at **https://token2049.coingraph.ai/docs**. This file is a summary kept with the code.
+
 **Base URL:** `https://token2049.coingraph.ai/api/v1`
 **Format:** JSON over HTTPS. No key needed to start.
-**Token ids:** CoinGecko ids (`bitcoin`, `ethereum`, `aave`). Symbols (`BTC`) and contract addresses also work.
+**Token ids:** CoinGecko ids (`cardano`, `chainlink`, `solana`). Symbols (`ADA`, `LINK`, `SOL`) and contract addresses also work.
 
 **Every response** uses the same envelope:
 
@@ -36,7 +38,7 @@ List the 100 tokens we track.
 
 **Returns** `TokenList`: for each token `id`, `symbol`, `name`, `rank`, `chains` (contract address per chain), `price_usd`, `change_1h`, `change_24h`, `categories`, `open_signals`, `latest_headline`, `tracked_since`.
 
-Example: `GET /v1/tokens?q=aave`
+Example: `GET /v1/tokens?q=chainlink`
 
 ### `GET /v1/status`
 
@@ -57,7 +59,7 @@ Everything we know about a token right now, in one object.
 | Input | Where | Required | Description |
 |---|---|---|---|
 | `token` | path | yes | Token id, symbol or contract address. |
-| `sections` | query | no | Comma list to return only some parts: `identity, market, liquidity, derivatives, onchain, supply, context, signals, brief`. Default: all. |
+| `sections` | query | no | Comma list to return only some parts: `identity, market, liquidity, derivatives, onchain, supply, security, context, signals, brief`. Default: all. |
 
 **Returns** `State` with these sections, each carrying its own `sources` and `as_of`:
 
@@ -73,7 +75,7 @@ Everything we know about a token right now, in one object.
 | `signals` | open signals: kind, direction, severity, when, details |
 | `brief` | latest brief: id, headline, direction, severity, confidence, when (full text via `/explain`) |
 
-Example: `GET /v1/state/aave?sections=market,liquidity`
+Example: `GET /v1/state/cardano?sections=market,liquidity`
 
 ### `GET /v1/history/{token}`
 
@@ -163,7 +165,7 @@ GET is the standard check, independent of order size. POST scores the check agai
 | `watch_next` | what would change the verdict |
 | `id`, `as_of`, `verify_url` | for the public record and proof |
 
-Example: `POST /v1/evaluate` with `{ "token": "ethereum", "size_usd": 5000 }`
+Example: `POST /v1/evaluate` with `{ "token": "solana", "size_usd": 5000 }`
 
 ### `GET /v1/explain/{token}` · `POST /v1/explain` · `GET /v1/explain/{token}/{id}`
 
@@ -179,7 +181,7 @@ GET returns the latest brief (cached). POST runs a fresh investigation (about 60
 
 **Returns** `Brief`: `headline`, `direction`, `severity`, `confidence`, `summary`, `what_happened[]`, `likely_causes[]` (with confidence), `onchain[]`, `market_context[]`, `watch_next[]`, `caveats[]`, `evidence[]` (each item: id, source, summary, data). Every statement cites evidence ids. Plus `id`, `as_of`, `verify_url`.
 
-Example: `POST /v1/explain` with `{ "token": "aave" }`
+Example: `POST /v1/explain` with `{ "token": "chainlink" }`
 
 ### `POST /v1/ask`
 
@@ -193,7 +195,7 @@ Ask a question about a token, or check whether a claim is true.
 
 **Returns** `Answer`. For a question: `answer` (plain text), `key_points[]` with sources, `confidence`. For a claim: `verdict` (`supported` / `contradicted` / `unknown`), `reasoning[]` with sources, `confidence`. Both include `evidence[]`, `id`, `as_of`, `verify_url`.
 
-Example: `POST /v1/ask` with `{ "token": "ondo-finance", "claim": "ONDO is up because whales are buying on Binance" }`
+Example: `POST /v1/ask` with `{ "token": "cardano", "question": "Are large holders moving ADA onto exchanges today?" }`
 
 ---
 
@@ -265,9 +267,9 @@ Ten ready-made agents built on the endpoints above. Full list, inputs and verdic
 | `GET /v1/agents/{id}` | One agent's card. |
 | `POST /v1/agents/{id}` | Run the agent. Returns `agent_run`: `verdict`, `summary`, `result`, `reasons`, `run_id`, `verify_url`. Invalid input answers `400 invalid_input`. |
 
-## Payments (to be finalised)
+## Payments
 
-Free endpoints need nothing. Paid endpoints answer `402 Payment Required` with the x402 payment details (amount in ADA, our address, network). The agent pays on Cardano and retries with the `X-Payment` header. A **Token Pass** (`POST /v1/pass`) buys unlimited Decide calls on one token for 24 hours and is sent as `Authorization: Bearer <pass>`. Which endpoints are paid, and the prices, are published at `/v1/status` and set in one configuration file.
+Free during the hackathon preview. Paid tiers switch on with x402 on Cardano: a paid endpoint answers `402 Payment Required` with the amount, asset and address; the agent pays and retries with the `X-Payment` header. Tiers: Free (0), Data (2 tADA, first 25 calls a day free), Premium (5 tADA), Pro (10 tADA); mainnet $0 / $0.01 / $0.05 / $0.25. Design partners use an API key (`Authorization: Bearer cg_…`) instead. Details: https://token2049.coingraph.ai/docs/pricing
 
 ## Limits
 

@@ -14,7 +14,7 @@ const READ = { readOnlyHint: true, idempotentHint: true, openWorldHint: true } a
 // Work: creates a new object (a check, a brief, an answer, a watch) that is stored and graded.
 const WORK = { readOnlyHint: false, destructiveHint: false, openWorldHint: true } as const;
 
-const tokenArg = z.string().min(1).max(100).describe("The token: a CoinGecko id (bitcoin, ethereum, aave), a symbol (BTC) or a contract address");
+const tokenArg = z.string().min(1).max(100).describe("The token: a CoinGecko id (cardano, chainlink, solana), a symbol (BTC) or a contract address");
 
 async function callApi(handler: Handler, opts: { path: string; method?: string; params?: Record<string, string>; query?: Record<string, string | undefined>; body?: unknown; forwardedFor?: string | null }) {
   const url = new URL(`${BASE_URL}/api/v1${opts.path}`);
@@ -168,8 +168,8 @@ export function buildMcpServer(forwardedFor: string | null): McpServer {
 
   server.registerTool("get_proof", {
     title: "Get proof",
-    description: "Proof of exactly what CoinGraph told you. Give the id of a check (eval_…), an answer (ans_…) or a brief (a number) and get the original object, its SHA-256 fingerprint, the Chainlink attestation status and the list of data-source calls behind it.",
-    inputSchema: { id: z.string().min(1).max(60).describe("The id from a previous answer: eval_…, ans_… or a brief number") },
+    description: "Proof of exactly what CoinGraph told you. Give the id of a check (eval_…), an answer (ans_…), an agent run (run_…) or a brief (a number) and get the original object, its SHA-256 fingerprint, the Chainlink attestation status and the list of data-source calls behind it.",
+    inputSchema: { id: z.string().min(1).max(60).describe("The id from a previous answer: eval_…, ans_…, run_… or a brief number") },
     annotations: { title: "Get proof", ...READ },
   }, ({ id }) => call(api.verify, { path: `/verify/${encodeURIComponent(id)}`, params: { id } }));
 
@@ -195,9 +195,9 @@ export function buildMcpServer(forwardedFor: string | null): McpServer {
   server.registerPrompt("pre_trade_check", {
     title: "Pre-trade check",
     description: "Run the Trade Gatekeeper before placing a trade and explain the decision.",
-    argsSchema: { token: z.string().describe("Token, e.g. aave"), size_usd: z.string().describe("Order size in USD, e.g. 25000"), side: z.string().optional().describe("buy or sell (default buy)") },
+    argsSchema: { token: z.string().describe("Token, e.g. chainlink"), size_usd: z.string().describe("Order size in USD, e.g. 5000"), side: z.string().optional().describe("buy or sell (default buy)") },
   }, ({ token, size_usd, side }) => ({
-    messages: [{ role: "user", content: { type: "text", text: `Before I ${side ?? "buy"} $${size_usd} of ${token}, run CoinGraph's run_trade_gatekeeper tool with token "${token}", size_usd ${Number(size_usd) || 10000} and side "${side ?? "buy"}". Then tell me the decision (ALLOW / REDUCE / BLOCK) in one line, the top 3 reasons with their sources, the safe size if it says REDUCE, and the proof link. If the check mentions a brief, call get_token_brief and summarise why the token moved.` } }],
+    messages: [{ role: "user", content: { type: "text", text: `Before I ${side ?? "buy"} $${size_usd} of ${token}, run CoinGraph's run_trade_gatekeeper tool with token "${token}", size_usd ${Number(size_usd) || 5000} and side "${side ?? "buy"}". Then tell me the decision (ALLOW / REDUCE / BLOCK) in one line, the top 3 reasons with their sources, the safe size if it says REDUCE, and the proof link. If the check mentions a brief, call get_token_brief and summarise why the token moved.` } }],
   }));
   server.registerPrompt("wallet_safety_check", {
     title: "Wallet safety check",
@@ -209,7 +209,7 @@ export function buildMcpServer(forwardedFor: string | null): McpServer {
   server.registerPrompt("token_due_diligence", {
     title: "Token due diligence",
     description: "Produce a due-diligence memo on a token with the Due Diligence Analyst.",
-    argsSchema: { token: z.string().describe("Token, e.g. morpho") },
+    argsSchema: { token: z.string().describe("Token, e.g. cardano") },
   }, ({ token }) => ({
     messages: [{ role: "user", content: { type: "text", text: `Run CoinGraph's run_due_diligence_analyst tool for "${token}". Present the overall grade, a table of the section grades with their key findings, the red flags and strengths, and the proof link. Don't add facts that aren't in the result.` } }],
   }));

@@ -39,7 +39,7 @@ export const walletGuard = defineAgent({
     to_address: z.string().min(20).max(130).optional().describe("Recipient address (for a send)"),
     chain: chainField.optional().describe("Chain of the recipient address"),
   }).refine((v) => v.token || v.to_address, { message: "Provide a token, a to_address, or both" }).refine((v) => !v.to_address || v.chain, { message: "chain is required with to_address" }),
-  example: { token: "pepe", amount_usd: 5000, to_address: "0x28c6c06298d514db089934071355e5743bf21d60", chain: "eth" },
+  example: { token: "chainlink", amount_usd: 5000, to_address: "0x28c6c06298d514db089934071355e5743bf21d60", chain: "eth" },
   async run({ token: t, amount_usd, to_address, chain }) {
     const stop: Reason[] = [];
     const warn: Reason[] = [];
@@ -189,7 +189,7 @@ export const treasurySteward = defineAgent({
       max_position_pct_of_market_cap: z.number().optional(),
     }),
   }),
-  example: { assets: [{ token: "ethereum", value_usd: 2_000_000 }, { token: "aave", value_usd: 500_000 }, { token: "uniswap", value_usd: 250_000 }], policy: { min_depth_usd: 1_000_000, max_exit_slippage_pct: 3, allow_mint_authority: false, max_position_pct_of_market_cap: 0.5 } },
+  example: { assets: [{ token: "cardano", value_usd: 9_000 }, { token: "chainlink", value_usd: 6_000 }, { token: "solana", value_usd: 5_000 }], policy: { min_depth_usd: 500_000, max_exit_slippage_pct: 1, allow_mint_authority: false, max_position_pct_of_market_cap: 0.5 } },
   async run({ assets, policy }) {
     const { max_exit_slippage_pct, max_position_pct_of_market_cap, ...checkPolicy } = policy;
     const rows = await Promise.all(assets.map(async (a) => {

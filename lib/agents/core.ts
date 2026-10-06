@@ -88,4 +88,4 @@ export const fmtPct = (v: number | null | undefined, digits = 2) => (v === null 
 export const n = (v: unknown): number | null => (v === null || v === undefined || v === "" || v === "unassessed" || !Number.isFinite(Number(v)) ? null : Number(v));
 export const get = (o: unknown, path: string): unknown => path.split(".").reduce<unknown>((acc, k) => (acc && typeof acc === "object" ? (acc as Record<string, unknown>)[k] : undefined), o);
 
-export const tokenField = z.string().min(1).max(100).describe("Token: CoinGecko id (aave), symbol (AAVE) or contract address");
+export const tokenField = z.string().min(1).max(100).describe("Token: CoinGecko id (chainlink), symbol (LINK) or contract address");

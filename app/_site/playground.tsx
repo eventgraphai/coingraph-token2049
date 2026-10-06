@@ -206,9 +206,9 @@ function CodeLine({ text }: { text: string }) {
 }
 
 function askInClaude(a: AgentCard, i: Record<string, unknown>): string {
-  const t = (i.token as string) ?? "aave";
+  const t = (i.token as string) ?? "chainlink";
   switch (a.id) {
-    case "trade-gatekeeper": return `Before I ${i.side ?? "buy"} $${Number(i.size_usd ?? 50000).toLocaleString("en")} of ${t}, run CoinGraph's Trade Gatekeeper. Should I go ahead?`;
+    case "trade-gatekeeper": return `Before I ${i.side ?? "buy"} $${Number(i.size_usd ?? 5000).toLocaleString("en")} of ${t}, run CoinGraph's Trade Gatekeeper. Should I go ahead?`;
     case "wallet-guard": return `I'm about to send funds to ${i.to_address ?? "this address"}. Is it safe? Check it with CoinGraph's Wallet Guard.`;
     case "due-diligence-analyst": return `Give me a due-diligence memo on ${t} using CoinGraph.`;
     case "opportunity-scout": return "What's moving in crypto right now that's actually safe to act on? Use CoinGraph's Opportunity Scout.";
@@ -216,7 +216,7 @@ function askInClaude(a: AgentCard, i: Record<string, unknown>): string {
     case "whale-watch": return `What are the whales doing with ${t}? Use CoinGraph's Whale Watch.`;
     case "portfolio-checkup": return `Give this wallet a health check with CoinGraph: ${i.address ?? "0x…"}`;
     case "treasury-steward": return "Check our treasury against our rules with CoinGraph's Treasury Steward.";
-    case "alert-watchtower": return `Any alerts on ${((i.tokens as string[]) ?? ["bitcoin", "ethereum"]).join(", ")}? Explain each one with CoinGraph.`;
+    case "alert-watchtower": return `Any alerts on ${((i.tokens as string[]) ?? ["cardano", "chainlink", "solana"]).join(", ")}? Explain each one with CoinGraph.`;
     default: return "Give me today's crypto market brief from CoinGraph.";
   }
 }

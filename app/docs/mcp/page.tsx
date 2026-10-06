@@ -25,7 +25,7 @@ export default function McpConnect() {
       <Steps>
         <Step title="Open connectors"><P>Go to <strong>Settings → Connectors</strong> and choose <strong>Add custom connector</strong>.</P></Step>
         <Step title="Add CoinGraph"><P>Name: <C>CoinGraph</C>. URL: <C>{URL}</C>. Save.</P></Step>
-        <Step title="Use it"><P>In a new chat, enable CoinGraph from the tools menu and ask: <em>“Check Chainlink before I buy $50K. Use CoinGraph.”</em></P></Step>
+        <Step title="Use it"><P>In a new chat, enable CoinGraph from the tools menu and ask: <em>“Check Chainlink before I buy $5K. Use CoinGraph.”</em></P></Step>
       </Steps>
 
       <H2>Claude Code</H2>
@@ -42,13 +42,13 @@ export default function McpConnect() {
 
       <H2>From your own agent</H2>
       <P>Any MCP client library works. With the official TypeScript SDK:</P>
-      <CodeTabs samples={[{ label: "TypeScript", code: `import { Client } from "@modelcontextprotocol/sdk/client/index.js";\nimport { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";\n\nconst client = new Client({ name: "my-agent", version: "1.0.0" });\nawait client.connect(new StreamableHTTPClientTransport(new URL("${URL}")));\n\nconst result = await client.callTool({\n  name: "check_token",\n  arguments: { token: "solana", size_usd: 250000 },\n});\nconsole.log(result.content[0].text); // { object: "evaluation", data: { verdict, … } }` }]} />
+      <CodeTabs samples={[{ label: "TypeScript", code: `import { Client } from "@modelcontextprotocol/sdk/client/index.js";\nimport { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";\n\nconst client = new Client({ name: "my-agent", version: "1.0.0" });\nawait client.connect(new StreamableHTTPClientTransport(new URL("${URL}")));\n\nconst result = await client.callTool({\n  name: "check_token",\n  arguments: { token: "solana", size_usd: 5000 },\n});\nconsole.log(result.content[0].text); // { object: "evaluation", data: { verdict, … } }` }]} />
 
       <H2>What to ask</H2>
       <Table
         head={["You ask", "CoinGraph tool used"]}
         rows={[
-          ["“Is it safe to buy $50K of LINK right now?”", <C key="1">run_trade_gatekeeper</C>],
+          ["“Is it safe to buy $5K of LINK right now?”", <C key="1">run_trade_gatekeeper</C>],
           ["“Why did SOL move in the last hour?”", <C key="2">get_token_brief</C>],
           ["“Are whales moving ADA onto exchanges?”", <C key="3">run_whale_watch</C>],
           ["“Who owns 5tzFkiKs…uAi9 on Solana?”", <C key="4">lookup_address</C>],

@@ -11,7 +11,7 @@ const envelope = (object: string, dataRef: string) => ({
   required: ["object", "as_of", "data", "sources"],
 });
 const err = { description: "Error", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } };
-const tokenParam = { name: "token", in: "path", required: true, description: "Token id (coingecko id), symbol or contract address.", schema: { type: "string" }, example: "aave" };
+const tokenParam = { name: "token", in: "path", required: true, description: "Token id (coingecko id), symbol or contract address.", schema: { type: "string" }, example: "chainlink" };
 const sectionsParam = (values: string[]) => ({ name: "sections", in: "query", required: false, description: `Comma-separated list of sections to return. Default: all. Valid: ${values.join(", ")}.`, schema: { type: "string" } });
 const sinceParam = { name: "since", in: "query", required: false, description: "ISO-8601 time. Limits events (and series) to after this time.", schema: { type: "string", format: "date-time" } };
 const resp = (object: string, schema: string, description: string) => ({ 200: { description, content: { "application/json": { schema: envelope(object, `#/components/schemas/${schema}`) } } }, 400: err, 404: err, 429: err });
@@ -37,7 +37,7 @@ export function buildOpenApi() {
       { name: "Agents", description: "Ten ready-made agents built on the data above. Each returns a verdict, a plain summary, sourced reasons and a proof id." },
     ],
     paths: {
-      "/tokens": { get: { tags: ["Discover"], operationId: "tokens", summary: "List the 100 tokens we track", description: "Ids, symbols, contract addresses per chain, rank, price, changes, categories, open signals, latest headline. Use `q` to search 21,000+ coins by name, symbol or contract." + paid("GET /v1/tokens"), parameters: [{ name: "q", in: "query", required: false, schema: { type: "string" }, example: "aave" }], responses: resp("token_list", "TokenList", "The tracked universe") } },
+      "/tokens": { get: { tags: ["Discover"], operationId: "tokens", summary: "List the 100 tokens we track", description: "Ids, symbols, contract addresses per chain, rank, price, changes, categories, open signals, latest headline. Use `q` to search 21,000+ coins by name, symbol or contract." + paid("GET /v1/tokens"), parameters: [{ name: "q", in: "query", required: false, schema: { type: "string" }, example: "chainlink" }], responses: resp("token_list", "TokenList", "The tracked universe") } },
       "/status": { get: { tags: ["Discover"], operationId: "status", summary: "Is CoinGraph healthy right now?", description: "Pipeline health, data freshness, coverage, prices and the payment address.", responses: resp("service_status", "ServiceStatus", "Service status") } },
       "/state/{token}": { get: { tags: ["Understand"], operationId: "state", summary: "Everything we know about a token right now", description: "Sections: identity, market, liquidity, derivatives, onchain, supply, security (contract risk via GoPlus), context, signals, brief. Each section carries its own sources and as_of." + paid("GET /v1/state"), parameters: [tokenParam, sectionsParam(["identity", "market", "liquidity", "derivatives", "onchain", "supply", "security", "context", "signals", "brief"])], responses: resp("state", "State", "Unified token state") } },
       "/history/{token}": { get: { tags: ["Understand"], operationId: "history", summary: "What happened to a token over time", description: "Series (price, candles, open interest, funding, long/short, exchange net flow, reserves, TVL) and events (large transfers, liquidations, signals, headlines, briefs). Default window: 24h events, 14 days series." + paid("GET /v1/history"), parameters: [tokenParam, sinceParam, { name: "series", in: "query", required: false, description: "Comma list of series to include.", schema: { type: "string" } }], responses: resp("history", "History", "Series and events") } },
@@ -83,7 +83,7 @@ export function buildOpenApi() {
         AgentRun: { type: "object", properties: { run_id: { type: "string" }, agent: { type: "string" }, verdict: { type: "string" }, summary: { type: "string" }, result: { type: "object" }, reasons: { type: "array" }, warnings: { type: "array" }, hash: { type: "string" }, verify_url: { type: "string" } } },
         Monitor: { type: "object", additionalProperties: true }, MonitorList: { type: "object", additionalProperties: true }, Record: { type: "object", additionalProperties: true }, Proof: { type: "object", additionalProperties: true },
       },
-      securitySchemes: { x402: { type: "apiKey", in: "header", name: "X-Payment", description: "x402 payment proof (Cardano). Paid endpoints answer 402 with payment details." }, pass: { type: "http", scheme: "bearer", description: "Token Pass: 24h of Decide calls on one token." } },
+      securitySchemes: { x402: { type: "apiKey", in: "header", name: "X-Payment", description: "x402 payment proof (Cardano). Paid endpoints answer 402 with payment details." }, partner: { type: "http", scheme: "bearer", description: "Design-partner API key (cg_…): used instead of paying per call." } },
     },
   };
 }
@@ -94,7 +94,7 @@ export function buildLlmsTxt(): string {
 > The check before they act. Verified crypto market intelligence for AI agents: one call returns a sourced, timed answer about a token — never a trade.
 
 Base URL: ${BASE_URL}/api/v1 · OpenAPI: ${BASE_URL}/api/v1/openapi.json · Reference: ${BASE_URL}/docs
-Token ids are CoinGecko ids (bitcoin, ethereum, aave); symbols and contract addresses also work.
+Token ids are CoinGecko ids (cardano, chainlink, solana); symbols and contract addresses also work.
 Every response: { object, id, as_of, data, sources }. Unmeasured values are "unassessed". No key needed to start (60 requests/min).
 
 ## Discover (free)

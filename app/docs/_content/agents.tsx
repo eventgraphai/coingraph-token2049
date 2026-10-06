@@ -25,7 +25,8 @@ export const AGENT_DOCS: Record<string, AgentDoc> = {
     ],
     verdicts: { ALLOW: "The order fits current liquidity and nothing in the check stops it.", REDUCE: "Go ahead with a smaller order; result.size.max_safe_usd says how much.", BLOCK: "Do not place this order now; the reasons say why." },
     result: [["size", "requested_usd and max_safe_usd (0 on BLOCK)."], ["impact", "best_route, best_pct, every route priced, limit_pct and share_of_daily_volume_pct."], ["check", "The underlying check: verdict, confidence, dimension ratings and evaluation_id."], ["policy", "Your rules, pass / fail / unknown."], ["latest_brief", "The latest brief when the token is rated caution or avoid."]],
-    examples: [{ key: "agent:trade-gatekeeper", label: "ALLOW: buy $250K of SOL" }, { key: "agent:trade-gatekeeper:reduce", label: "REDUCE: buy $20M of ADA" }, { key: "agent:trade-gatekeeper:block", label: "BLOCK: sell $5M of LINK" }],
+    examples: [{ key: "agent:trade-gatekeeper", label: "ALLOW: buy $5K of SOL" }, { key: "agent:trade-gatekeeper:reduce", label: "REDUCE: buy $10K of RAIN with a 0.25% impact limit" }, { key: "agent:trade-gatekeeper:block", label: "BLOCK: buy $10K of LEO" }],
+    notes: <>For liquid tokens such as ADA, LINK and SOL, an order of a few thousand dollars barely moves the price, so the answer is usually ALLOW. REDUCE and BLOCK show up on thin tokens, on tokens with contract or concentration risks, or when you set a tight <code>max_impact_pct</code>.</>,
   },
   "wallet-guard": {
     useWhen: ["A wallet app wants a safety check before the user signs.", "An agent is about to send funds to an address it has not seen before.", "A person wants to know if a token they are swapping into is safe."],
@@ -37,7 +38,7 @@ export const AGENT_DOCS: Record<string, AgentDoc> = {
     ],
     verdicts: { SAFE: "Nothing risky found.", WARN: "You can continue, but read the warning first.", STOP: "Do not sign." },
     result: [["token", "Symbol, the check's verdict, contract rating, price impact and proof id."], ["recipient", "Label, type, transaction count, screening and any look-alike match."]],
-    examples: [{ key: "agent:wallet-guard", label: "SAFE: swap $20K into LINK, send to a Binance wallet" }, { key: "agent:wallet-guard:stop", label: "STOP: send to an address on the OFAC list" }],
+    examples: [{ key: "agent:wallet-guard", label: "SAFE: swap $5K into LINK, send to a Binance wallet" }, { key: "agent:wallet-guard:stop", label: "STOP: send to an address on the OFAC list" }],
   },
   "due-diligence-analyst": {
     useWhen: ["Before adding a token to a portfolio, a listing or a treasury.", "A research or compliance team needs a consistent, sourced memo.", "A person wants the full picture on one token in plain language."],
@@ -84,7 +85,7 @@ export const AGENT_DOCS: Record<string, AgentDoc> = {
     decides: ["Checks every asset against every rule: minimum depth, top-10 holders, funding, exchange inflow, mint authority, exit slippage for the whole position, and share of market cap.", "Exit slippage uses the cheaper of a live on-chain sell quote and the exchange order books.", "Native coins (ADA, SOL, ETH…) have no token contract, so no admin can mint; the mint rule passes for them."],
     verdicts: { COMPLIANT: "Every asset passes every rule.", BREACH: "At least one rule fails.", INCOMPLETE: "No failures, but at least one rule could not be measured." },
     result: [["assets[]", "Token, value, status, every rule's pass / fail / unknown with detail, and a proof id."], ["total_usd", "The treasury's total."]],
-    examples: [{ key: "agent:treasury-steward", label: "$2.75M in ADA, LINK and SOL" }],
+    examples: [{ key: "agent:treasury-steward", label: "A $20K community treasury in ADA, LINK and SOL" }],
   },
   "alert-watchtower": {
     useWhen: ["You hold or follow a few tokens and want every alert explained.", "An app needs signed webhooks without building the signal engine."],
