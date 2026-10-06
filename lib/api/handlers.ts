@@ -109,11 +109,16 @@ export const market = wrap((req) => cached(req, 30, async () => {
   return ok("market", m.sections, { id: newId("mk"), sources: m.sources });
 }));
 
-export const inspect = wrap((req, p) => cached(req, 60, () => withSlot("inspect", 4, async () => {
+export const inspect = wrap(async (req, p) => {
+  // Validate before taking a slot or touching the cache, so bad input never waits behind live lookups.
   if (!CHAINS.includes(p.chain as Chain)) throw new ApiError(400, "invalid_chain", `chain must be one of ${CHAINS.join(", ")}`);
-  const r = await inspectAddress(p.chain as Chain, decodeURIComponent(p.address));
-  return ok("address_profile", r.data, { id: newId("ad"), as_of: r.as_of, sources: r.sources });
-})));
+  const address = decodeURIComponent(p.address);
+  if ((p.chain === "eth" || p.chain === "bsc") ? !/^0x[0-9a-fA-F]{40}$/.test(address) : !/^[A-Za-z0-9]{20,120}$/.test(address)) throw new ApiError(400, "invalid_address", `Not a valid ${p.chain} address.`);
+  return cached(req, 60, () => withSlot("inspect", 6, async () => {
+    const r = await inspectAddress(p.chain as Chain, address);
+    return ok("address_profile", r.data, { id: newId("ad"), as_of: r.as_of, sources: r.sources });
+  }));
+});
 
 // --- Decide ---------------------------------------------------------------------------------------
 export const evaluateGet = wrap((_req, p) => withSlot("evaluate", 8, async () => {
