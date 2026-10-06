@@ -7,7 +7,7 @@ import { env } from "./env";
 const databaseUrl = process.env.DB_POOL_MODE === "transaction" ? env.databaseUrl : env.databaseUrl.replace(":6543/", ":5432/");
 // Session mode holds one server connection per client connection, so keep each process small
 // (worker 6, web app and scripts 4) to stay within the pooler's limits.
-const maxConnections = Number(process.env.DB_MAX_CONNECTIONS ?? 4);
+const maxConnections = Number(process.env.DB_MAX_CONNECTIONS ?? 8);
 
 const create = () =>
   postgres(databaseUrl, {

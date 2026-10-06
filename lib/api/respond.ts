@@ -53,8 +53,9 @@ export function ok(object: string, data: unknown, opts: { id?: string; as_of?: D
 export function fail(err: unknown): Response {
   const e = err instanceof ApiError ? err : new ApiError(500, "internal_error", (err as Error)?.message?.slice(0, 300) ?? "unexpected error");
   if (e.status >= 500) console.error("[api]", err);
+  const retry = e.extra?.retry_after_sec;
   return new Response(JSON.stringify({ error: { code: e.code, message: e.message, ...(e.extra ?? {}) } }), {
-    status: e.status, headers: { "content-type": "application/json; charset=utf-8", ...CORS },
+    status: e.status, headers: { "content-type": "application/json; charset=utf-8", ...CORS, ...(retry ? { "retry-after": String(retry) } : {}) },
   });
 }
 
@@ -112,7 +113,49 @@ export function rateLimit(req: Request, perMinute = Number(process.env.API_RATE_
     return;
   }
   b.count++;
-  if (b.count > perMinute) throw new ApiError(429, "rate_limited", `Free use is limited to ${perMinute} requests per minute. Try again in ${Math.ceil((b.reset - now) / 1000)}s.`);
+  if (b.count > perMinute) throw new ApiError(429, "rate_limited", `Free use is limited to ${perMinute} requests per minute. Try again in ${Math.ceil((b.reset - now) / 1000)}s.`, { retry_after_sec: Math.ceil((b.reset - now) / 1000) });
+}
+
+// Response cache for read endpoints: identical URLs within the TTL are served from memory. Our data
+// changes once a minute at most, so a 15–30s cache removes almost all duplicate load at volume.
+type Cached = { body: string; status: number; headers: Record<string, string>; expires: number; stored: number };
+const cache = new Map<string, Cached>();
+const CACHE_MAX_ENTRIES = 2000;
+export async function cached(req: Request, ttlSec: number, produce: () => Promise<Response>): Promise<Response> {
+  const key = `${req.method} ${new URL(req.url).pathname}${new URL(req.url).search}`;
+  const now = Date.now();
+  const hit = cache.get(key);
+  if (hit && hit.expires > now) {
+    return new Response(hit.body, { status: hit.status, headers: { ...hit.headers, "x-cache": "HIT", age: String(Math.round((now - hit.stored) / 1000)) } });
+  }
+  const res = await produce();
+  if (res.status === 200) {
+    const body = await res.clone().text();
+    const headers: Record<string, string> = {};
+    res.headers.forEach((v, k) => { headers[k] = v; });
+    headers["cache-control"] = `public, max-age=${ttlSec}`;
+    if (cache.size >= CACHE_MAX_ENTRIES) {
+      for (const [k, v] of cache) if (v.expires <= now) cache.delete(k);
+      if (cache.size >= CACHE_MAX_ENTRIES) cache.delete(cache.keys().next().value as string);
+    }
+    cache.set(key, { body, status: 200, headers, expires: now + ttlSec * 1000, stored: now });
+    return new Response(body, { status: 200, headers: { ...headers, "x-cache": "MISS" } });
+  }
+  return res;
+}
+
+// Concurrency limiter for slow endpoints (live chain lookups, Claude calls): beyond `max` in flight the
+// caller gets a 429 with Retry-After instead of queueing onto the database and the model.
+const inflight = new Map<string, number>();
+export async function withSlot<T>(name: string, max: number, fn: () => Promise<T>): Promise<T> {
+  const active = inflight.get(name) ?? 0;
+  if (active >= max) throw new ApiError(429, "busy", `Too many ${name} requests in progress (${max} at a time). Retry in a few seconds.`, { retry_after_sec: 5 });
+  inflight.set(name, active + 1);
+  try {
+    return await fn();
+  } finally {
+    inflight.set(name, (inflight.get(name) ?? 1) - 1);
+  }
 }
 
 export const num = (v: unknown): number | null => (v === null || v === undefined || v === "" ? null : Number.isFinite(Number(v)) ? Number(v) : null);

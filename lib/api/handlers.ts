@@ -1,6 +1,6 @@
 import { sql } from "../db";
 import { investigateNow, MAX_INVESTIGATIONS_PER_HOUR } from "../investigations/runner";
-import { ApiError, BASE_URL, fail, newId, ok, options, rateLimit, readJson, resolveToken, type Source } from "./respond";
+import { ApiError, BASE_URL, cached, fail, newId, ok, options, rateLimit, readJson, resolveToken, withSlot, type Source } from "./respond";
 import { buildState, STATE_SECTIONS, type StateSection } from "./state";
 import { buildHistory, SERIES, type SeriesName } from "./history";
 import { buildMarket, MARKET_SECTIONS, type MarketSection } from "./market";
@@ -41,7 +41,7 @@ const sinceParam = (raw: string | null): Date | null => {
 };
 
 // --- Discover -------------------------------------------------------------------------------------
-export const tokens = wrap(async (req) => {
+export const tokens = wrap((req) => cached(req, 30, async () => {
   const q = new URL(req.url).searchParams.get("q")?.trim().toLowerCase();
   if (q) {
     const rows = await sql`
@@ -66,9 +66,9 @@ export const tokens = wrap(async (req) => {
       price_usd: r.current_price !== null ? Number(r.current_price) : null, change_1h_pct: r.change_1h !== null ? Math.round(Number(r.change_1h) * 100) / 100 : null, change_24h_pct: r.price_change_percentage_24h !== null ? Math.round(Number(r.price_change_percentage_24h) * 100) / 100 : null,
       market_cap_usd: r.market_cap !== null ? Number(r.market_cap) : null, volume_24h_usd: r.total_volume !== null ? Number(r.total_volume) : null, categories: (r.categories ?? []).slice(0, 5), open_signals: r.open_signals, latest_headline: r.latest_headline, tracked_since: r.first_seen_at, as_of: r.captured_at })),
   }, { as_of: rows[0]?.captured_at, sources: [{ provider: "coingecko", endpoint: "/coins/markets", as_of: rows[0]?.captured_at }, { provider: "coingraph", endpoint: "signals" }] });
-});
+}));
 
-export const status = wrap(async () => {
+export const status = wrap((req) => cached(req, 15, async () => {
   const s = await loadStatus();
   const freshness = Object.fromEntries(s.freshness.map((f) => [f.name, { newest: f.newest, cadence: f.cadence }]));
   const feeds = s.feeds.map((f) => ({ feed: f.feed, status: f.status, last_success_sec_ago: f.age_sec, every_sec: f.every_sec, venues: f.venues }));
@@ -82,51 +82,51 @@ export const status = wrap(async () => {
     payment: { network: PAYMENT.network, address: PAYMENT.address, facilitator: PAYMENT.facilitator, protocol: "x402" },
     docs: { openapi: `${BASE_URL}/api/v1/openapi.json`, llms: `${BASE_URL}/llms.txt`, api_reference: `${BASE_URL}/docs` },
   }, { as_of: s.now });
-});
+}));
 
 // --- Understand -----------------------------------------------------------------------------------
-export const state = wrap(async (req, p) => {
+export const state = wrap((req, p) => cached(req, 20, async () => {
   const token = await resolveToken(p.token);
   const sections = pick<StateSection>(new URL(req.url).searchParams.get("sections"), STATE_SECTIONS, "sections");
   const st = await buildState(token, sections);
   return ok("state", { token: st.token, ...st.sections }, { id: newId("st"), as_of: st.as_of ?? undefined, sources: st.sources });
-});
+}));
 
-export const history = wrap(async (req, p) => {
+export const history = wrap((req, p) => cached(req, 30, async () => {
   const token = await resolveToken(p.token);
   const url = new URL(req.url);
   const series = pick<SeriesName>(url.searchParams.get("series"), SERIES, "series");
   const h = await buildHistory(token, sinceParam(url.searchParams.get("since")), series);
   return ok("history", { token: h.token, window: h.window, series: h.series, events: h.events }, { id: newId("hs"), sources: h.sources });
-});
+}));
 
-export const market = wrap(async (req) => {
+export const market = wrap((req) => cached(req, 30, async () => {
   const sections = pick<MarketSection>(new URL(req.url).searchParams.get("sections"), MARKET_SECTIONS, "sections");
   const m = await buildMarket(sections);
   return ok("market", m.sections, { id: newId("mk"), sources: m.sources });
-});
+}));
 
-export const inspect = wrap(async (_req, p) => {
+export const inspect = wrap((req, p) => cached(req, 60, () => withSlot("inspect", 4, async () => {
   if (!CHAINS.includes(p.chain as Chain)) throw new ApiError(400, "invalid_chain", `chain must be one of ${CHAINS.join(", ")}`);
   const r = await inspectAddress(p.chain as Chain, decodeURIComponent(p.address));
   return ok("address_profile", r.data, { id: newId("ad"), as_of: r.as_of, sources: r.sources });
-});
+})));
 
 // --- Decide ---------------------------------------------------------------------------------------
-export const evaluateGet = wrap(async (_req, p) => {
+export const evaluateGet = wrap((_req, p) => withSlot("evaluate", 8, async () => {
   const token = await resolveToken(p.token);
   const e = await evaluate(token);
   return ok("evaluation", e.data, { id: e.id, as_of: e.as_of, sources: e.sources });
-});
+}));
 
-export const evaluatePost = wrap(async (req) => {
+export const evaluatePost = wrap((req) => withSlot("evaluate", 8, async () => {
   const body = await readJson<{ token?: string; size_usd?: number; policy?: Policy }>(req);
   if (!body.token) throw new ApiError(400, "token_required", "Body must include token.");
   if (body.size_usd !== undefined && (typeof body.size_usd !== "number" || body.size_usd <= 0)) throw new ApiError(400, "invalid_size", "size_usd must be a positive number.");
   const token = await resolveToken(body.token);
   const e = await evaluate(token, { size_usd: body.size_usd, policy: body.policy, requester: req.headers.get("x-payment") ? "x402" : undefined });
   return ok("evaluation", e.data, { id: e.id, as_of: e.as_of, sources: e.sources, status: 201 });
-});
+}));
 
 const briefSources = (evidence: { items?: { source: string }[] } | null): Source[] => (evidence?.items ?? []).map((e) => ({ provider: e.source.split(":")[0], endpoint: e.source }));
 async function briefResponse(row: Record<string, unknown>, token: { coingecko_id: string; symbol: string; name: string }): Promise<Response> {
@@ -144,7 +144,7 @@ export const explainGet = wrap(async (_req, p) => {
   return briefResponse(row, token);
 });
 
-export const explainPost = wrap(async (req) => {
+export const explainPost = wrap((req) => withSlot("explain", 3, async () => {
   const body = await readJson<{ token?: string; hours?: number }>(req);
   if (!body.token) throw new ApiError(400, "token_required", "Body must include token.");
   const token = await resolveToken(body.token);
@@ -155,16 +155,16 @@ export const explainPost = wrap(async (req) => {
   const [row] = await sql`select * from investigations where id = ${id}`;
   if (row.status !== "done") throw new ApiError(502, "investigation_failed", String(row.error ?? "investigation failed"));
   return briefResponse(row, token);
-});
+}));
 
-export const askPost = wrap(async (req) => {
+export const askPost = wrap((req) => withSlot("ask", 4, async () => {
   const body = await readJson<{ token?: string; question?: string; claim?: string }>(req);
   if (!body.token) throw new ApiError(400, "token_required", "Body must include token.");
   if (!body.question === !body.claim) throw new ApiError(400, "question_or_claim", "Provide exactly one of question or claim.");
   const token = await resolveToken(body.token);
   const a = await ask(token, { question: body.question, claim: body.claim });
   return ok("answer", a.data, { id: a.id, sources: a.sources, status: 201 });
-});
+}));
 
 // --- Watch ----------------------------------------------------------------------------------------
 export const monitorPost = wrap(async (req) => ok("monitor", await createMonitor(await readJson(req)), { status: 201 }));
@@ -172,12 +172,12 @@ export const monitorGet = wrap(async (req) => ok("monitor_list", { monitors: awa
 export const monitorDelete = wrap(async (req, p) => ok("monitor", await deleteMonitor(p.id, req.headers.get("x-monitor-secret"))));
 
 // --- Trust ----------------------------------------------------------------------------------------
-export const record = wrap(async (req, p) => {
+export const record = wrap((req, p) => cached(req, 60, async () => {
   const url = new URL(req.url);
   const token = p.token ? (await resolveToken(p.token)).coingecko_id : null;
   const r = await buildRecord(token, sinceParam(url.searchParams.get("since")), url.searchParams.get("kind"));
   return ok("record", r, { sources: [{ provider: "coingraph", endpoint: "evaluations, signals, briefs" }, { provider: "coingecko", endpoint: "/coins/markets" }] });
-});
+}));
 
 export const verify = wrap(async (_req, p) => {
   const v = await verifyObject(decodeURIComponent(p.id));
