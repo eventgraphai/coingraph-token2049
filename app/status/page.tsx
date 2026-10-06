@@ -71,7 +71,9 @@ function jobLevel(j: JobRow, now: Date): Level {
   if (sinceRun === null) return j.every_sec >= 3600 ? "ok" : "late"; // not run yet since tracking started
   if (sinceRun > j.every_sec * 3 + 120) return "down";
   if (j.failed_1h > 0 || (j.success_pct !== null && j.success_pct < 95)) return "late";
-  if (j.median_rows && j.median_rows > 0 && (j.last_rows ?? 0) < j.median_rows * 0.5) return "late";
+  // Row check only for jobs that normally write a meaningful number of rows; event-driven jobs
+  // (large transfers, new blocks, investigations) legitimately write 0 some runs.
+  if (j.median_rows && j.median_rows >= 5 && (j.last_rows ?? 0) < j.median_rows * 0.5) return "late";
   return "ok";
 }
 
