@@ -45,7 +45,7 @@ const sinceParam = (raw: string | null): Date | null => {
 
 // --- Discover -------------------------------------------------------------------------------------
 export const tokens = wrap((req) => cached(req, 30, async () => {
-  const q = new URL(req.url).searchParams.get("q")?.trim().toLowerCase();
+  const q = new URL(req.url).searchParams.get("q")?.trim().toLowerCase().slice(0, 100);
   if (q) {
     const rows = await sql`
       select c.coingecko_id, c.symbol, c.name, (t.coingecko_id is not null and t.in_universe) as tracked, t.market_cap_rank
@@ -125,7 +125,14 @@ export const evaluateGet = wrap((_req, p) => withSlot("evaluate", 8, async () =>
 export const evaluatePost = wrap((req) => withSlot("evaluate", 8, async () => {
   const body = await readJson<{ token?: string; size_usd?: number; policy?: Policy }>(req);
   if (!body.token) throw new ApiError(400, "token_required", "Body must include token.");
-  if (body.size_usd !== undefined && (typeof body.size_usd !== "number" || body.size_usd <= 0)) throw new ApiError(400, "invalid_size", "size_usd must be a positive number.");
+  if (body.size_usd !== undefined && (typeof body.size_usd !== "number" || !Number.isFinite(body.size_usd) || body.size_usd <= 0 || body.size_usd > 1e12)) throw new ApiError(400, "invalid_size", "size_usd must be a positive number.");
+  if (body.policy !== undefined) {
+    const allowed = ["max_unlock_pct", "min_depth_usd", "allow_mint_authority", "max_top10_holder_pct", "max_funding_pct", "max_exchange_inflow_usd"];
+    if (typeof body.policy !== "object" || body.policy === null || Array.isArray(body.policy)) throw new ApiError(400, "invalid_policy", "policy must be an object.");
+    const unknown = Object.keys(body.policy).filter((k) => !allowed.includes(k));
+    if (unknown.length) throw new ApiError(400, "invalid_policy", `Unknown policy rule(s): ${unknown.join(", ")}. Allowed: ${allowed.join(", ")}.`);
+    for (const [k, v] of Object.entries(body.policy)) if (k !== "allow_mint_authority" ? typeof v !== "number" || !Number.isFinite(v) : typeof v !== "boolean") throw new ApiError(400, "invalid_policy", `policy.${k} has the wrong type.`);
+  }
   const token = await resolveToken(body.token);
   const e = await evaluate(token, { size_usd: body.size_usd, policy: body.policy, requester: req.headers.get("x-payment") ? "x402" : undefined });
   return ok("evaluation", e.data, { id: e.id, as_of: e.as_of, sources: e.sources, status: 201 });
@@ -140,6 +147,7 @@ async function briefResponse(row: Record<string, unknown>, token: { coingecko_id
 
 export const explainGet = wrap(async (_req, p) => {
   const token = await resolveToken(p.token);
+  if (p.id !== undefined && !/^\d{1,12}$/.test(p.id)) throw new ApiError(400, "invalid_id", "Brief ids are numbers.");
   const [row] = p.id
     ? await sql`select * from investigations where id = ${Number(p.id)} and coingecko_id = ${token.coingecko_id} and status = 'done'`
     : await sql`select * from investigations where coingecko_id = ${token.coingecko_id} and status = 'done' order by finished_at desc limit 1`;
@@ -164,6 +172,8 @@ export const askPost = wrap((req) => withSlot("ask", 4, async () => {
   const body = await readJson<{ token?: string; question?: string; claim?: string }>(req);
   if (!body.token) throw new ApiError(400, "token_required", "Body must include token.");
   if (!body.question === !body.claim) throw new ApiError(400, "question_or_claim", "Provide exactly one of question or claim.");
+  const text = String(body.question ?? body.claim);
+  if (typeof (body.question ?? body.claim) !== "string" || text.trim().length < 3 || text.length > 500) throw new ApiError(400, "invalid_text", "question / claim must be a string of 3–500 characters.");
   const token = await resolveToken(body.token);
   const a = await ask(token, { question: body.question, claim: body.claim });
   return ok("answer", a.data, { id: a.id, sources: a.sources, status: 201 });

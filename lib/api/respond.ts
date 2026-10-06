@@ -19,8 +19,12 @@ export const CORS = {
   "access-control-allow-origin": "*",
   "access-control-allow-methods": "GET, POST, DELETE, OPTIONS",
   "access-control-allow-headers": "content-type, authorization, x-payment, x-monitor-secret",
-  "access-control-expose-headers": "x-request-id, x-payment-required",
+  "access-control-expose-headers": "x-request-id, x-payment-required, x-cache, age, retry-after",
+  "x-content-type-options": "nosniff",
+  "referrer-policy": "no-referrer",
 };
+
+export const MAX_BODY_BYTES = 16 * 1024;
 
 export function newId(prefix: string): string {
   return `${prefix}_${randomBytes(10).toString("hex")}`;
@@ -51,7 +55,8 @@ export function ok(object: string, data: unknown, opts: { id?: string; as_of?: D
 }
 
 export function fail(err: unknown): Response {
-  const e = err instanceof ApiError ? err : new ApiError(500, "internal_error", (err as Error)?.message?.slice(0, 300) ?? "unexpected error");
+  // Internal errors are logged in full but never echoed: database and upstream details stay private.
+  const e = err instanceof ApiError ? err : new ApiError(500, "internal_error", "Something went wrong on our side. Please retry; if it persists, contact ajay@coingraph.ai.");
   if (e.status >= 500) console.error("[api]", err);
   const retry = e.extra?.retry_after_sec;
   return new Response(JSON.stringify({ error: { code: e.code, message: e.message, ...(e.extra ?? {}) } }), {
@@ -95,10 +100,14 @@ export async function resolveToken(input: string): Promise<Token> {
 
 // Body parsing with a clear error.
 export async function readJson<T>(req: Request): Promise<T> {
+  const text = await req.text();
+  if (text.length > MAX_BODY_BYTES) throw new ApiError(413, "body_too_large", `Request body must be under ${MAX_BODY_BYTES / 1024} KB.`);
   try {
-    return (await req.json()) as T;
+    const parsed = JSON.parse(text);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("not an object");
+    return parsed as T;
   } catch {
-    throw new ApiError(400, "invalid_json", "Request body must be JSON.");
+    throw new ApiError(400, "invalid_json", "Request body must be a JSON object.");
   }
 }
 

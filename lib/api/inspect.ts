@@ -10,6 +10,8 @@ export type Chain = (typeof CHAINS)[number];
 export async function inspectAddress(chain: Chain, address: string) {
   const addr = chain === "eth" || chain === "bsc" ? address.toLowerCase() : address;
   if ((chain === "eth" || chain === "bsc") && !/^0x[0-9a-f]{40}$/.test(addr)) throw new ApiError(400, "invalid_address", "EVM addresses are 0x followed by 40 hex characters.");
+  // Non-EVM addresses are base58 / bech32 strings; anything else is rejected before it reaches an upstream URL.
+  if (chain !== "eth" && chain !== "bsc" && !/^[A-Za-z0-9]{20,120}$/.test(addr)) throw new ApiError(400, "invalid_address", `Not a valid ${chain} address.`);
   const [label] = await sql`select entity, label, kind, confidence from wallet_labels where chain = ${chain} and address = ${addr}`;
   const prices = new Map((await sql<{ coingecko_id: string; current_price: string }[]>`select distinct on (coingecko_id) coingecko_id, current_price from market_snapshots where captured_at > now() - interval '2 hours' order by coingecko_id, captured_at desc`).map((r) => [r.coingecko_id, Number(r.current_price)]));
   const sources: Source[] = [];

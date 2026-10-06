@@ -7,10 +7,27 @@ import { ApiError, newId, resolveToken } from "./respond";
 
 export type Conditions = { kinds?: string[]; min_severity?: number; verdict_changes?: boolean; new_briefs?: boolean };
 
+// Webhooks only go to public hosts: no localhost, private ranges, link-local/metadata addresses or internal names (SSRF guard).
+export function assertPublicUrl(raw: string): void {
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    throw new ApiError(400, "webhook_url_invalid", "webhook_url is not a valid URL.");
+  }
+  const host = url.hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  const blockedName = host === "localhost" || host.endsWith(".localhost") || host.endsWith(".local") || host.endsWith(".internal") || host.endsWith(".railway.internal") || !host.includes(".");
+  const v4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(host);
+  const privateV4 = v4 ? (() => { const [a, b] = [Number(v4[1]), Number(v4[2])]; return a === 10 || a === 127 || a === 0 || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || a >= 224; })() : false;
+  const privateV6 = host.includes(":") && (host === "::1" || host.startsWith("fc") || host.startsWith("fd") || host.startsWith("fe80") || host.startsWith("::ffff:"));
+  if (blockedName || privateV4 || privateV6) throw new ApiError(400, "webhook_url_not_public", "webhook_url must point to a public host.");
+}
+
 export async function createMonitor(input: { tokens?: string[]; webhook_url?: string; conditions?: Conditions }) {
   if (!Array.isArray(input.tokens) || !input.tokens.length) throw new ApiError(400, "tokens_required", "Provide tokens: [\"bitcoin\", …].");
   if (input.tokens.length > 50) throw new ApiError(400, "too_many_tokens", "A monitor can watch up to 50 tokens.");
-  if (!input.webhook_url || !/^https:\/\//.test(input.webhook_url)) throw new ApiError(400, "webhook_url_required", "webhook_url must be an https URL.");
+  if (!input.webhook_url || !/^https:\/\//.test(input.webhook_url) || input.webhook_url.length > 2000) throw new ApiError(400, "webhook_url_required", "webhook_url must be an https URL.");
+  assertPublicUrl(input.webhook_url);
   const tokens = [];
   for (const t of input.tokens) tokens.push((await resolveToken(t)).coingecko_id);
   const conditions: Conditions = { kinds: input.conditions?.kinds, min_severity: input.conditions?.min_severity ?? 2, verdict_changes: input.conditions?.verdict_changes ?? true, new_briefs: input.conditions?.new_briefs ?? true };
