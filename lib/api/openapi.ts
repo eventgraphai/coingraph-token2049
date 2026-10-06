@@ -23,6 +23,7 @@ export function buildOpenApi() {
       summary: "The check before they act: verified crypto market intelligence for AI agents.",
       description: `Humans read it, agents call it. Every response carries where the data came from (sources) and when it was true (as_of); anything unmeasured is "unassessed". CoinGraph never executes, custodies or advises — the caller decides.\n\nPhase: ${PRICING_NOTES.phase}. ${PRICING_NOTES.summary}`,
       contact: { name: "CoinGraph", url: "https://coingraph.ai", email: "ajay@coingraph.ai" },
+      "x-mcp-server": `${BASE_URL}/mcp`,
     },
     servers: [{ url: `${BASE_URL}/api/v1`, description: "TOKEN2049 build" }],
     tags: [
@@ -106,6 +107,10 @@ Every response: { object, id, as_of, data, sources }. Unmeasured values are "una
 ## Trust
 - GET /record[/{token}] — public scorecard: every call we made and whether it was right
 - GET /verify/{id} — canonical object, sha256, Chainlink attestation, source provenance
+
+## MCP
+Remote MCP server (Streamable HTTP): ${BASE_URL}/mcp — Claude Code: \`claude mcp add --transport http coingraph ${BASE_URL}/mcp\`
+Tools: search_tokens, get_token_snapshot, get_token_timeline, check_token, get_token_brief, ask_about_token, watch_tokens, get_market_overview, lookup_address, get_track_record, get_proof, get_service_status
 
 ## Payments
 ${PRICING_NOTES.summary} Paid endpoints answer 402 with x402 details; pay in ADA and retry with the X-Payment header.
