@@ -4,9 +4,16 @@ import { config } from "dotenv";
 // On Railway the variables come from the environment and this is a no-op.
 config({ path: ".env.local", quiet: true });
 
+// During `next build` (Docker image, no secrets) route modules are imported to collect page data.
+// Required variables get placeholders then; at runtime a missing one still fails loudly.
+export const isBuild = process.env.NEXT_PHASE === "phase-production-build";
+
 function required(name: string): string {
   const value = process.env[name];
-  if (!value) throw new Error(`Missing required env var ${name}`);
+  if (!value) {
+    if (isBuild) return name === "DATABASE_URL" ? "postgres://build:build@localhost:5432/build" : "build-placeholder";
+    throw new Error(`Missing required env var ${name}`);
+  }
   return value;
 }
 

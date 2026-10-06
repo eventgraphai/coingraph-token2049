@@ -28,7 +28,7 @@ async function warmOnce(): Promise<void> {
 
 const g = globalThis as unknown as { coingraphWarmer?: NodeJS.Timeout };
 export function startWarmer(): void {
-  if (g.coingraphWarmer || process.env.API_WARM === "off") return;
+  if (g.coingraphWarmer || process.env.API_WARM === "off" || process.env.NEXT_PHASE === "phase-production-build") return;
   const run = () => warmOnce().catch((err) => console.warn(`[api:warm] ${(err as Error).message.slice(0, 120)}`));
   setTimeout(run, 2_000);
   g.coingraphWarmer = setInterval(run, EVERY_MS);
