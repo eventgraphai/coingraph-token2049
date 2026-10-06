@@ -200,7 +200,7 @@ export async function loadStatus() {
 
     // Coverage: 1-minute candle series on primary venues.
     sql`
-      with expected as (select venue, symbol from symbol_map where is_primary and price_check_ok),
+      with expected as (select m.venue, m.symbol from symbol_map m join tokens t using (coingecko_id) where m.is_primary and m.price_check_ok and t.in_universe),
       c as (select venue, symbol, count(*) as n, max(ts) as last from cex_ohlcv where ts > now() - interval '61 minutes' and ts < date_trunc('minute', now()) group by 1, 2)
       select count(*)::int as expected,
              count(*) filter (where c.last > now() - interval '5 minutes')::int as fresh,
@@ -210,7 +210,7 @@ export async function loadStatus() {
 
     // Coverage: futures per venue (mapped perps vs symbols seen recently).
     sql`
-      with mapped as (select venue, symbol from symbol_map where market_type = 'swap' and price_check_ok and venue in ('binanceusdm','okx','bybit'))
+      with mapped as (select m.venue, m.symbol from symbol_map m join tokens t using (coingecko_id) where m.market_type = 'swap' and m.price_check_ok and t.in_universe and m.venue in ('binanceusdm','okx','bybit'))
       select m.venue,
              count(*)::int as mapped,
              count(*) filter (where exists (select 1 from open_interest_snapshots o where o.venue = m.venue and o.symbol = m.symbol and o.exchange_ts > now() - interval '20 minutes'))::int as oi_fresh,
