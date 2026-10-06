@@ -9,7 +9,7 @@
     "lint": "eslint",
     "db:migrate": "tsx scripts/migrate.ts",
     "cg": "tsx scripts/cg.ts",
-    "worker": "DB_MAX_CONNECTIONS=6 tsx worker/index.ts",
+    "worker": "DB_MAX_CONNECTIONS=5 tsx worker/index.ts",
     "storage:setup": "tsx scripts/setup-storage.ts",
     "health": "tsx scripts/health.ts",
     "retention": "tsx scripts/retention.ts",
