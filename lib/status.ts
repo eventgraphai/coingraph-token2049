@@ -170,7 +170,7 @@ export async function loadStatus() {
         ('chain_fee_snapshots',         (select max(captured_at) from chain_fee_snapshots),        'NOWNodes · 15 min'),
         ('exchange_reserve_snapshots',  (select max(captured_at) from exchange_reserve_snapshots), 'NOWNodes · hourly'),
         ('token_holder_snapshots',      (select max(captured_at) from token_holder_snapshots),     'NOWNodes · daily'),
-        ('news_items',                  (select max(published_at) from news_items),                'RSS · 15 min'),
+        ('news_items',                  (select max(published_at) from news_items),                'RSS · 120 min'),
         ('protocol_tvl_snapshots',      (select max(captured_at) from protocol_tvl_snapshots),     'DefiLlama · 360 min'),
         ('market_sentiment_snapshots',  (select max(captured_at) from market_sentiment_snapshots), 'Fear & Greed · daily'),
         ('exchange_tickers',            (select max(captured_at) from exchange_tickers),           'CoinGecko · daily'),
