@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { remember } from "@/lib/site/data";
 import { connection } from "next/server";
 import type { Category } from "@/lib/jobs-meta";
 import { loadStatus, type Feed, type JobRow, type Level } from "@/lib/status";
@@ -88,14 +89,12 @@ const DEMO_COLUMNS: { key: string; label: string; expected: number }[] = [
   { key: "dex_pools", label: "DEX pools", expected: 900 },
 ];
 
-export default async function StatusPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+export default async function StatusPage() {
   await connection(); // always render live data at request time
 
-  // Optional gate: when STATUS_TOKEN is set, the page requires ?token=<value>.
-  const token = process.env.STATUS_TOKEN;
-  if (token && (await searchParams).token !== token) notFound();
-
-  const data = await loadStatus();
+  // Public, read-only. The load is cached briefly so a burst of visitors costs the database one query set.
+  const data = await remember("status-page", 20_000, loadStatus);
+  if (!data) notFound();
   const now = new Date(data.now);
   const { coverage, budget } = data;
 
