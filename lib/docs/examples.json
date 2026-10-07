@@ -1840,8 +1840,24 @@
      "hash_matches_stored": true,
      "canonical_bytes": 3262,
      "attestation": {
-      "status": "pending",
-      "note": "Chainlink CRE attestation is written after the workflow runs; until then the hash above is the commitment."
+      "mode": "simulation",
+      "note": "The Chainlink CRE workflow fetched this proof, recomputed the SHA-256 independently and reached consensus on the CRE simulator (a local DON). On-chain publication of the attestation is the next step.",
+      "sha256": "191799c06ad780515560070f892e1c19d7dd72e22b844e127980674a496e5599",
+      "status": "attested",
+      "network": "chainlink-cre",
+      "workflow": {
+       "id": null,
+       "name": "verify-investigation-staging",
+       "execution_id": null
+      },
+      "consensus": {
+       "nodes": null,
+       "aggregation": "identical"
+      },
+      "attested_at": "2026-10-07T12:09:13.389Z",
+      "recorded_at": "2026-10-07T12:09:29.574Z",
+      "served_sha256": "191799c06ad780515560070f892e1c19d7dd72e22b844e127980674a496e5599",
+      "matches_stored": true
      },
      "object": {
       "token": {
