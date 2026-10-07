@@ -14,6 +14,7 @@ export type Config = {
   schedule: string;
   baseUrl: string;        // CoinGraph API origin, e.g. https://token2049.coingraph.ai
   batch: number;          // proofs attested per run
+  ids?: string[];         // optional: attest exactly these proof ids instead of the pending queue
   workflowName: string;
   mode: "simulation" | "don";
 };
@@ -40,7 +41,8 @@ const headers = (key: string) => ({ [KEY_HEADER]: { values: [key] }, "content-ty
 
 // Node mode: every node asks CoinGraph for the queue; consensus requires the same list back.
 const fetchPending = (r: HTTPSendRequester, cfg: Config, key: string): PendingProof[] => {
-  const res = r.sendRequest({ url: `${cfg.baseUrl}/api/v1/attest?limit=${cfg.batch}`, method: "GET", multiHeaders: headers(key) }).result();
+  const ids = cfg.ids?.length ? `&ids=${cfg.ids.map(encodeURIComponent).join(",")}` : "";
+  const res = r.sendRequest({ url: `${cfg.baseUrl}/api/v1/attest?limit=${cfg.batch}${ids}`, method: "GET", multiHeaders: headers(key) }).result();
   if (!ok(res)) throw new Error(`attest queue failed: HTTP ${res.statusCode}`);
   const body = json(res) as { data?: { proofs?: { id: string; kind: string }[] } };
   return (body.data?.proofs ?? []).map((p) => ({ id: p.id, kind: p.kind }));

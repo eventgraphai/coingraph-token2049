@@ -207,8 +207,10 @@ export const verify = wrap(async (_req, p) => {
 // Chainlink CRE workflow: proofs waiting for attestation, and where the workflow posts its results.
 export const attestPending = wrap(async (req) => {
   requireAttestKey(req);
-  const limit = Number(new URL(req.url).searchParams.get("limit") ?? 5);
-  const proofs = await pendingProofs(Number.isFinite(limit) ? limit : 5);
+  const url = new URL(req.url);
+  const limit = Number(url.searchParams.get("limit") ?? 5);
+  const ids = (url.searchParams.get("ids") ?? "").split(",").filter(Boolean);
+  const proofs = await pendingProofs(Number.isFinite(limit) ? limit : 5, ids);
   return ok("attest_queue", { count: proofs.length, proofs, verify_url: `${BASE_URL}/api/v1/verify/{id}` }, { sources: [{ provider: "coingraph", endpoint: "attestations" }] });
 });
 

@@ -2,3 +2,4 @@
 node_modules/
 .cre_build_tmp.js
 config.local.json
+config.ids*.json

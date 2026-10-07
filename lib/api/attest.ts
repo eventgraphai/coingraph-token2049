@@ -21,8 +21,21 @@ export function requireAttestKey(req: Request): void {
   if (!attestAuthorised(req)) throw new ApiError(401, "unauthorized", `This endpoint is for the Chainlink CRE workflow; send the workflow key as ${ATTEST_HEADER}.`);
 }
 
-// Proofs issued in the last day that have no attestation yet, newest first.
-export async function pendingProofs(limit: number): Promise<{ id: string; kind: string; issued_at: Date }[]> {
+// Proofs issued in the last day that have no attestation yet, newest first. With `ids`, exactly those
+// proofs (attested or not), so a workflow run can be pointed at specific answers.
+export async function pendingProofs(limit: number, ids: string[] = []): Promise<{ id: string; kind: string; issued_at: Date }[]> {
+  const wanted = ids.map((x) => x.trim()).filter((x) => ID_RE.test(x)).slice(0, 50);
+  if (wanted.length) {
+    const rows = await sql`
+      with p as (
+        select id, 'evaluation' as kind, created_at as issued_at from evaluations where id = any(${wanted})
+        union all select id, 'answer', created_at from answers where id = any(${wanted})
+        union all select id, 'agent_run:' || agent, created_at from agent_runs where id = any(${wanted})
+        union all select id::text, 'brief', finished_at from investigations where status = 'done' and id::text = any(${wanted})
+      )
+      select id, kind, issued_at from p`;
+    return wanted.flatMap((id) => rows.filter((r) => r.id === id).map((r) => ({ id: r.id, kind: r.kind, issued_at: r.issued_at })));
+  }
   const rows = await sql`
     with p as (
       select id, 'evaluation' as kind, created_at as issued_at from evaluations where created_at > now() - interval '24 hours'
