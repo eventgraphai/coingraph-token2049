@@ -11,7 +11,7 @@ export function CoverageStrip({ c }: { c: Coverage }) {
     <div className="rounded-2xl border border-edge bg-slab p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <p className="font-semibold">The {c.total} largest tokens, tracked around the clock</p>
-        <Link href="/api/v1/tokens" className="text-[12px] text-brand hover:underline">Full list (API) →</Link>
+        <Link href="/tokens" className="text-[12px] text-brand hover:underline">Open the token explorer →</Link>
       </div>
       <div className="mt-3 flex flex-wrap gap-1.5">
         {shown.map((t) => (

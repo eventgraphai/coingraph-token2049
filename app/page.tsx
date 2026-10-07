@@ -60,7 +60,7 @@ export default async function Home() {
             </p>
             <div className="rise rise-4 mt-8 flex flex-wrap gap-3">
               <Link href="/agents" className="btn-glow rounded-lg bg-brand px-5 py-2.5 text-[14px] font-semibold text-brand-ink">Try an agent</Link>
-              <a href="#product" className="rounded-lg border border-edge bg-slab px-5 py-2.5 text-[14px] font-semibold text-bone transition-colors hover:border-brand/40">See a live check</a>
+              <Link href="/tokens" className="rounded-lg border border-edge bg-slab px-5 py-2.5 text-[14px] font-semibold text-bone transition-colors hover:border-brand/40">Explore 100 tokens</Link>
             </div>
             <div className="rise rise-5 mt-6 flex flex-wrap items-center gap-2">
               <span className="numerals inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/5 px-3 py-1 text-[11px] uppercase tracking-[0.1em] text-brand">
