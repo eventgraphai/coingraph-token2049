@@ -7,7 +7,9 @@ import { config, secrets } from './config.mjs';
 import { createStore, safeId } from './worker-state.mjs';
 import { runOnce, cliRuntime, WORKER_DIRECTORY } from './worker.mjs';
 import { createPaymentPlan, createMpsClient } from './payment.ts';
-import { createCoreRuntime } from './core-runtime.mjs';
+import { createCoreRuntime, scopeCoreRuntime } from './core-runtime.mjs';
+import { createCoreHttp } from './core-http.mjs';
+import { httpRuntime } from './http-runtime.mjs';
 import { createPaidAdapter, resumeReceipt } from './paid-adapter.mjs';
 
 const POLL_DELAY_MS = 10_000;
@@ -36,13 +38,27 @@ async function main() {
   const stop = new AbortController();
   process.once('SIGINT', () => stop.abort());
   process.once('SIGTERM', () => stop.abort());
-  const core = await createCoreRuntime(config.coworkerId, config.userId);
+  // Hosted mode: the Coworker API key from the environment, Core over HTTP, no CLI or OS vault.
+  const hosted = Boolean(process.env.SOKOSUMI_COWORKER_API_KEY);
+  let core, runtime;
+  if (hosted) {
+    const client = createCoreHttp(process.env.SOKOSUMI_COWORKER_API_KEY);
+    const me = (await client.get('/v1/coworkers/me'))?.data;
+    if (me?.id !== config.coworkerId || me.archivedAt !== null || !me.capabilities?.includes('tasks')) throw new Error('Coworker key does not match the configured Coworker.');
+    core = scopeCoreRuntime(client);
+    runtime = httpRuntime(client, config.coworkerId);
+  } else {
+    core = await createCoreRuntime(config.coworkerId, config.userId);
+    runtime = cliRuntime(config.coworkerId);
+  }
+  const store = await createStore(WORKER_DIRECTORY);
+  if (hosted && process.env.COWORKER_SINGLE_REPLICA === 'true') await store.clearLock(config.coworkerId); // stale lock from a container restart
   const dependencies = {
-    core,
-    coworkerId: config.coworkerId, store: await createStore(WORKER_DIRECTORY), runtime: cliRuntime(config.coworkerId),
+    core, coworkerId: config.coworkerId, store, runtime,
     eve: createAnalystClient({ baseUrl: config.coingraphUrl, secret: config.coworkerSecret }),
     payments: createPaidAdapter({ ...config, core, signal: stop.signal }),
   };
+  console.log(JSON.stringify({ status: 'started', mode: hosted ? 'hosted' : 'local', coworkerId: config.coworkerId }));
   if (receipt) {
     const release = await dependencies.store.lock(config.coworkerId);
     try { console.log(JSON.stringify(await resumeReceipt(safeId(args[1]), dependencies))); }
@@ -50,9 +66,14 @@ async function main() {
     return;
   }
   do {
-    console.log(JSON.stringify(await runOnce(dependencies)));
+    try { console.log(JSON.stringify(await runOnce(dependencies))); }
+    catch (error) {
+      // A stopped Task keeps its journal for inspection; keep serving other Tasks in poll mode.
+      console.error(JSON.stringify({ status: 'error', message: String(error?.message ?? error).slice(0, 240) }));
+      if (!args.includes('--poll')) throw error;
+    }
     if (!args.includes('--poll')) break;
-    await delay(POLL_DELAY_MS, undefined, { signal: stop.signal });
+    await delay(POLL_DELAY_MS, undefined, { signal: stop.signal }).catch(() => {});
   } while (!stop.signal.aborted);
 }
 

@@ -15,9 +15,14 @@ const RESULT_LIMIT = 1_048_576;
 const POLL_DELAY_MS = 10_000;
 const CLI_TIMEOUT_MS = 900_000;
 
+// Personal Workspace Tasks (organizationId null) plus any organization Workspace listed in COWORKER_ALLOWED_ORGS,
+// e.g. the TOKEN2049 event Workspace.
+const ALLOWED_ORGS = new Set((process.env.COWORKER_ALLOWED_ORGS || '').split(',').map(s => s.trim()).filter(Boolean));
+export const workspaceAllowed = organizationId => organizationId === null || ALLOWED_ORGS.has(organizationId);
+
 export function validateTask(task, coworkerId, status = 'READY') {
   safeId(task?.id);
-  if (task.status !== status || task.organizationId !== null ||
+  if (task.status !== status || !workspaceAllowed(task.organizationId ?? null) ||
       (task.assigneeId ?? task.coworkerId) !== coworkerId ||
       typeof task.description !== 'string' || !task.description.trim()) {
     throw new Error('Task identity, personal Workspace, status, or input does not match.');
@@ -85,7 +90,12 @@ export async function processTask(task, { coworkerId, store, runtime, eve, payme
     }
     state.eventId = safeId(completed.eventId);
     await save('task-completed');
-    if (payments) state.paymentProof = await payments.settle(state, save);
+    if (payments) {
+      // Collection happens after the unlock time (~35-50 min). Hand it to the settlement pass so new Tasks are
+      // served immediately instead of waiting behind this payout.
+      await save('collection-pending');
+      return { taskId: task.id, status: 'COMPLETED', eventId: state.eventId, collection: 'pending' };
+    }
     await save('completed');
     return { taskId: task.id, status: 'COMPLETED', eventId: state.eventId, executionOnly: !payments };
   } catch {
@@ -96,18 +106,37 @@ export async function processTask(task, { coworkerId, store, runtime, eve, payme
   }
 }
 
+// One check per paid Task whose payout is due: collected and verified on chain, or still pending.
+export async function settlementPass({ store, payments }) {
+  if (!payments?.settleOnce) return [];
+  const results = [];
+  for (const id of await store.ids()) {
+    const state = await store.read(id);
+    if (!state || state.stage !== 'collection-pending' || state.inspectionRequired || !state.plan) continue;
+    if (Date.now() < Date.parse(state.plan.unlockTime)) continue;
+    const save = async stage => { state.stage = stage; await store.save(state); };
+    try {
+      const proof = await payments.settleOnce(state);
+      if (proof) { state.paymentProof = proof; await save('completed'); results.push({ taskId: id, status: 'collected', txHash: proof.receipt?.txHash }); }
+      else results.push({ taskId: id, status: 'collection-pending' });
+    } catch (error) { results.push({ taskId: id, status: 'collection-check-failed', message: String(error?.message ?? error).slice(0, 160) }); }
+  }
+  return results;
+}
+
 export async function runOnce(dependencies) {
   const release = await dependencies.store.lock(dependencies.coworkerId);
   try {
-    const comments = null; // comment replies are not enabled for the CoinGraph Coworker yet
     const tasks = await dependencies.runtime.list();
+    let result = { status: 'idle' };
     for (const task of tasks) {
       const saved = await dependencies.store.read(task.id);
-      if (saved?.stage === 'completed') continue;
-      const result = await processTask(task, dependencies);
-      return comments && comments.status !== 'idle' ? { ...result, comments } : result;
+      if (saved) continue; // already handled (or stopped for inspection)
+      result = await processTask(task, dependencies);
+      break;
     }
-    return comments ?? { status: 'idle' };
+    const settlements = await settlementPass(dependencies);
+    return settlements.length ? { ...result, settlements } : result;
   } finally { await release(); }
 }
 

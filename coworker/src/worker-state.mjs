@@ -41,6 +41,9 @@ export async function createStore(directory) {
       await atomicWrite(resultPath, text);
       return resultPath;
     },
+    async clearLock(coworkerId) {
+      await rm(join(directory, `${safeId(coworkerId)}.lock`), { recursive: true, force: true });
+    },
     async lock(coworkerId) {
       const lockPath = join(directory, `${safeId(coworkerId)}.lock`);
       try { await mkdir(lockPath, { mode: 0o700 }); }

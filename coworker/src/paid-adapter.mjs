@@ -3,12 +3,14 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { createPaymentPlan, createSignedQuote, buildMasumiPaymentEvent, waitForFundsLocked,
   submitSellerResult, fetchCoreReceipt, validatePlan, validateQuote, readSellerCollection } from './payment.ts';
 import { verifySellerPayment } from './chain.ts';
+import { workspaceAllowed } from './worker.mjs';
 
 const RECEIPT_POLL_MS = 10_000;
 const COLLECTION_GRACE_MS = 30 * 60_000;
 
 export function createPaidAdapter({ source, mps, core, blockfrostKey, verify = verifySellerPayment, pause = delay, signal }) {
   return {
+    settleOnce: state => settleOnceWith({ core, mps, blockfrostKey, verify, signal }, state),
     async request(task, state, save) {
       state.plan = createPaymentPlan({ taskId: task.id, name: task.name, description: task.description }, source);
       await save('quote-pending');
@@ -54,6 +56,21 @@ export function createPaidAdapter({ source, mps, core, blockfrostKey, verify = v
   };
 }
 
+// A single, non-blocking settlement check (used by the worker's settlement pass).
+export async function settleOnceWith({ core, mps, blockfrostKey, verify = verifySellerPayment, signal }, state) {
+  validatePlan(state.plan);
+  validateQuote(state.plan, state.quote);
+  const receipt = await fetchCoreReceipt(core, state.taskId, signal);
+  const payment = await readSellerCollection(mps, state.plan, state.quote, signal);
+  if (receipt.blockchainIdentifier && receipt.blockchainIdentifier !== state.quote.blockchainIdentifier) throw new Error('Core receipt belongs to another payment.');
+  if (receipt.settled && receipt.txHash && payment.settled && payment.txHash === receipt.txHash) {
+    if (receipt.blockchainIdentifier !== state.quote.blockchainIdentifier) throw new Error('Receipt has no matching payment identifier.');
+    const proof = await verify(receipt.txHash, state.plan, blockfrostKey, signal);
+    return { receipt, proof };
+  }
+  return null;
+}
+
 export async function resumeReceipt(taskId, { store, payments, runtime, coworkerId }) {
   const state = await store.read(taskId);
   if (!state || state.coworkerId !== coworkerId || state.executionOnly || !state.eventId ||
@@ -61,7 +78,7 @@ export async function resumeReceipt(taskId, { store, payments, runtime, coworker
     throw new Error('Receipt verification requires a completed paid Task journal.');
   }
   const detail = await runtime.inspect(taskId);
-  if (detail.task.id !== taskId || detail.task.status !== 'COMPLETED' || detail.task.organizationId !== null ||
+  if (detail.task.id !== taskId || detail.task.status !== 'COMPLETED' || !workspaceAllowed(detail.task.organizationId ?? null) ||
       (detail.task.assigneeId ?? detail.task.coworkerId) !== coworkerId) throw new Error('Completed Task identity differs from the journal.');
   const text = await readFile(state.resultFile, 'utf8');
   const { hashPaymentResult } = await import('./payment.ts');

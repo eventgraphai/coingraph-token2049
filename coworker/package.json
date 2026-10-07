@@ -3,9 +3,14 @@
   "private": true,
   "type": "module",
   "description": "CoinGraph Crypto Analyst: a Masumi Coworker on Sokosumi. Payment, worker-safety and runtime code adapted from Masumi's TOKEN2049 demo template.",
-  "engines": { "node": ">=24" },
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "worker": "node src/worker.mjs",
     "worker:paid": "node src/paid-worker.mjs"
+  },
+  "dependencies": {
+    "zod": "4.6.5"
   }
 }

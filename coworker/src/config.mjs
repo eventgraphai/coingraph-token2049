@@ -23,5 +23,7 @@ export function secrets() {
 }
 
 export function config() {
+  // Hosted: the same non-secret settings arrive as COWORKER_CONFIG_JSON.
+  if (process.env.COWORKER_CONFIG_JSON) return JSON.parse(process.env.COWORKER_CONFIG_JSON);
   return JSON.parse(readFileSync(resolve(privateDir, 'config.json'), 'utf8'));
 }
