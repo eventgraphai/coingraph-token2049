@@ -5,7 +5,7 @@ import { buildRecord } from "../api/record";
 // memoised for a minute, so the homepage never shows a number this build cannot back up.
 
 const memo = new Map<string, { at: number; value: Promise<unknown> }>();
-function remember<T>(key: string, ttlMs: number, fn: () => Promise<T>): Promise<T | null> {
+export function remember<T>(key: string, ttlMs: number, fn: () => Promise<T>): Promise<T | null> {
   const hit = memo.get(key);
   if (hit && Date.now() - hit.at < ttlMs) return hit.value as Promise<T | null>;
   const value = fn().catch((e) => { console.error(`[site] ${key}:`, e instanceof Error ? e.message : e); memo.delete(key); return null; });

@@ -7,7 +7,7 @@ import { buildHistory } from "@/lib/api/history";
 import { buildRecord } from "@/lib/api/record";
 import { ApiError, BASE_URL, resolveToken } from "@/lib/api/respond";
 import { buildState } from "@/lib/api/state";
-import { ago, SIGNAL_LABEL } from "@/lib/site/data";
+import { ago, remember, SIGNAL_LABEL } from "@/lib/site/data";
 import { TONE_CHIP, toneOf } from "@/lib/site/verdict";
 import { SiteFooter, SiteHeader } from "../../_site/chrome";
 import { BarChart, compactMoney, HBars, LineChart, money, pct, pctTone, type Point } from "../../_site/charts";
@@ -36,12 +36,18 @@ export default async function TokenPage({ params }: { params: Promise<{ id: stri
   const { id } = await params;
   const token = await resolveToken(id).catch((e) => { if (e instanceof ApiError) return null; throw e; });
   if (!token) notFound();
-  const [state, history, ev, record] = await Promise.all([
-    buildState(token),
-    buildHistory(token, null).catch(() => null),
-    evaluate(token, { requester: "website" }).catch(() => null),
-    buildRecord(token.coingecko_id, null, null).catch(() => null),
-  ]);
+  // One minute of memory per token: a demo that opens the same page twice should not rebuild everything.
+  const loaded = await remember(`token-page:${token.coingecko_id}`, 60_000, async () => {
+    const [state, history, ev, record] = await Promise.all([
+      buildState(token),
+      buildHistory(token, null).catch(() => null),
+      evaluate(token, { requester: "website" }).catch(() => null),
+      buildRecord(token.coingecko_id, null, null).catch(() => null),
+    ]);
+    return { state, history, ev, record };
+  });
+  if (!loaded) notFound();
+  const { state, history, ev, record } = loaded;
   const s = state.sections as R;
   const idn = s.identity as R, m = s.market as R, liq = s.liquidity as R, der = s.derivatives as R, on = s.onchain as R, sup = s.supply as R, sec = s.security as R, ctx = s.context as R, sig = s.signals as R, brief = s.brief as R;
   const series = history?.series as R | undefined;

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { buildMarket } from "@/lib/api/market";
 import { listTokens } from "@/lib/site/explorer";
-import { ago, SIGNAL_LABEL } from "@/lib/site/data";
+import { ago, remember, SIGNAL_LABEL } from "@/lib/site/data";
 import { SiteFooter, SiteHeader } from "../_site/chrome";
 import { compactMoney, LineChart, pct, pctTone, Split, type Point } from "../_site/charts";
 import { TokenTable } from "../_site/token-table";
@@ -17,10 +17,16 @@ type R = Record<string, unknown>;
 const get = (o: unknown, p: string): unknown => p.split(".").reduce<unknown>((a, k) => (a && typeof a === "object" ? (a as R)[k] : undefined), o);
 const num = (v: unknown): number | null => (typeof v === "number" && Number.isFinite(v) ? v : null);
 const arr = <T,>(v: unknown): T[] => (Array.isArray(v) ? (v as T[]) : []);
+const dedupe = <T,>(xs: T[], key: (x: T) => string): T[] => { const seen = new Set<string>(); return xs.filter((x) => { const k = key(x); if (seen.has(k)) return false; seen.add(k); return true; }); };
 
 export default async function TokensPage() {
   await connection();
-  const [rows, market] = await Promise.all([listTokens(), buildMarket(["overview", "breadth", "sentiment", "flows", "rankings", "events"]).catch(() => null)]);
+  const loaded = await remember("tokens-page", 60_000, async () => {
+    const [rows, market] = await Promise.all([listTokens(), buildMarket(["overview", "breadth", "sentiment", "flows", "rankings", "events"]).catch(() => null)]);
+    return { rows, market };
+  });
+  const rows = loaded?.rows ?? [];
+  const market = loaded?.market ?? null;
   const m = (market?.sections ?? {}) as R;
   const ov = m.overview as R | undefined, br = m.breadth as R | undefined, se = m.sentiment as R | undefined, fl = m.flows as R | undefined, rk = m.rankings as R | undefined, evs = m.events as R | undefined;
   const fgHist: Point[] = arr<[string, number]>(get(se, "fear_greed.history_30d")).map((p) => [Date.parse(p[0]), Number(p[1])] as Point).filter((p) => Number.isFinite(p[1]));
@@ -67,7 +73,7 @@ export default async function TokensPage() {
         <section className="mt-3 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
           <Rank title="Gainers 24h" items={arr<R>(rk?.gainers_24h).slice(0, 4).map((x) => ({ id: String(x.id), symbol: String(x.symbol), value: pct(num(x.change_24h_pct), 1), tone: "text-life" }))} />
           <Rank title="Losers 24h" items={arr<R>(rk?.losers_24h).slice(0, 4).map((x) => ({ id: String(x.id), symbol: String(x.symbol), value: pct(num(x.change_24h_pct), 1), tone: "text-blood" }))} />
-          <Rank title="Open-interest moves" items={arr<R>(rk?.open_interest_moves).slice(0, 4).map((x) => ({ id: String(x.id), symbol: String(x.symbol), value: `${num(x.ratio) != null ? `${num(x.ratio)}×` : pct(num(x.value), 1)}`, tone: "text-ember" }))} />
+          <Rank title="Open-interest moves, 1h" items={dedupe(arr<R>(rk?.open_interest_moves), (x) => String(x.symbol)).slice(0, 4).map((x) => ({ id: String(x.id), symbol: String(x.symbol), value: pct(num(x.value), 1), tone: (num(x.value) ?? 0) >= 0 ? "text-life" : "text-blood" }))} />
           <div className="rounded-2xl border border-edge bg-slab p-4">
             <p className="text-[10.5px] uppercase tracking-wider text-mist">Latest signals, all tokens</p>
             <ul className="mt-2 space-y-1 text-[12px]">
