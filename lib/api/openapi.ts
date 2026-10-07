@@ -60,7 +60,7 @@ export function buildOpenApi() {
       "/monitor/{id}": { delete: { tags: ["Watch"], operationId: "monitorDelete", summary: "Stop a monitor", parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }, { name: "X-Monitor-Secret", in: "header", required: true, schema: { type: "string" } }], responses: resp("monitor", "Monitor", "Monitor") } },
       "/record": { get: { tags: ["Trust"], operationId: "record", summary: "Our public scorecard", description: "Every evaluation, signal and brief issued, what the price did 1h/24h/7d later, and whether the call was right; calibration by kind and severity.", parameters: [sinceParam, { name: "kind", in: "query", required: false, schema: { type: "string", enum: ["evaluation", "signal", "brief"] } }], responses: resp("record", "Record", "Record") } },
       "/record/{token}": { get: { tags: ["Trust"], operationId: "recordToken", summary: "The scorecard for one token", parameters: [tokenParam, sinceParam], responses: resp("record", "Record", "Record") } },
-      "/verify/{id}": { get: { tags: ["Trust"], operationId: "verify", summary: "Proof of what you were told", description: "The canonical object, its sha256, the Chainlink attestation (pending until written) and the source calls behind it.", parameters: [{ name: "id", in: "path", required: true, description: "eval_…, ans_…, run_… or a brief number", schema: { type: "string" } }], responses: resp("proof", "Proof", "Proof") } },
+      "/verify/{id}": { get: { tags: ["Trust"], operationId: "verify", summary: "Proof of what you were told", description: "The canonical object, its sha256, the Chainlink CRE attestation (pending until the workflow has reached it) and the source calls behind it.", parameters: [{ name: "id", in: "path", required: true, description: "eval_…, ans_…, run_… or a brief number", schema: { type: "string" } }], responses: resp("proof", "Proof", "Proof") } },
       "/agents": { get: { tags: ["Agents"], operationId: "agents", summary: "List the agents", description: "Every agent with its input schema, verdicts, price and an example input.", responses: resp("agent_list", "AgentList", "Agents") } },
       "/agents/{id}": { get: { tags: ["Agents"], operationId: "agent", summary: "One agent's card", parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", enum: AGENTS.map((a) => a.id) } }], responses: resp("agent", "AgentCard", "Agent") } },
       ...Object.fromEntries(AGENTS.map((a) => [`/agents/${a.id}`, { post: {
@@ -123,7 +123,7 @@ Every response: { object, id, as_of, data, sources }. Unmeasured values are "una
 
 ## Trust
 - GET /record[/{token}] — public scorecard: every call we made and whether it was right
-- GET /verify/{id} — canonical object, sha256, source provenance (Chainlink CRE attestation in progress)
+- GET /verify/{id} — canonical object, sha256, source provenance, Chainlink CRE attestation (workflow re-hashes every proof; simulator today)
 
 ## Agents
 Ready-made agents built on the data above. POST /agents/{id} with JSON input → { verdict, summary, result, reasons, run_id, verify_url }. GET /agents lists input schemas and examples.

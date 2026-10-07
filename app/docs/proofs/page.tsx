@@ -25,7 +25,7 @@ export default function Proofs() {
         <Step title="Store the exact object"><P>The object returned to you is saved as it was, with its id and time.</P></Step>
         <Step title="Fingerprint it"><P>CoinGraph writes the object as canonical JSON (keys sorted, no spaces) and takes its SHA-256. Change one character and the fingerprint changes completely.</P></Step>
         <Step title="Record the sources"><P>The data-source calls made around the issue time are listed with provider, endpoint, time, latency and outcome.</P></Step>
-        <Step title="Attest it"><P>A Chainlink CRE workflow writes the fingerprint to an attestation, so anyone can confirm what was said and when without trusting CoinGraph. Until that runs, the status is <C>pending</C> and the fingerprint itself is the commitment.</P></Step>
+        <Step title="Attest it"><P>A Chainlink CRE workflow (<C>cre/verify-investigation</C>) runs every few minutes: it fetches each new proof from <C>/v1/verify</C>, recomputes the SHA-256 on every node, requires the nodes to agree, and posts the attestation back. CoinGraph re-hashes the object before storing it, so neither side can attest a fingerprint the object does not hash to. The attestation records the workflow, the consensus rule and the time. Today it runs on the CRE simulator (<C>mode: &quot;simulation&quot;</C>), as agreed with the Chainlink team; a DON deployment is next. Until the workflow has reached a new proof, its status is <C>pending</C> and the fingerprint itself is the commitment.</P></Step>
       </Steps>
 
       <H2>Check a proof</H2>

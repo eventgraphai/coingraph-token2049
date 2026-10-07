@@ -1,3 +1,7 @@
 {
-  "schedule": "*/30 * * * * *"
+  "schedule": "0 */5 * * * *",
+  "baseUrl": "https://token2049.coingraph.ai",
+  "batch": 3,
+  "workflowName": "verify-investigation-staging",
+  "mode": "simulation"
 }

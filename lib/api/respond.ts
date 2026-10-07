@@ -18,7 +18,7 @@ export class ApiError extends Error {
 export const CORS = {
   "access-control-allow-origin": "*",
   "access-control-allow-methods": "GET, POST, DELETE, OPTIONS",
-  "access-control-allow-headers": "content-type, authorization, x-payment, x-monitor-secret",
+  "access-control-allow-headers": "content-type, authorization, x-payment, x-monitor-secret, x-cre-key",
   "access-control-expose-headers": "x-request-id, x-payment-required, x-cache, age, retry-after",
   "x-content-type-options": "nosniff",
   "referrer-policy": "no-referrer",

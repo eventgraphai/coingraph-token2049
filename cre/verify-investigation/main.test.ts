@@ -1,42 +1,32 @@
 import { describe, expect } from "bun:test";
-import { newTestRuntime, test } from "@chainlink/cre-sdk/test";
-import { onCronTrigger, initWorkflow } from "./main";
-import type { Config } from "./main";
+import { createHash } from "node:crypto";
+import { test } from "@chainlink/cre-sdk/test";
+import { canonical, fingerprint, initWorkflow, type Config } from "./main";
 
-describe("onCronTrigger", () => {
-  test("logs message and returns greeting", async () => {
-    const config: Config = { schedule: "*/5 * * * *" };
-    const runtime = newTestRuntime();
-    runtime.config = config;
+const config: Config = { schedule: "0 */5 * * * *", baseUrl: "https://token2049.coingraph.ai", batch: 3, workflowName: "verify-investigation-test", mode: "simulation" };
 
-    const result = onCronTrigger(runtime);
+describe("canonical", () => {
+  test("sorts keys at every level and writes no whitespace", () => {
+    expect(canonical({ b: 1, a: { d: [3, { z: 1, y: 2 }], c: "x" } })).toBe('{"a":{"c":"x","d":[3,{"y":2,"z":1}]},"b":1}');
+  });
+  test("matches the server's canonical form for scalars", () => {
+    expect(canonical(null)).toBe("null");
+    expect(canonical("é\"")).toBe(JSON.stringify("é\""));
+    expect(canonical(1.5)).toBe("1.5");
+  });
+});
 
-    expect(result).toBe("Hello world!");
-    const logs = runtime.getLogs();
-    expect(logs).toContain("Hello world! Workflow triggered.");
+describe("fingerprint", () => {
+  test("equals node's sha256 of the same bytes", () => {
+    const canon = canonical({ verdict: "proceed", token: { id: "chainlink", symbol: "LINK" }, size_usd: 5000 });
+    expect(fingerprint(canon)).toBe(createHash("sha256").update(canon).digest("hex"));
   });
 });
 
 describe("initWorkflow", () => {
-  test("returns one handler with correct cron schedule", async () => {
-    const testSchedule = "0 0 * * *";
-    const config: Config = { schedule: testSchedule };
-
+  test("registers one cron handler on the configured schedule", () => {
     const handlers = initWorkflow(config);
-
-    expect(handlers).toBeArray();
     expect(handlers).toHaveLength(1);
-    expect(handlers[0].trigger.config.schedule).toBe(testSchedule);
-  });
-
-  test("handler executes onCronTrigger and returns result", async () => {
-    const config: Config = { schedule: "*/5 * * * *" };
-    const runtime = newTestRuntime();
-    runtime.config = config;
-    const handlers = initWorkflow(config);
-
-    const result = handlers[0].fn(runtime, {});
-
-    expect(result).toBe(onCronTrigger(runtime));
+    expect(handlers[0].trigger.config.schedule).toBe(config.schedule);
   });
 });

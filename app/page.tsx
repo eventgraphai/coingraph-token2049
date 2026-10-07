@@ -142,7 +142,7 @@ export default async function Home() {
               ["Detect", "Eleven rules flag what changed: price, volume, leverage, whale moves, exchange flows, TVL, news."],
               ["Investigate", "Big signals open an investigation. Claude writes a brief where every claim cites evidence."],
               ["Decide", "Checks and agents turn the state into a verdict, sized to your order and your rules."],
-              ["Prove", "Each answer is stored with a SHA-256 fingerprint and its source calls. Chainlink CRE attestation is in progress."],
+              ["Prove", "Each answer is stored with a SHA-256 fingerprint and its source calls. A Chainlink CRE workflow re-hashes it independently and attests it."],
               ["Grade", "Every call is scored against what the price did next, in public."],
             ].map(([t, d], i) => (
               <li key={t} className={`sv sv-d${Math.min(i, 3)} rounded-2xl border border-edge bg-slab p-4`}>
@@ -302,7 +302,7 @@ export default async function Home() {
             <div className="mt-12 grid gap-4 lg:grid-cols-3">
               <Track name="NOWNodes" status="Live" text="Full nodes for Ethereum, BNB Chain, Bitcoin, Solana and Cardano power exchange flows and reserves, whale transfers, holder concentration, fees, and live address lookups." stat={stats ? `${compact(stats.transfers)} large transfers tracked` : undefined} />
               <Track name="Cardano · x402 · Masumi" status="Live" text="Two ways to pay CoinGraph on Cardano. Per call: the API answers 402, the agent pays in tADA with x402 and gets the verdict in seconds (facilitated by CoinGraph's own facilitator). Per Task: CoinGraph Crypto Analyst is a Masumi Coworker on Sokosumi, paid into escrow with the result hash on chain." stat="x402 live on the API · Coworker registered on Masumi" />
-              <Track name="Chainlink CRE" status="In progress" text="A Chainlink workflow attests each answer’s fingerprint, so anyone can confirm what CoinGraph said and when, without trusting CoinGraph." />
+              <Track name="Chainlink CRE" status="Simulated" text="A Chainlink CRE workflow fetches each proof, recomputes its SHA-256 on every node, reaches consensus and writes the attestation back, so anyone can confirm what CoinGraph said and when without trusting CoinGraph. Runs on the CRE simulator today, as agreed with the Chainlink team; a DON deployment is next." stat="Workflow: cre/verify-investigation · attestations visible on every /proof page" />
             </div>
           </div>
         </section>
@@ -529,12 +529,12 @@ function Tier({ name, price, usd, items, note, highlight }: { name: string; pric
   );
 }
 
-function Track({ name, status, text, stat }: { name: string; status: "Live" | "In progress"; text: string; stat?: string }) {
+function Track({ name, status, text, stat }: { name: string; status: "Live" | "Simulated" | "In progress"; text: string; stat?: string }) {
   return (
     <div className="rounded-2xl border border-edge bg-slab p-5">
       <div className="flex items-center justify-between gap-2">
         <p className="font-semibold">{name}</p>
-        <span className={`numerals rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-wider ${status === "Live" ? "border-life/35 bg-life/10 text-life" : "border-ember/35 bg-ember/10 text-ember"}`}>{status}</span>
+        <span className={`numerals rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-wider ${status === "Live" ? "border-life/35 bg-life/10 text-life" : status === "Simulated" ? "border-brand/35 bg-brand/10 text-brand" : "border-ember/35 bg-ember/10 text-ember"}`}>{status}</span>
       </div>
       <p className="mt-3 text-[13px] leading-relaxed text-mist">{text}</p>
       {stat && <p className="numerals mt-3 text-[12px] text-brand">{stat}</p>}

@@ -67,7 +67,7 @@ export default function Pricing() {
           ["Masumi Coworker on Sokosumi (escrow per Task)", <Badge key="2" tone="good">Live on Cardano preprod</Badge>],
           ["MCP server for Claude, Claude Code, Cursor", <Badge key="3" tone="good">Live, free preview</Badge>],
           ["Design-partner API keys", <Badge key="4" tone="good">Live, issued by hand</Badge>],
-          ["Chainlink CRE attestation of proofs", <Badge key="5" tone="warn">In progress</Badge>],
+          ["Chainlink CRE attestation of proofs", <Badge key="5" tone="good">Live on the CRE simulator</Badge>],
           ["Self-service accounts, usage and prepaid packs", <Badge key="6" tone="mist">Planned</Badge>],
           ["Mainnet pricing and subscriptions", <Badge key="7" tone="mist">Planned</Badge>],
         ]}

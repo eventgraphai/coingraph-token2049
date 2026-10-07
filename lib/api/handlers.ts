@@ -9,6 +9,7 @@ import { evaluate, type Policy } from "./evaluate";
 import { ask } from "./ask";
 import { buildRecord } from "./record";
 import { verifyObject } from "./verify";
+import { pendingProofs, recordAttestation, requireAttestKey, type AttestInput } from "./attest";
 import { createMonitor, deleteMonitor, listMonitors } from "./monitor";
 import { PAYMENT, PRICES, PRICING_NOTES } from "./pricing";
 import { requesterOf } from "../x402/server";
@@ -201,6 +202,32 @@ export const record = wrap((req, p) => cached(req, 60, async () => {
 export const verify = wrap(async (_req, p) => {
   const v = await verifyObject(decodeURIComponent(p.id));
   return ok("proof", v, { id: v.id, as_of: v.issued_at, sources: v.provenance.map((x) => ({ provider: x.provider, endpoint: x.endpoint, as_of: x.at })) });
+});
+
+// Chainlink CRE workflow: proofs waiting for attestation, and where the workflow posts its results.
+export const attestPending = wrap(async (req) => {
+  requireAttestKey(req);
+  const limit = Number(new URL(req.url).searchParams.get("limit") ?? 5);
+  const proofs = await pendingProofs(Number.isFinite(limit) ? limit : 5);
+  return ok("attest_queue", { count: proofs.length, proofs, verify_url: `${BASE_URL}/api/v1/verify/{id}` }, { sources: [{ provider: "coingraph", endpoint: "attestations" }] });
+});
+
+export const attestRecord = wrap(async (req) => {
+  requireAttestKey(req);
+  const body = await readJson<{ proofs?: AttestInput[]; workflow?: AttestInput["workflow"] } & AttestInput>(req);
+  const items = Array.isArray(body.proofs) ? body.proofs.slice(0, 50) : [body];
+  if (!items.length) throw new ApiError(400, "invalid_body", "Send { id, sha256 } or { proofs: [{ id, sha256 }, …], workflow }.");
+  const results = [];
+  for (const item of items) {
+    try {
+      const r = await recordAttestation({ ...item, workflow: item.workflow ?? body.workflow });
+      results.push({ id: r.id, status: "attested", created: r.created, sha256: r.attestation.sha256 });
+    } catch (e) {
+      if (!(e instanceof ApiError) || e.status >= 500) throw e;
+      results.push({ id: String(item?.id ?? ""), status: "rejected", error: e.code, message: e.message });
+    }
+  }
+  return ok("attest_result", { attested: results.filter((r) => r.status === "attested").length, rejected: results.filter((r) => r.status === "rejected").length, results }, { status: 200, sources: [{ provider: "coingraph", endpoint: "attestations" }] });
 });
 
 // --- Agents ---------------------------------------------------------------------------------------

@@ -30,13 +30,16 @@ export async function verifyObject(id: string) {
 
   const canon = canonical(object);
   const hash = sha256(canon);
+  // The Chainlink CRE workflow's attestation, when it has run for this id (see ./attest.ts).
+  const [att] = await sql`select attestation from attestations where id = ${id}`;
+  if (att?.attestation) attestation = att.attestation;
   const provenance = await sql`
     select id, provider, endpoint, started_at, latency_ms, ok, row_count from api_calls
     where started_at between ${windowFrom} and ${issuedAt} and (params->>'coin' = ${token} or params->>'wallet' is not null and provider = 'nownodes' or endpoint in ('/coins/markets', 'klines:1m', 'fetchFundingRates', 'openInterestHist:5m', 'futuresSentiment:5m', 'eth:eth_getLogs', 'bsc:eth_getLogs'))
     order by started_at desc limit 60`;
   return {
     id, kind, token, issued_at: issuedAt, sha256: hash, hash_matches_stored: storedHash ? storedHash === hash : null, canonical_bytes: Buffer.byteLength(canon),
-    attestation: attestation ?? { status: "pending", note: "Chainlink CRE attestation is written after the workflow runs; until then the hash above is the commitment." },
+    attestation: attestation ?? { status: "pending", note: "The Chainlink CRE workflow attests new proofs every few minutes; until then the hash above is the commitment." },
     object,
     provenance: provenance.map((p) => ({ call_id: Number(p.id), provider: p.provider, endpoint: p.endpoint, at: p.started_at, latency_ms: p.latency_ms, ok: p.ok, rows: p.row_count })),
   };

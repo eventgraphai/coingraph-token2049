@@ -38,7 +38,8 @@ export default async function ProofPage({ params }: { params: Promise<{ id: stri
   if (!proof) notFound();
   const obj = proof.object as Obj;
   const g = gist(proof.kind, obj);
-  const att = proof.attestation as { status?: string; note?: string } | null;
+  const att = proof.attestation as { status?: string; note?: string; mode?: string; attested_at?: string; workflow?: { name?: string; id?: string | null }; consensus?: { aggregation?: string; nodes?: number | null }; served_sha256?: string } | null;
+  const attested = att?.status === "attested";
   const api = `${BASE_URL}/api/v1/verify/${id}`;
 
   return (
@@ -64,8 +65,19 @@ export default async function ProofPage({ params }: { params: Promise<{ id: stri
         <section className="mt-8 grid gap-3 sm:grid-cols-3">
           <Check ok={proof.hash_matches_stored !== false} title="Fingerprint" detail={proof.hash_matches_stored === null ? "Computed from the stored object" : proof.hash_matches_stored ? "Matches the one stored at issue time" : "Does NOT match the stored fingerprint"} />
           <Check ok title="Sources" detail={`${proof.provenance.length} source calls recorded around issue time`} />
-          <Check ok={att?.status === "attested"} pending={att?.status !== "attested"} title="Chainlink attestation" detail={att?.status === "attested" ? "Written on chain" : "Pending: the fingerprint above is the commitment"} />
+          <Check ok={attested} pending={!attested} title="Chainlink CRE attestation" detail={attested ? `Re-hashed by the CRE workflow${att?.mode === "simulation" ? " (simulator)" : " (DON)"}${att?.attested_at ? ` · ${new Date(att.attested_at).toISOString().replace("T", " ").slice(0, 16)} UTC` : ""}` : "Pending: the workflow attests new proofs every few minutes; the fingerprint above is the commitment"} />
         </section>
+
+        {attested && (
+          <section className="mt-6 rounded-xl border border-edge bg-slab p-4 text-[13px] leading-relaxed text-mist">
+            <p className="font-semibold text-bone">What the Chainlink CRE workflow did</p>
+            <p className="mt-1">
+              <span className="numerals text-bone">{att?.workflow?.name ?? "verify-investigation"}</span> fetched this proof from <span className="numerals">/api/v1/verify/{id}</span>, recomputed the SHA-256 on every node, reached <span className="text-bone">{att?.consensus?.aggregation ?? "identical"}</span> consensus and posted the attestation; CoinGraph re-hashed the object before storing it.
+              {att?.mode === "simulation" ? " This run was on the CRE simulator (a local DON), as agreed with the Chainlink team; a DON deployment is next." : ""}
+            </p>
+            <p className="numerals mt-2 text-[12px]">Workflow fingerprint: {att?.served_sha256 && att.served_sha256 === proof.sha256 ? "matches the one above" : proof.sha256}</p>
+          </section>
+        )}
 
         <section className="mt-8">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-mist">SHA-256 fingerprint</h2>
