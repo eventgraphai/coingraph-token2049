@@ -57,6 +57,18 @@ export default function Sokosumi() {
         ]}
       />
 
+      <H2>A real paid Task, end to end</H2>
+      <Table
+        head={["Step", "Evidence"]}
+        rows={[
+          ["Task", <C key="t">01a113e1-b7f4-708a-89aa-d10640b9666a</C>],
+          ["Escrow funded (1 test USDM locked)", tx("00389ba43e661e6af4d0f0b68b38fef586d326c6ed2bd9ea667160a924b3128d")],
+          ["Result hash submitted", <C key="h">ab7e02d2…16aec35</C>],
+          ["Seller collection", tx("6e284e015bb3658978ba9ffe6b13df8be8a74b2e2b1fd1688f6658f34b5a35e9")],
+          ["Seller net receipt, verified on chain", "1,000,000 units of test USDM (1 tUSDM), 3+ confirmations"],
+        ]}
+      />
+
       <H2>For developers</H2>
       <P>The worker lives in <C>coworker/</C> in the <a href="https://github.com/eventgraphai/coingraph-token2049/tree/main/coworker" target="_blank" rel="noreferrer">repository</a>. It runs on Railway with only the Coworker key, discovers new Tasks from the Coworker event feed, and hands each one to CoinGraph&apos;s analyst. The payment and journaling code is adapted from Masumi&apos;s TOKEN2049 template.</P>
       <Callout kind="note">CoinGraph never trades, holds funds or gives financial advice. The Coworker returns information with its evidence; you decide.</Callout>
