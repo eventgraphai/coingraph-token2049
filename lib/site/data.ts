@@ -96,3 +96,24 @@ export function ago(d: Date | string, now = new Date()): string {
 }
 
 export const compact = (v: number) => Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(v);
+
+export type Coverage = { top: { symbol: string; name: string; rank: number | null; stablecoin: boolean }[]; total: number; stablecoins: number; chains: string[]; venues: string[]; categories: { name: string; n: number }[] };
+
+// What CoinGraph covers, read live: the tracked universe by market-cap rank, the chains read on chain, the exchanges
+// read for order books and futures, and the most common categories.
+export const getCoverage = () => remember<Coverage>("coverage", 300_000, async () => {
+  const [tokens, chains, venues] = await Promise.all([
+    sql`select upper(symbol) as symbol, name, market_cap_rank, is_stablecoin, coalesce(categories, '{}') as categories from tokens where in_universe order by market_cap_rank nulls last`,
+    sql`select distinct chain from onchain_contracts order by 1`,
+    sql`select venue, count(*)::int as n from symbol_map where is_primary group by 1 order by 2 desc`,
+  ]);
+  const cats = new Map<string, number>();
+  for (const t of tokens) for (const c of t.categories as string[]) if (!/index|made in usa|ecosystem/i.test(c)) cats.set(c, (cats.get(c) ?? 0) + 1);
+  return {
+    top: tokens.map((t) => ({ symbol: t.symbol, name: t.name, rank: t.market_cap_rank, stablecoin: t.is_stablecoin })),
+    total: tokens.length, stablecoins: tokens.filter((t) => t.is_stablecoin).length,
+    chains: ["eth", "bsc", "btc", "sol", "ada"].filter((c) => c === "btc" || chains.some((x) => x.chain === c)),
+    venues: venues.map((v) => String(v.venue).replace("binanceusdm", "binance futures")),
+    categories: [...cats.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8).map(([name, n]) => ({ name, n })),
+  };
+});

@@ -27,6 +27,7 @@ export const DOCS_NAV: DocGroup[] = [
       { href: "/docs", title: "Introduction", description: "What CoinGraph is and the three ways to use it." },
       { href: "/docs/quickstart", title: "Quickstart", description: "Your first check in two minutes: API, Claude or an agent." },
       { href: "/docs/access", title: "Get access", description: "Agents pay per call, companies hire on Sokosumi, partners use a key, MCP is free." },
+      { href: "/use-cases", title: "Use cases", description: "Who needs CoinGraph and what they call, with real tokens." },
       { href: "/docs/concepts", title: "Core concepts", description: "Token ids, the response envelope, sources, unassessed, verdicts and proofs." },
     ],
   },
@@ -68,7 +69,7 @@ export const DOCS_NAV: DocGroup[] = [
   },
 ];
 
-export const ALL_DOCS: (DocLink & { group: string })[] = DOCS_NAV.flatMap((g) => g.links.map((l) => ({ ...l, group: g.title })));
+export const ALL_DOCS: (DocLink & { group: string })[] = DOCS_NAV.flatMap((g) => g.links.filter((l) => l.href.startsWith("/docs")).map((l) => ({ ...l, group: g.title })));
 
 export function docMeta(href: string) {
   const i = ALL_DOCS.findIndex((d) => d.href === href);

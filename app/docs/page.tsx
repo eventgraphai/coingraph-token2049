@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Callout, Cards, DocPage, H2, P, Table, C } from "./_ui/kit";
 
 export const metadata: Metadata = { title: { absolute: "CoinGraph Docs" }, description: "CoinGraph is the check before AI agents act: verified crypto intelligence over REST, MCP and ten ready-made agents." };
@@ -23,7 +24,7 @@ export default function Intro() {
         An agent about to buy $5K of SOL needs more than a price. It needs to know whether the order book can absorb the order, whether futures are crowded, whether coins are flowing onto exchanges, whether the contract has admin powers, and whether something in the news explains the move. That means stitching together exchanges, nodes, security scanners and news feeds, continuously.
       </P>
       <P>
-        CoinGraph does that work once and returns one answer. It watches the top 100 tokens around the clock, on Ethereum, BNB Chain, Bitcoin, Solana and Cardano, and answers on demand for any address or contract.
+        CoinGraph does that work once and returns one answer. It watches the 100 largest tokens around the clock, from BTC, ETH, SOL, XRP and ADA to LINK, DOGE, UNI and AVAX, reads five chains directly (Ethereum, BNB Chain, Bitcoin, Solana and Cardano), and answers on demand for any of 21,000+ coins, any address and any contract. See <Link href="/use-cases">who uses it and for what</Link>.
       </P>
 
       <H2>Three ways in</H2>

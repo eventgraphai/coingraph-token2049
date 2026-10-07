@@ -7,6 +7,7 @@ export const DOCS_URL = "/docs";
 const NAV: [string, string][] = [
   ["Product", "/#product"],
   ["Agents", "/agents"],
+  ["Use cases", "/use-cases"],
   ["Developers", "/#developers"],
   ["Proof", "/#proof"],
   ["Pricing", "/#pricing"],
@@ -49,7 +50,7 @@ export function SiteFooter() {
             The check before they act. Sourced, timed and graded in public. CoinGraph never trades, holds funds or gives financial advice.
           </p>
         </div>
-        <FooterCol title="Product" links={[["Agents", "/agents"], ["Get access", "/docs/access"], ["Live example", "/#product"], ["Track record", "/#proof"], ["Pricing", "/#pricing"]]} />
+        <FooterCol title="Product" links={[["Agents", "/agents"], ["Use cases", "/use-cases"], ["Get access", "/docs/access"], ["Live example", "/#product"], ["Track record", "/#proof"], ["Pricing", "/#pricing"]]} />
         <FooterCol title="Developers" links={[["REST API", "/#developers"], ["MCP server", "/mcp"], ["OpenAPI", "/openapi.json"], ["llms.txt", "/llms.txt"], ["Docs", DOCS_URL], ["GitHub", GITHUB_URL]]} />
         <FooterCol title="Company" links={[["coingraph.ai", "https://coingraph.ai"], ["ajay@coingraph.ai", "mailto:ajay@coingraph.ai"], ["TOKEN2049 Origins", "/#origins"]]} />
       </div>

@@ -3,7 +3,8 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { AGENTS, TIER_PRICE } from "@/lib/agents/registry";
 import { BASE_URL } from "@/lib/api/respond";
-import { ago, compact, getExample, getFeed, getLatestBrief, getStats, SIGNAL_LABEL, type Example } from "@/lib/site/data";
+import { ago, compact, getCoverage, getExample, getFeed, getLatestBrief, getStats, SIGNAL_LABEL, type Example } from "@/lib/site/data";
+import { CoverageStrip } from "./_site/coverage";
 import { label, TONE_CHIP, TONE_TEXT, toneOf } from "@/lib/site/verdict";
 import { DOCS_URL, GITHUB_URL, SectionHead, SiteFooter, SiteHeader } from "./_site/chrome";
 import { CopyButton, Snippet } from "./_site/copy";
@@ -31,7 +32,7 @@ const MCP_URL = `${BASE_URL}/mcp`;
 
 export default async function Home() {
   await connection();
-  const [stats, example, feed, brief] = await Promise.all([getStats(), getExample(), getFeed(), getLatestBrief()]);
+  const [stats, example, feed, brief, coverage] = await Promise.all([getStats(), getExample(), getFeed(), getLatestBrief(), getCoverage()]);
   const now = new Date();
 
   return (
@@ -150,6 +151,7 @@ export default async function Home() {
               </li>
             ))}
           </ol>
+          {coverage && <div className="mt-10"><CoverageStrip c={coverage} /></div>}
           <div className="mt-10">
             <p className="numerals text-[11px] uppercase tracking-[0.16em] text-mist">Sources stitched together</p>
             <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
