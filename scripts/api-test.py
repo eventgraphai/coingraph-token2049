@@ -5,7 +5,8 @@ Usage:  python3 scripts/api-test.py                      # http://localhost:3000
         python3 scripts/api-test.py https://token2049.coingraph.ai
 Paced at ~1.1s per call to stay under the free 60 requests/minute limit. Fresh /explain and /ask calls use Claude.
 """
-import json, time, urllib.request, urllib.error, sys
+import json
+import os, time, urllib.request, urllib.error, sys
 
 ORIGIN = (sys.argv[1] if len(sys.argv) > 1 else "http://localhost:3000").rstrip("/")
 BASE = ORIGIN + "/api/v1"
@@ -16,7 +17,9 @@ def call(method, path, body=None, headers=None, expect=200, check=None, timeout=
     time.sleep(PACE_SEC)
     url = BASE + path if path.startswith("/") else ORIGIN + path[1:]
     data = json.dumps(body).encode() if body is not None else None
-    req = urllib.request.Request(url, data=data, method=method, headers={"content-type": "application/json", **(headers or {})})
+    # Paid routes: a design-partner key (API_TEST_KEY env) bypasses x402 so the suite can run end to end.
+    auth = {"authorization": f"Bearer {os.environ['API_TEST_KEY']}"} if os.environ.get("API_TEST_KEY") else {}
+    req = urllib.request.Request(url, data=data, method=method, headers={"content-type": "application/json", **auth, **(headers or {})})
     t = time.time()
     try:
         with urllib.request.urlopen(req, timeout=timeout) as r:

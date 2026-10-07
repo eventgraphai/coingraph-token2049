@@ -43,7 +43,7 @@ Every check, answer, brief and agent run is stored exactly as issued and can be 
 |---|---|---|
 | **NOWNodes** | Full nodes for Ethereum, BNB Chain, Bitcoin, Solana and Cardano: exchange flows and reserves, large transfers, holder concentration, fees, live address lookups | Live |
 | **Cardano · Masumi · Sokosumi** | CoinGraph Crypto Analyst is a Masumi Coworker on Sokosumi: hired per Task, paid 1 test USDM into Masumi escrow on Cardano Preprod, result hash on chain, payout collected and verified on chain (`coworker/`) | Live |
-| **x402 on Cardano** | Pay-per-call for the REST API and MCP | Next |
+| **x402 on Cardano** | Paid API calls answer `402 Payment Required`; agents pay in tADA (x402 v2, `exact` scheme) and get the answer in seconds. CoinGraph runs its own facilitator (`app/api/x402/facilitator`); buyer demo in `scripts/x402-buyer.ts` | Live |
 | **Chainlink CRE** | Attests each answer's fingerprint so anyone can confirm what was said and when | In progress |
 
 Other sources: CoinGecko (market data), exchanges via CCXT (order books, funding, open interest, liquidations), GoPlus (contract and address security), DefiLlama (TVL), ParaSwap / KyberSwap / Jupiter (swap quotes), OFAC sanctions lists, crypto news feeds, Fear & Greed, and Claude for cited briefs.

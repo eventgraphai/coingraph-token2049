@@ -1,47 +1,99 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PAYMENT } from "@/lib/api/pricing";
 import { CodeTabs } from "../_ui/client";
-import { Badge, C, Callout, DocPage, H2, P, Step, Steps, Table, highlightJson } from "../_ui/kit";
+import { API, Badge, C, Callout, DocPage, H2, H3, P, Step, Steps, Table, highlightJson } from "../_ui/kit";
 
-export const metadata: Metadata = { title: "Pricing & payments", description: "CoinGraph tiers, x402 pay-per-call on Cardano, and design-partner API keys." };
+export const metadata: Metadata = { title: "Pricing & payments", description: "CoinGraph tiers, x402 pay-per-call on Cardano (live on preprod), Masumi, and design-partner API keys." };
 
-const PAYMENT_REQUIRED = JSON.stringify({ x402Version: 2, error: "payment_required", accepts: [{ scheme: "exact", network: "cardano:preprod", asset: "lovelace", amount: "5000000", payTo: "addr_test1…", resource: "https://token2049.coingraph.ai/api/v1/agents/trade-gatekeeper", description: "Trade Gatekeeper run" }] }, null, 2);
+const PAYMENT_REQUIRED = JSON.stringify({
+  x402Version: 2,
+  error: "Payment required",
+  resource: { url: `${API}/agents/trade-gatekeeper`, description: "Run a CoinGraph agent (Premium tier, 5 tADA)", mimeType: "application/json", serviceName: "CoinGraph" },
+  accepts: [{ scheme: "exact", network: "cardano:preprod", amount: "5000000", asset: "lovelace", payTo: PAYMENT.address ?? "addr_test1…", maxTimeoutSeconds: 600, extra: { confirmationPolicy: { l1Confirmations: -1 } } }],
+}, null, 2);
+
+const RECEIPT = JSON.stringify({ success: true, payer: "addr_test1qrwcm2ks…szndmw", transaction: "d3a147217859d56695edf6135e4c34c5b483efa120052e7bde4215b39bd1d477", network: "cardano:preprod", extra: { status: "mempool", confirmations: -1 } }, null, 2);
+
+const BUYER = `import { wrapFetchWithPayment, x402Client } from "@x402/fetch";
+import { ExactCardanoScheme } from "@x402/cardano/exact/client";
+import { toClientCardanoSigner } from "@x402/cardano";
+
+// A preprod wallet with some tADA (faucet: docs.cardano.org/cardano-testnets/tools/faucet)
+const signer = toClientCardanoSigner({
+  mnemonic: process.env.CARDANO_BUYER_MNEMONIC!,
+  network: "cardano:preprod",
+  provider: { blockfrost: { baseUrl: "https://cardano-preprod.blockfrost.io/api/v0", projectId: process.env.BLOCKFROST_PROJECT_ID! } },
+});
+
+const client = new x402Client()
+  .register("cardano:*", new ExactCardanoScheme(signer))
+  // Never pay more than 12 tADA for one call.
+  .setSpendControls({ allowedAssets: [{ network: "cardano:*", asset: "lovelace", maxAmountPerPayment: "12000000" }] });
+
+const payingFetch = wrapFetchWithPayment(fetch, client);
+
+// 402 → pay → retry happens inside payingFetch.
+const res = await payingFetch("${API}/agents/trade-gatekeeper", {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({ token: "solana", size_usd: 5000, side: "buy" }),
+});
+const { data } = await res.json();          // { verdict: "ALLOW", summary, reasons, verify_url, … }
+const receipt = res.headers.get("PAYMENT-RESPONSE"); // base64 JSON with the Cardano transaction id`;
 
 export default function Pricing() {
   return (
     <DocPage href="/docs/pricing" lede="Agents pay per call with x402 on Cardano, with no account and no key. Apps use an API key on a contract. The free tier stays free.">
-      <Callout kind="tip" title="Free during the hackathon preview">
-        <p>Every endpoint and agent is free to use right now. Payments switch on for the paid tiers with x402 on the Cardano preprod testnet; the prices below are what will apply.</p>
-      </Callout>
+      <div className="mb-6 flex flex-wrap gap-2"><Badge tone="good">x402 live on Cardano preprod</Badge><Badge tone="brand">Prices in tADA</Badge></div>
 
       <H2>Tiers</H2>
       <Table
         head={["Tier", "Testnet", "Mainnet", "Includes"]}
         rows={[
-          [<Badge key="f" tone="good">Free</Badge>, "0", "$0", "Token list and search, status, the standard check (GET evaluate), the latest brief (GET explain), track record and proofs."],
+          [<Badge key="f" tone="good">Free</Badge>, "0", "$0", "Token list and search, status, the standard check (GET evaluate), briefs (GET explain), track record and proofs. MCP during the preview."],
           [<Badge key="d" tone="mist">Data</Badge>, "2 tADA", "$0.01", "Token state, history and market overview. The first 25 calls each day are free."],
           [<Badge key="p" tone="brand">Premium</Badge>, "5 tADA", "$0.05", "Checks sized to your order and rules, fresh investigations, questions, address lookups, monitors, and six agents."],
           [<Badge key="r" tone="brand">Pro</Badge>, "10 tADA", "$0.25", "Due Diligence Analyst, Opportunity Scout, Portfolio Checkup and Treasury Steward: agents that check many tokens or rules in one run."],
         ]}
       />
-      <P>Mainnet prices sit at market rates: $0.01 matches common per-call data pricing, and a Pro run costs less than the five to twenty calls it replaces.</P>
+      <P>Mainnet prices sit at market rates: $0.01 matches common per-call data pricing, and a Pro run costs less than the five to twenty calls it replaces. Current prices and the seller address are always published at <Link href="/docs/api/status">/v1/status</Link>.</P>
 
       <H2>How x402 works</H2>
       <P>x402 uses the HTTP status <C>402 Payment Required</C>. An agent needs only a Cardano wallet:</P>
       <Steps>
-        <Step title="Call the endpoint"><P>Without payment, a paid endpoint answers 402 with what to pay, in what asset, and to which address.</P></Step>
-        <Step title="Pay"><P>The agent signs a Cardano payment for the exact amount. Client libraries such as <C>@x402/fetch</C> with <C>@x402/cardano</C> do this automatically within a spending cap you set.</P></Step>
-        <Step title="Retry with proof of payment"><P>The agent repeats the request with the <C>X-Payment</C> header. CoinGraph verifies it through a facilitator and returns the answer.</P></Step>
+        <Step title="Call the endpoint"><P>Without payment, a paid endpoint answers 402. The <C>PAYMENT-REQUIRED</C> header (base64 JSON) says what to pay, in what asset, and to which address; the body repeats it in plain words.</P></Step>
+        <Step title="Pay"><P>The agent builds and signs a Cardano transaction for the exact amount, but does not broadcast it. <C>@x402/fetch</C> with <C>@x402/cardano</C> does this automatically within a spending cap you set.</P></Step>
+        <Step title="Retry with the signed payment"><P>The agent repeats the request with the <C>PAYMENT-SIGNATURE</C> header. CoinGraph&apos;s facilitator verifies the transaction, the answer is computed, the facilitator broadcasts the payment, and the answer is released with a <C>PAYMENT-RESPONSE</C> receipt carrying the transaction id.</P></Step>
       </Steps>
-      <CodeTabs title="402 response (illustrative)" samples={[{ label: "JSON", code: PAYMENT_REQUIRED, node: highlightJson(PAYMENT_REQUIRED) }]} />
-      <Callout kind="note">On Cardano every payment output must carry a minimum amount of ADA, which is why testnet prices start at 2 tADA. On mainnet, small calls are bought as prepaid packs.</Callout>
+      <CodeTabs title="402 response (decoded PAYMENT-REQUIRED header, real)" samples={[{ label: "JSON", code: PAYMENT_REQUIRED, node: highlightJson(PAYMENT_REQUIRED) }]} />
+      <CodeTabs title="Receipt (decoded PAYMENT-RESPONSE header, real)" samples={[{ label: "JSON", code: RECEIPT, node: highlightJson(RECEIPT) }]} />
+      <P>A whole round trip takes a few seconds. <a href="https://preprod.cardanoscan.io/transaction/d3a147217859d56695edf6135e4c34c5b483efa120052e7bde4215b39bd1d477" target="_blank" rel="noreferrer">That transaction on Cardanoscan</a>.</P>
 
-      <H2>Masumi</H2>
-      <P>CoinGraph Crypto Analyst is registered on Masumi, the agent network on Cardano, and hired per Task on Sokosumi: 1 test USDM per Task, held in Masumi escrow until the result is delivered, with the result hash recorded on chain. It runs Trade Gatekeeper, Wallet Guard and Due Diligence Analyst behind one plain-language brief. See <Link href="/docs/sokosumi">Hire on Sokosumi</Link>.</P>
+      <H3>Pay from code</H3>
+      <P>Packages: <C>@x402/fetch</C>, <C>@x402/cardano</C> and <C>@x402/core</C>, version 2.26.0.</P>
+      <CodeTabs samples={[{ label: "TypeScript", code: BUYER }]} />
+      <P>The same buyer is in the repository as <C>scripts/x402-buyer.ts</C>.</P>
+
+      <H3>Confirmation policy</H3>
+      <P>On preprod, CoinGraph releases the answer once its facilitator has broadcast the payment and the node accepted it (<C>l1Confirmations: -1</C>), because preprod blocks can be minutes apart. For real value on mainnet the policy would require block inclusion or depth, which the same code supports by changing one setting.</P>
+      <Callout kind="note">On Cardano every payment output must carry a minimum amount of ADA, which is why testnet prices start at 2 tADA. On mainnet, cent-level calls are sold as prepaid packs or priced in a stablecoin.</Callout>
+
+      <H2>Free allowances</H2>
+      <Table
+        head={["Who", "Allowance"]}
+        rows={[
+          ["Any caller", "25 Data calls a day (state, history, market)."],
+          ["The website playground", "10 Premium and 5 Pro agent runs a day, so people can try agents without a wallet."],
+          ["MCP (Claude, Cursor…)", "Free during the hackathon preview; x402 over the MCP transport is next."],
+        ]}
+      />
 
       <H2>Design partners</H2>
-      <P>Teams building agents, wallets or treasuries can use an API key instead of paying per call: send it as <C>Authorization: Bearer cg_…</C>. Keys also let assistants such as Claude use paid tools. Write to <a href="mailto:ajay@coingraph.ai?subject=CoinGraph%20design%20partner">ajay@coingraph.ai</a>.</P>
-      <P>Current prices and the payment address are always published at <Link href="/docs/api/status">/v1/status</Link>.</P>
+      <P>Teams building agents, wallets or treasuries can use an API key instead of paying per call: send it as <C>Authorization: Bearer cg_…</C>. Write to <a href="mailto:ajay@coingraph.ai?subject=CoinGraph%20design%20partner">ajay@coingraph.ai</a>.</P>
+
+      <H2>Masumi</H2>
+      <P>CoinGraph Crypto Analyst is registered on Masumi, the agent network on Cardano, and hired per Task on Sokosumi: 1 test USDM per Task, held in Masumi escrow until the result is delivered, with the result hash recorded on chain. See <Link href="/docs/sokosumi">Hire on Sokosumi</Link>.</P>
     </DocPage>
   );
 }

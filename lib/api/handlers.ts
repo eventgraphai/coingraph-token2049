@@ -11,6 +11,7 @@ import { buildRecord } from "./record";
 import { verifyObject } from "./verify";
 import { createMonitor, deleteMonitor, listMonitors } from "./monitor";
 import { PAYMENT, PRICES, PRICING_NOTES } from "./pricing";
+import { requesterOf } from "../x402/server";
 import { loadStatus } from "../status";
 import { startWarmer } from "./warm";
 
@@ -82,7 +83,7 @@ export const status = wrap((req) => cached(req, 15, async () => {
     feeds, freshness,
     budgets: { coingecko_credits_remaining: s.budget.remaining, nownodes_requests_this_month: s.budget.nownodes.usedMonth, nownodes_plan: s.budget.nownodes.plan },
     pricing: { ...PRICING_NOTES, paid_endpoints: PRICES },
-    payment: { network: PAYMENT.network, address: PAYMENT.address, facilitator: PAYMENT.facilitator, protocol: "x402" },
+    payment: { ...PAYMENT, x402_version: 2, pay_header: "PAYMENT-SIGNATURE", partner_header: "Authorization: Bearer cg_…" },
     docs: { openapi: `${BASE_URL}/api/v1/openapi.json`, llms: `${BASE_URL}/llms.txt`, api_reference: `${BASE_URL}/docs` },
   }, { as_of: s.now });
 }));
@@ -139,7 +140,7 @@ export const evaluatePost = wrap((req) => withSlot("evaluate", 8, async () => {
     for (const [k, v] of Object.entries(body.policy)) if (k !== "allow_mint_authority" ? typeof v !== "number" || !Number.isFinite(v) : typeof v !== "boolean") throw new ApiError(400, "invalid_policy", `policy.${k} has the wrong type.`);
   }
   const token = await resolveToken(body.token);
-  const e = await evaluate(token, { size_usd: body.size_usd, policy: body.policy, requester: req.headers.get("x-payment") ? "x402" : undefined });
+  const e = await evaluate(token, { size_usd: body.size_usd, policy: body.policy, requester: requesterOf(req) });
   return ok("evaluation", e.data, { id: e.id, as_of: e.as_of, sources: e.sources, status: 201 });
 }));
 
@@ -223,6 +224,6 @@ export const agentRun = wrap((req, p) => withSlot("agents", 6, async () => {
   const body = await readJson<Record<string, unknown>>(req);
   const parsed = def.input.safeParse(body);
   if (!parsed.success) throw new ApiError(400, "invalid_input", parsed.error.issues.map((i) => `${i.path.join(".") || "input"}: ${i.message}`).join("; "));
-  const { run, sources } = await runAgent(def, body, { requester: req.headers.get("x-payment") ? "x402" : "anonymous" });
+  const { run, sources } = await runAgent(def, body, { requester: requesterOf(req) });
   return ok("agent_run", run, { id: run.run_id, as_of: run.as_of, sources, status: 201 });
 }));

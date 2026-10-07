@@ -113,8 +113,10 @@ export async function readJson<T>(req: Request): Promise<T> {
 
 // Per-IP rate limit (free tier). In-memory, per process: enough for a single service.
 const buckets = new Map<string, { count: number; reset: number }>();
+export const clientIp = (req: Request) => req.headers.get("x-forwarded-for")?.split(",")[0].trim() || req.headers.get("x-real-ip") || "local";
+
 export function rateLimit(req: Request, perMinute = Number(process.env.API_RATE_LIMIT_PER_MINUTE ?? 60)): void {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || req.headers.get("x-real-ip") || "local";
+  const ip = clientIp(req);
   const now = Date.now();
   const b = buckets.get(ip);
   if (!b || b.reset < now) {

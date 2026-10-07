@@ -1,1 +1,6 @@
-export { history as GET, OPTIONS } from "@/lib/api/handlers";
+import { history, OPTIONS } from "@/lib/api/handlers";
+import { paid } from "@/lib/x402/server";
+
+export { OPTIONS };
+// Data tier: 25 free calls a day per caller, then 2 tADA.
+export const GET = paid(history, { tier: "data", group: "data", description: "A token's series and events over time" });

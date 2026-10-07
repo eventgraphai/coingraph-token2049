@@ -57,7 +57,7 @@ export default function ApiOverview() {
         ]}
       />
       <Callout kind="note" title="Payments">
-        <p>All endpoints are free during the hackathon preview. Paid tiers switch on with x402 on Cardano; see <Link href="/docs/pricing">Pricing & payments</Link>.</p>
+        <p>Discover and Trust calls are free. Data calls have a daily free allowance; Premium and Pro calls are paid per call with x402 on Cardano preprod. Design partners use an API key. See <Link href="/docs/pricing">Pricing & payments</Link>.</p>
       </Callout>
     </DocPage>
   );

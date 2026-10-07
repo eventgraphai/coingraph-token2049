@@ -72,7 +72,7 @@ export function Playground({ agents, base }: { agents: AgentCard[]; base: string
       const js = await res.json().catch(() => null);
       if (!res.ok || !js?.data) {
         const msg = js?.error?.message ?? `The agent answered ${res.status}.`;
-        setState({ status: "error", message: res.status === 402 ? `Payment required: ${msg}` : res.status === 429 ? "Too many runs from this connection. Wait a minute and try again." : msg });
+        setState({ status: "error", message: res.status === 402 ? `Today's free runs from this page are used up. Agents pay ${agent.tada} tADA per run with x402; see the docs for how.` : res.status === 429 ? "Too many runs from this connection. Wait a minute and try again." : msg });
         return;
       }
       setState({ status: "done", run: js.data as Run, ms: Date.now() - started });
@@ -159,7 +159,7 @@ export function Playground({ agents, base }: { agents: AgentCard[]; base: string
               <button type="button" onClick={run} disabled={!parsed || state.status === "running"} className="btn-glow rounded-lg bg-brand px-5 py-2 text-[14px] font-semibold text-brand-ink disabled:opacity-50">
                 {state.status === "running" ? `Running… ${elapsed.toFixed(1)}s` : `Run ${agent.name}`}
               </button>
-              {parseError ? <span className="text-[12px] text-blood">{parseError}</span> : <span className="text-[12px] text-mist">Free to try during the hackathon preview. Most runs take 2 to 20 seconds.</span>}
+              {parseError ? <span className="text-[12px] text-blood">{parseError}</span> : <span className="text-[12px] text-mist">A few free runs a day from this page. Agents pay {agent.tada} tADA per run with x402 on Cardano. Most runs take 2 to 20 seconds.</span>}
             </div>
             <Result state={state} />
           </div>

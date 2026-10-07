@@ -16,7 +16,7 @@ export default function McpConnect() {
         rows={[
           ["Server URL", <C key="u">{URL}</C>],
           ["Transport", "Streamable HTTP, stateless"],
-          ["Authentication", "None needed during the preview"],
+          ["Authentication", "None needed during the preview (MCP calls are free; the REST API's x402 pricing applies to direct HTTP calls)"],
           ["Capabilities", "22 tools, 3 prompts, server instructions"],
         ]}
       />

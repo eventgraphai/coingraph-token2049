@@ -275,11 +275,11 @@ export default async function Home() {
             <Tier name="Pro" price="10 tADA" usd="$0.25" items={["Due Diligence Analyst", "Opportunity Scout", "Portfolio Checkup", "Treasury Steward"]} />
           </div>
           <p className="mt-4 text-[13px] text-mist">
-            Testnet prices in tADA on Cardano preprod during TOKEN2049; mainnet equivalents shown in USD. Design partners use an API key instead of paying per call.
+            Live on Cardano preprod: paid calls answer 402 and settle in tADA via x402. Mainnet equivalents shown in USD. Design partners use an API key instead of paying per call.
           </p>
           <div className="mt-10 grid gap-3 md:grid-cols-3">
             {[
-              ["Agents", "Pay per call", "x402 on Cardano. No account, no key: the 402 reply says what to pay, the agent pays and retries."],
+              ["Agents", "Pay per call", "x402 on Cardano, live now. No account, no key: the 402 reply says what to pay, the agent pays in tADA and retries."],
               ["Apps & businesses", "Pay by contract", "Wallets, exchanges, funds and risk teams embed the answer at volume with an API key."],
               ["People", "Subscribe", "Traders and holders get alerts, monitoring and deeper history. Coming after the hackathon."],
             ].map(([who, how, d]) => (
@@ -297,7 +297,7 @@ export default async function Home() {
             <SectionHead id="origins" eyebrow="TOKEN2049 Origins" title="Built for the hackathon," accent="on partner rails." lede="This build adds deep on-chain coverage, ten agents, machine payments and verifiable proofs to CoinGraph." />
             <div className="mt-12 grid gap-4 lg:grid-cols-3">
               <Track name="NOWNodes" status="Live" text="Full nodes for Ethereum, BNB Chain, Bitcoin, Solana and Cardano power exchange flows and reserves, whale transfers, holder concentration, fees, and live address lookups." stat={stats ? `${compact(stats.transfers)} large transfers tracked` : undefined} />
-              <Track name="Cardano · Masumi · Sokosumi" status="Live" text="CoinGraph Crypto Analyst is a Masumi Coworker on Sokosumi. Teams and agents hire it per Task; each Task is paid 1 test USDM into Masumi escrow on Cardano Preprod, the result hash goes on chain, and the payout is collected and verified on chain. x402 pay-per-call for the API comes next." stat="Registered on Masumi · hosted 24/7" />
+              <Track name="Cardano · x402 · Masumi" status="Live" text="Two ways to pay CoinGraph on Cardano. Per call: the API answers 402, the agent pays in tADA with x402 and gets the verdict in seconds (facilitated by CoinGraph's own facilitator). Per Task: CoinGraph Crypto Analyst is a Masumi Coworker on Sokosumi, paid into escrow with the result hash on chain." stat="x402 live on the API · Coworker registered on Masumi" />
               <Track name="Chainlink CRE" status="In progress" text="A Chainlink workflow attests each answer’s fingerprint, so anyone can confirm what CoinGraph said and when, without trusting CoinGraph." />
             </div>
           </div>

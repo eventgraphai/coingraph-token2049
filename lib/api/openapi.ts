@@ -15,7 +15,11 @@ const tokenParam = { name: "token", in: "path", required: true, description: "To
 const sectionsParam = (values: string[]) => ({ name: "sections", in: "query", required: false, description: `Comma-separated list of sections to return. Default: all. Valid: ${values.join(", ")}.`, schema: { type: "string" } });
 const sinceParam = { name: "since", in: "query", required: false, description: "ISO-8601 time. Limits events (and series) to after this time.", schema: { type: "string", format: "date-time" } };
 const resp = (object: string, schema: string, description: string) => ({ 200: { description, content: { "application/json": { schema: envelope(object, `#/components/schemas/${schema}`) } } }, 400: err, 404: err, 429: err });
-const paid = (key: string) => (PRICES[key] ? ` **Paid:** ${PRICES[key].label} via x402 (402 Payment Required → pay → retry with X-Payment).` : " Free.");
+const paid = (key: string) => {
+  const p = PRICES[key];
+  if (!p) return " Free.";
+  return ` **${p.tier === "data" ? "Data" : p.tier === "pro" ? "Pro" : "Premium"} tier:** ${p.free_per_day ? `${p.free_per_day} free calls a day, then ` : ""}${p.tada} tADA per call via x402 on Cardano preprod (402 Payment Required → pay → retry with PAYMENT-SIGNATURE); design partners send an API key instead.`;
+};
 
 export function buildOpenApi() {
   return {
@@ -83,7 +87,7 @@ export function buildOpenApi() {
         AgentRun: { type: "object", properties: { run_id: { type: "string" }, agent: { type: "string" }, verdict: { type: "string" }, summary: { type: "string" }, result: { type: "object" }, reasons: { type: "array" }, warnings: { type: "array" }, hash: { type: "string" }, verify_url: { type: "string" } } },
         Monitor: { type: "object", additionalProperties: true }, MonitorList: { type: "object", additionalProperties: true }, Record: { type: "object", additionalProperties: true }, Proof: { type: "object", additionalProperties: true },
       },
-      securitySchemes: { x402: { type: "apiKey", in: "header", name: "X-Payment", description: "x402 payment proof (Cardano). Paid endpoints answer 402 with payment details." }, partner: { type: "http", scheme: "bearer", description: "Design-partner API key (cg_…): used instead of paying per call." } },
+      securitySchemes: { x402: { type: "apiKey", in: "header", name: "PAYMENT-SIGNATURE", description: "x402 v2 payment (signed Cardano transaction, base64). Paid endpoints answer 402 with a PAYMENT-REQUIRED header describing the payment." }, partner: { type: "http", scheme: "bearer", description: "Design-partner API key (cg_…): used instead of paying per call." } },
     },
   };
 }
@@ -131,7 +135,7 @@ Tools: search_tokens, get_token_snapshot, get_token_timeline, check_token, get_t
 Prompts: pre_trade_check, wallet_safety_check, token_due_diligence
 
 ## Payments
-${PRICING_NOTES.summary} Paid endpoints answer 402 with x402 details; pay in ADA and retry with the X-Payment header.
+${PRICING_NOTES.summary} Paid endpoints answer 402 with x402 payment details (PAYMENT-REQUIRED header); pay on Cardano and retry with the PAYMENT-SIGNATURE header, or send a design-partner key as Authorization: Bearer cg_….
 
 CoinGraph never executes, custodies or advises. The caller decides.
 `;

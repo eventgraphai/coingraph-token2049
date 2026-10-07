@@ -16,10 +16,10 @@ export async function generateMetadata({ params }: { params: Promise<{ endpoint:
 
 const TIER_NOTE: Record<string, string> = {
   Free: "Free, always.",
-  Data: "Data tier: 25 free calls a day, then 2 tADA per call (mainnet $0.01).",
-  Premium: "Premium tier: 5 tADA per call (mainnet $0.05).",
-  "Free · Premium": "GET is free. POST is Premium: 5 tADA per call (mainnet $0.05).",
-  "Premium · Pro": "Listing is free. Runs are Premium (5 tADA) or Pro (10 tADA) depending on the agent.",
+  Data: "Data tier: 25 free calls a day per caller, then 2 tADA per call via x402 (mainnet $0.01).",
+  Premium: "Premium tier: 5 tADA per call via x402 (mainnet $0.05).",
+  "Free · Premium": "GET is free. POST is Premium: 5 tADA per call via x402 (mainnet $0.05).",
+  "Premium · Pro": "Listing is free. Runs are Premium (5 tADA) or Pro (10 tADA) via x402, depending on the agent.",
 };
 
 export default async function EndpointPage({ params }: { params: Promise<{ endpoint: string }> }) {
@@ -75,7 +75,7 @@ export default async function EndpointPage({ params }: { params: Promise<{ endpo
       {e.notes && typeof e.notes !== "string" && <Callout kind="note">{e.notes}</Callout>}
 
       <H2 id="pricing">Pricing</H2>
-      <P>{TIER_NOTE[e.tier]} Free during the hackathon preview. <Link href="/docs/pricing">How payment works</Link>.</P>
+      <P>{TIER_NOTE[e.tier]} Without payment a paid call answers <C>402</C> with a <C>PAYMENT-REQUIRED</C> header; design partners send <C>Authorization: Bearer cg_…</C> instead. <Link href="/docs/pricing">How payment works</Link>.</P>
       {e.slug === "agents" && example("agent:trade-gatekeeper:reduce") && <P>See every agent&apos;s inputs and real examples under <Link href="/docs/agents">Agents</Link>.</P>}
     </DocPage>
   );

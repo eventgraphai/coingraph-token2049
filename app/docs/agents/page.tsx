@@ -54,7 +54,7 @@ export default function AgentsOverview() {
         ["Pro", "10 tADA", "$0.25", "Due Diligence Analyst, Opportunity Scout, Portfolio Checkup, Treasury Steward"],
       ]} />
       <Callout kind="note">
-        <p>Free to run here during the hackathon preview. Trade Gatekeeper, Wallet Guard and Due Diligence Analyst can also be hired as a paid Coworker on Sokosumi, settled through Masumi escrow on Cardano. See <Link href="/docs/sokosumi">Hire on Sokosumi</Link> and <Link href="/docs/pricing">Pricing & payments</Link>.</p>
+        <p>Agents pay per run with x402 on Cardano preprod (5 or 10 tADA); the website playground has a small daily allowance, and design partners use an API key. Trade Gatekeeper, Wallet Guard and Due Diligence Analyst can also be hired as a paid Coworker on Sokosumi, settled through Masumi escrow. See <Link href="/docs/pricing">Pricing & payments</Link> and <Link href="/docs/sokosumi">Hire on Sokosumi</Link>.</p>
       </Callout>
       <Callout kind="warn" title="Not advice">
         <p>Agents return information with its evidence. They never trade, hold funds or give financial advice; the caller decides.</p>

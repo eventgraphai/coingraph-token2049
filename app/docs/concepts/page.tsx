@@ -83,7 +83,7 @@ export default function Concepts() {
         rows={[
           ["400", "The request is invalid", <C key="1">invalid_input, invalid_json, token_required, invalid_chain, invalid_address, question_or_claim</C>],
           ["401", "A monitor secret is missing or wrong", <C key="6">secret_required</C>],
-          ["402", "Payment required (paid tiers, once x402 is live)", "x402 payment details in the body"],
+          ["402", "Payment required: pay with x402 and retry, or send a partner key", <C key="2">payment_required, settlement_failed</C>],
           ["404", "Nothing matches", <C key="3">token_not_found, agent_not_found, no_brief, not_found</C>],
           ["413", "The body is over 16 KB", <C key="7">body_too_large</C>],
           ["429", "Too many requests, or the investigation queue is full", <C key="4">rate_limited, investigations_busy, busy</C>],
