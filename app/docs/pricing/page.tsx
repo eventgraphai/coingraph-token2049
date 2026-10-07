@@ -57,7 +57,21 @@ export default function Pricing() {
           [<Badge key="r" tone="brand">Pro</Badge>, "10 tADA", "$0.25", "Due Diligence Analyst, Opportunity Scout, Portfolio Checkup and Treasury Steward: agents that check many tokens or rules in one run."],
         ]}
       />
-      <P>Mainnet prices sit at market rates: $0.01 matches common per-call data pricing, and a Pro run costs less than the five to twenty calls it replaces. Current prices and the seller address are always published at <Link href="/docs/api/status">/v1/status</Link>.</P>
+      <P>Mainnet prices sit at market rates: $0.01 per call is in line with CoinGecko, CoinMarketCap and Nansen per-call data plans, and a Pro run costs less than the five to twenty calls it replaces. Current prices and the seller address are always published at <Link href="/docs/api/status">/v1/status</Link>.</P>
+
+      <H2>What is live today</H2>
+      <Table
+        head={["Capability", "Status"]}
+        rows={[
+          ["x402 pay-per-call on the REST API", <Badge key="1" tone="good">Live on Cardano preprod</Badge>],
+          ["Masumi Coworker on Sokosumi (escrow per Task)", <Badge key="2" tone="good">Live on Cardano preprod</Badge>],
+          ["MCP server for Claude, Claude Code, Cursor", <Badge key="3" tone="good">Live, free preview</Badge>],
+          ["Design-partner API keys", <Badge key="4" tone="good">Live, issued by hand</Badge>],
+          ["Chainlink CRE attestation of proofs", <Badge key="5" tone="warn">In progress</Badge>],
+          ["Self-service accounts, usage and prepaid packs", <Badge key="6" tone="mist">Planned</Badge>],
+          ["Mainnet pricing and subscriptions", <Badge key="7" tone="mist">Planned</Badge>],
+        ]}
+      />
 
       <H2>How x402 works</H2>
       <P>x402 uses the HTTP status <C>402 Payment Required</C>. An agent needs only a Cardano wallet:</P>
@@ -68,7 +82,7 @@ export default function Pricing() {
       </Steps>
       <CodeTabs title="402 response (decoded PAYMENT-REQUIRED header, real)" samples={[{ label: "JSON", code: PAYMENT_REQUIRED, node: highlightJson(PAYMENT_REQUIRED) }]} />
       <CodeTabs title="Receipt (decoded PAYMENT-RESPONSE header, real)" samples={[{ label: "JSON", code: RECEIPT, node: highlightJson(RECEIPT) }]} />
-      <P>A whole round trip takes a few seconds. <a href="https://preprod.cardanoscan.io/transaction/d3a147217859d56695edf6135e4c34c5b483efa120052e7bde4215b39bd1d477" target="_blank" rel="noreferrer">That transaction on Cardanoscan</a>.</P>
+      <P>A whole round trip takes a few seconds. <a href="https://preprod.cardanoscan.io/transaction/d3a147217859d56695edf6135e4c34c5b483efa120052e7bde4215b39bd1d477" target="_blank" rel="noreferrer">That transaction on Cardanoscan</a>. The facilitator is not custodial: it only verifies and broadcasts a transaction the agent has already signed, and never holds funds.</P>
 
       <H3 id="pay-from-code">Pay from code</H3>
       <P>Packages: <C>@x402/fetch</C>, <C>@x402/cardano</C> and <C>@x402/core</C>, version 2.26.0.</P>
@@ -84,16 +98,16 @@ export default function Pricing() {
         head={["Who", "Allowance"]}
         rows={[
           ["Any caller", "25 Data calls a day (state, history, market)."],
-          ["The website playground", "10 Premium and 5 Pro agent runs a day, so people can try agents without a wallet."],
-          ["MCP (Claude, Cursor…)", "Free during the hackathon preview; x402 over the MCP transport is next."],
+          ["The website playground", "10 Premium and 5 Pro agent runs a day per visitor, so people can try agents without a wallet."],
+          ["MCP (Claude, Cursor…)", "Free during the hackathon preview, including agent runs; the same calls cost 5–10 tADA over REST. After the preview, MCP carries the same tiers."],
         ]}
       />
 
       <H2>Design partners</H2>
-      <P>Teams building agents, wallets or treasuries can use an API key instead of paying per call: send it as <C>Authorization: Bearer cg_…</C>. Write to <a href="mailto:ajay@coingraph.ai?subject=CoinGraph%20design%20partner">ajay@coingraph.ai</a>.</P>
+      <P>Early integrators (teams building agents, wallets or treasuries) get a free key in exchange for feedback, and use it instead of paying per call: send it as <C>Authorization: Bearer cg_…</C>. Write to <a href="mailto:ajay@coingraph.ai?subject=CoinGraph%20design%20partner">ajay@coingraph.ai</a>.</P>
 
       <H2>Masumi</H2>
-      <P>CoinGraph Crypto Analyst is registered on Masumi, the agent network on Cardano, and hired per Task on Sokosumi: 1 test USDM per Task, held in Masumi escrow until the result is delivered, with the result hash recorded on chain. See <Link href="/docs/sokosumi">Hire on Sokosumi</Link>.</P>
+      <P>Masumi is Cardano&apos;s agent-payment and registry protocol; Sokosumi is its marketplace, where companies hire AI “Coworkers” per Task. CoinGraph Crypto Analyst is registered on Masumi and hired on Sokosumi for 1 test USDM per Task (USDM is a USD stablecoin on Cardano; the test version runs on preprod), held in escrow until the result is delivered, with the result hash recorded on chain. See <Link href="/docs/sokosumi">Hire on Sokosumi</Link>.</P>
     </DocPage>
   );
 }

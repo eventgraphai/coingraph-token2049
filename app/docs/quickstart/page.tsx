@@ -26,6 +26,7 @@ export default function Quickstart() {
         <Step title="Size it to your order">
           <P>Add your order size and rules with <C>POST</C>. CoinGraph compares the order with order-book depth, daily volume and the best on-chain route.</P>
           <Request method="POST" path="/evaluate" body={{ token: "solana", size_usd: 5000, policy: { min_depth_usd: 1000000, max_funding_pct: 0.05 } }} />
+          <P>Here <C>max_funding_pct: 0.05</C> means 0.05% per 8 hours, and <C>min_depth_usd</C> is the liquidity required within 2% of the price.</P>
         </Step>
         <Step title="Prove it later">
           <P>Every check has an id. Fetch its proof any time: the exact object, its SHA-256 fingerprint and the source calls behind it.</P>
@@ -49,7 +50,7 @@ export default function Quickstart() {
       <P>Agents do a whole job in one call. Trade Gatekeeper decides whether a trade should go ahead:</P>
       <Request method="POST" path="/agents/trade-gatekeeper" body={{ token: "solana", size_usd: 5000, side: "buy" }} />
       <P>
-        It answers <C>ALLOW</C>, <C>REDUCE</C> (with a safe size) or <C>BLOCK</C>, with the reasons. Direct API runs are paid per call with x402 (5 tADA here); the <Link href="/agents">playground</Link> gives a few free runs a day, and <Link href="/docs/access">Get access</Link> covers every path including partner keys.
+        It answers <C>ALLOW</C>, <C>REDUCE</C> (with a safe size) or <C>BLOCK</C>, with the reasons. Copying that curl gives you HTTP 402: that is the payment prompt, not an error. Pay with x402 (5 tADA here), use a partner key (judges have one in the submission), or run it free in the <Link href="/agents">playground</Link> (10 Premium and 5 Pro runs a day). <Link href="/docs/access">Get access</Link> covers every path.
       </P>
 
       <H2 id="next">Next steps</H2>

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 // Example inputs people can run with one click. The first one is the agent's own example.
 const PRESETS: Record<string, [string, Record<string, unknown>][]> = {
-  "trade-gatekeeper": [["Buy $5K of SOL", { token: "solana", size_usd: 5000, side: "buy" }], ["Sell $8K of LINK", { token: "chainlink", size_usd: 8000, side: "sell" }], ["Buy $10K of RAIN, max 0.25% impact", { token: "rain", size_usd: 10000, side: "buy", max_impact_pct: 0.25 }], ["Buy $10K of LEO", { token: "leo-token", size_usd: 10000, side: "buy" }]],
+  "trade-gatekeeper": [["Buy $5K of SOL", { token: "solana", size_usd: 5000, side: "buy" }], ["Sell $8K of LINK", { token: "chainlink", size_usd: 8000, side: "sell" }], ["Buy $10K of RAIN (a thin token), max 0.25% impact", { token: "rain", size_usd: 10000, side: "buy", max_impact_pct: 0.25 }], ["Buy $10K of LEO", { token: "leo-token", size_usd: 10000, side: "buy" }]],
   "wallet-guard": [["Swap $5K into LINK, send to Binance", { token: "chainlink", amount_usd: 5000, to_address: "0x28c6c06298d514db089934071355e5743bf21d60", chain: "eth" }], ["Send to a sanctioned address", { to_address: "0x0330070fd38ec3bb94f58fa55d40368271e9e54a", chain: "eth" }], ["Swap $2K into ADA", { token: "cardano", amount_usd: 2000 }]],
   "due-diligence-analyst": [["Cardano", { token: "cardano" }], ["Chainlink", { token: "chainlink" }], ["Solana", { token: "solana" }]],
   "opportunity-scout": [["Top 3 setups", { limit: 3 }], ["Top 5 setups", { limit: 5 }]],

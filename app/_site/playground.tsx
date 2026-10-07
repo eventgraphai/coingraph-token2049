@@ -159,7 +159,7 @@ export function Playground({ agents, base }: { agents: AgentCard[]; base: string
               <button type="button" onClick={run} disabled={!parsed || state.status === "running"} className="btn-glow rounded-lg bg-brand px-5 py-2 text-[14px] font-semibold text-brand-ink disabled:opacity-50">
                 {state.status === "running" ? `Running… ${elapsed.toFixed(1)}s` : `Run ${agent.name}`}
               </button>
-              {parseError ? <span className="text-[12px] text-blood">{parseError}</span> : <span className="text-[12px] text-mist">A few free runs a day from this page. Agents pay {agent.tada} tADA per run with x402 on Cardano. Most runs take 2 to 20 seconds.</span>}
+              {parseError ? <span className="text-[12px] text-blood">{parseError}</span> : <span className="text-[12px] text-mist">Free from this page: 10 Premium and 5 Pro runs a day. Agents calling the API pay {agent.tada} tADA per run with x402 on Cardano (≈ ${agent.usd} on mainnet). Most runs take 2 to 20 seconds.</span>}
             </div>
             <Result state={state} />
           </div>

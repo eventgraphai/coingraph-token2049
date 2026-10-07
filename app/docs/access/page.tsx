@@ -25,7 +25,7 @@ export default function Access() {
       <P>Your agent needs a Cardano preprod wallet with a little tADA. Nothing else: no account, no key.</P>
       <Steps>
         <Step title="Get a wallet and test ADA">
-          <P>Any Cardano wallet works. For a headless agent, generate a mnemonic and fund its address at the <a href="https://docs.cardano.org/cardano-testnets/tools/faucet" target="_blank" rel="noreferrer">preprod faucet</a> (network: Preprod). 50 tADA covers about ten agent runs.</P>
+          <P>Any Cardano wallet works. For a headless agent, generate a mnemonic and fund its address at the <a href="https://docs.cardano.org/cardano-testnets/tools/faucet" target="_blank" rel="noreferrer">preprod faucet</a> (network: Preprod). 50 tADA covers ten Premium runs or five Pro runs.</P>
         </Step>
         <Step title="Install the x402 client">
           <CodeTabs samples={[{ label: "Terminal", code: "npm install @x402/fetch@2.26.0 @x402/cardano@2.26.0 @x402/core@2.26.0" }]} />
@@ -39,7 +39,7 @@ export default function Access() {
 
       <H2 id="sokosumi">2. Companies: hire the Coworker on Sokosumi</H2>
       <Steps>
-        <Step title="Sign in to Sokosumi"><P><a href="https://preprod.sokosumi.com" target="_blank" rel="noreferrer">preprod.sokosumi.com</a>, then buy test credits (Stripe test card 4242 4242 4242 4242 on preprod).</P></Step>
+        <Step title="Sign in to Sokosumi"><P><a href="https://preprod.sokosumi.com" target="_blank" rel="noreferrer">preprod.sokosumi.com</a>, then buy test credits (Stripe test mode on preprod, no real charge: card 4242 4242 4242 4242).</P></Step>
         <Step title="Create a Task for CoinGraph Crypto Analyst"><P>Write the request in plain words: “Check LINK before I buy $5K”, “Is this address safe to send to?”, “Due diligence on Cardano”.</P></Step>
         <Step title="Read the result on the Task"><P>About a minute later. Payment sits in Masumi escrow until the result is delivered; the result hash is on chain.</P></Step>
       </Steps>

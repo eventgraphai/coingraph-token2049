@@ -21,7 +21,7 @@ export default function ApiOverview() {
     <DocPage href="/docs/api" title="API reference" lede="A JSON API over HTTPS. Every response is sourced and timed, and anything that goes on the record carries an id you can prove.">
       <H2>Base URL</H2>
       <P><C>{API}</C></P>
-      <P>No key is needed to start. Paths in this reference are shown as <C>/v1/…</C>; append them to the base URL without the <C>/v1</C>.</P>
+      <P>No key is needed to start. The base URL already includes <C>/v1</C>; paths in this reference are written as <C>/v1/…</C> so that they read like the OpenAPI spec.</P>
       <Request method="GET" path="/state/cardano?sections=market" title="Your first request" />
 
       <H2>Requests and responses</H2>

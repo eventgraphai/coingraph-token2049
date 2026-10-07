@@ -11,7 +11,7 @@ export default function Intro() {
         cols={3}
         items={[
           { title: "Quickstart", href: "/docs/quickstart", text: "Check Chainlink, ask Claude about Cardano, and run an agent on Solana. About two minutes.", tag: "Start here" },
-          { title: "API reference", href: "/docs/api", text: "Twelve REST endpoints in five groups: discover, understand, decide, watch, trust.", tag: "REST" },
+          { title: "API reference", href: "/docs/api", text: "Twelve REST endpoints in five groups (discover, understand, decide, watch, trust) plus the agents route.", tag: "REST" },
           { title: "MCP server", href: "/docs/mcp", text: "Add CoinGraph to Claude, Claude Code or Cursor. 22 tools and 3 prompts.", tag: "MCP" },
           { title: "Agents", href: "/docs/agents", text: "Ten agents that each do a whole job, from pre-trade checks to due diligence.", tag: "10 agents" },
           { title: "Proofs & track record", href: "/docs/proofs", text: "How fingerprints, source lists and public grading make answers checkable.", tag: "Trust" },
@@ -43,7 +43,7 @@ export default function Intro() {
         head={["Principle", "What it means for you"]}
         rows={[
           ["Sourced", <>Every response lists its <C key="s">sources</C> and its <C key="a">as_of</C> time.</>],
-          ["Honest about gaps", <>Anything not measured is the string <C key="u">&quot;unassessed&quot;</C>, never a guess.</>],
+          ["Honest about gaps", <>Anything not measured is the string <C key="u">&quot;unassessed&quot;</C>, never a guess. A new memecoin with no GoPlus report returns <C key="c">contract: &quot;unassessed&quot;</C>, so Trade Gatekeeper never says ALLOW on a contract it never read.</>],
           ["Checkable", "Checks, answers, briefs and agent runs carry an id. Its SHA-256 fingerprint proves what was said."],
           ["Graded in public", "Every call is compared with what the price did next, and the record is open."],
           ["Neutral", "CoinGraph never trades, holds funds or gives financial advice. The caller decides."],

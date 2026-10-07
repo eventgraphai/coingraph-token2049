@@ -5,7 +5,7 @@ import { AGENTS, TIER_PRICE } from "@/lib/agents/registry";
 import { BASE_URL } from "@/lib/api/respond";
 import { ago, compact, getCoverage, getExample, getFeed, getLatestBrief, getStats, SIGNAL_LABEL, type Example } from "@/lib/site/data";
 import { CoverageStrip } from "./_site/coverage";
-import { label, TONE_CHIP, TONE_TEXT, toneOf } from "@/lib/site/verdict";
+import { TONE_CHIP, TONE_TEXT, toneOf } from "@/lib/site/verdict";
 import { DOCS_URL, GITHUB_URL, SectionHead, SiteFooter, SiteHeader } from "./_site/chrome";
 import { CopyButton, Snippet } from "./_site/copy";
 import { ProofForm } from "./_site/proof-form";
@@ -56,7 +56,7 @@ export default async function Home() {
               CoinGraph is the check before they act.
             </p>
             <p className="rise rise-3 mt-5 max-w-xl text-[16px] leading-relaxed text-mist">
-              Fragmented crypto data in. One verifiable answer out. Every number is sourced and timed, every verdict comes with its reasons, and every answer carries a fingerprint you can check.
+              Ask “Can my agent buy $5K of SOL right now?” and get ALLOW, with the order-book depth, funding, exchange flows and contract check behind it, plus an id anyone can verify. Every number sourced and timed; anything unmeasured says so.
             </p>
             <div className="rise rise-4 mt-8 flex flex-wrap gap-3">
               <Link href="/agents" className="btn-glow rounded-lg bg-brand px-5 py-2.5 text-[14px] font-semibold text-brand-ink">Try an agent</Link>
@@ -76,7 +76,7 @@ export default async function Home() {
 
         {/* ---------------------------------------------------------------- Live numbers */}
         <section aria-label="Live numbers" className="relative border-y border-edge bg-ink/60">
-          <div className="mx-auto grid max-w-6xl grid-cols-2 gap-px px-4 sm:px-8 md:grid-cols-4 lg:grid-cols-7">
+          <div className="mx-auto grid max-w-6xl grid-cols-2 gap-px px-4 sm:px-8 md:grid-cols-4 lg:grid-cols-7" title="Live numbers from this build's database">
             <Stat value={stats ? String(stats.tokens) : "100"} label="tokens tracked deeply" />
             <Stat value={stats ? String(stats.venues) : "—"} label="exchanges read" />
             <Stat value="5" label="chains read live via NOWNodes" />
@@ -85,6 +85,7 @@ export default async function Home() {
             <Stat value={stats ? String(stats.briefs) : "—"} label="cited briefs written" />
             <Stat value={stats ? compact(stats.checks) : "—"} label="checks issued with proofs" />
           </div>
+          <p className="mx-auto max-w-6xl px-4 pb-3 text-[11px] text-mist sm:px-8">Live from this build&apos;s database; health and freshness at <a href="/api/v1/status" className="text-brand hover:underline">/api/v1/status</a>.</p>
         </section>
 
         {/* ---------------------------------------------------------------- Problem */}
@@ -117,7 +118,7 @@ export default async function Home() {
               ))}
               <div className="rounded-2xl border border-brand/25 bg-brand/[0.06] p-5">
                 <p className="text-[15px] text-bone">
-                  <span className="font-semibold text-brand">Why now:</span> agents can already read markets (MCP) and pay for data (x402). What they lack is a neutral check, with evidence, before they move money.
+                  <span className="font-semibold text-brand">Why now:</span> agents can already read markets (MCP, the tool protocol Claude and Cursor use) and pay for data (x402, pay-per-request over HTTP 402). What they lack is a neutral check, with evidence, before they move money.
                 </p>
               </div>
             </div>
@@ -141,7 +142,7 @@ export default async function Home() {
               ["Detect", "Eleven rules flag what changed: price, volume, leverage, whale moves, exchange flows, TVL, news."],
               ["Investigate", "Big signals open an investigation. Claude writes a brief where every claim cites evidence."],
               ["Decide", "Checks and agents turn the state into a verdict, sized to your order and your rules."],
-              ["Prove", "Each answer is stored with a SHA-256 fingerprint and its source calls; Chainlink attests it."],
+              ["Prove", "Each answer is stored with a SHA-256 fingerprint and its source calls. Chainlink CRE attestation is in progress."],
               ["Grade", "Every call is scored against what the price did next, in public."],
             ].map(([t, d], i) => (
               <li key={t} className={`sv sv-d${Math.min(i, 3)} rounded-2xl border border-edge bg-slab p-4`}>
@@ -178,11 +179,11 @@ export default async function Home() {
                   <p className="font-semibold text-bone group-hover:text-brand">{a.name}</p>
                   <p className="mt-1.5 flex-1 text-[13px] leading-snug text-mist">{a.tagline}</p>
                   <div className="mt-3 flex flex-wrap gap-1">
-                    {a.verdicts.slice(0, 3).map((v) => (
-                      <span key={v} className={`numerals rounded border px-1.5 py-0.5 text-[10px] ${TONE_CHIP[toneOf(v)]}`}>{label(v)}</span>
+                    {(a.verdicts.length > 4 ? [`${a.verdicts[0]}–${a.verdicts[a.verdicts.length - 1]}`] : a.verdicts).map((v) => (
+                      <span key={v} className={`numerals rounded border px-1.5 py-0.5 text-[10px] ${TONE_CHIP[toneOf(v.split("–")[0])]}`}>{v}</span>
                     ))}
                   </div>
-                  <p className="numerals mt-3 text-[11px] text-mist">{a.tier} · {TIER_PRICE[a.tier].tada} tADA</p>
+                  <p className="numerals mt-3 text-[11px] text-mist">{a.tier} · {TIER_PRICE[a.tier].tada} tADA <span className="text-mist/70">(≈ ${TIER_PRICE[a.tier].usd} on mainnet)</span></p>
                 </Link>
               ))}
             </div>
@@ -229,7 +230,7 @@ export default async function Home() {
                     ) : null;
                   })}
                 </ul>
-                <p className="mt-3 text-[13px] leading-relaxed text-mist">Every check, signal and brief is compared with the price 1 hour, 24 hours and 7 days later. The record started on 6 October 2026; misses stay on it.</p>
+                <p className="mt-3 text-[13px] leading-relaxed text-mist">Every check, signal and brief is compared with the price 1 hour, 24 hours and 7 days later. Signals are alerts, not calls; briefs are the directional product. The record started on 6 October 2026; misses stay on it.</p>
                 {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- JSON API route, not a page */}
                 <a href="/api/v1/record" className="mt-3 inline-block text-[13px] text-brand hover:underline">See the full record →</a>
               </div>
@@ -282,7 +283,7 @@ export default async function Home() {
           </p>
           <div className="mt-10 grid gap-3 md:grid-cols-3">
             {[
-              ["Agents", "Pay per call", "x402 on Cardano, live now. No account, no key: the 402 reply says what to pay, the agent pays in tADA and retries."],
+              ["Agents", "Pay per call", "x402 on Cardano, live now. No account, no key: the 402 reply says what to pay, the agent pays in tADA and retries. Real receipts: an x402 payment and a Masumi payout, both on chain (see Pricing & payments)."],
               ["Apps & businesses", "Pay by contract", "Wallets, exchanges, funds and risk teams embed the answer at volume with an API key."],
               ["People", "Subscribe", "Traders and holders get alerts, monitoring and deeper history. Coming after the hackathon."],
             ].map(([who, how, d]) => (
@@ -549,7 +550,8 @@ function Comparison() {
     ["Says “unknown” instead of guessing", [0, 0, 0, 2]],
     ["Built for agents to call", [1, 2, 2, 2]],
     ["Stays neutral: never executes", [2, 2, 0, 2]],
-    ["Gets stronger with every check", [0, 0, 0, 2]],
+    ["Graded against the price 1h/24h/7d later, in public", [0, 0, 0, 2]],
+    ["Historical depth and custom SQL", [1, 2, 2, 0]],
   ];
   const dot = (v: number, us: boolean) => (
     <span className={`inline-block h-3 w-3 rounded-full border ${us ? "border-brand" : "border-mist/60"}`} style={{ background: v === 2 ? (us ? "var(--color-brand)" : "var(--color-bone)") : v === 1 ? `linear-gradient(90deg, ${us ? "var(--color-brand)" : "var(--color-bone)"} 50%, transparent 50%)` : "transparent" }} />

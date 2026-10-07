@@ -9,7 +9,7 @@ const NAV: [string, string][] = [
   ["Agents", "/agents"],
   ["Use cases", "/use-cases"],
   ["Developers", "/#developers"],
-  ["Proof", "/#proof"],
+  ["Track record", "/#proof"],
   ["Pricing", "/#pricing"],
   ["Docs", DOCS_URL],
 ];

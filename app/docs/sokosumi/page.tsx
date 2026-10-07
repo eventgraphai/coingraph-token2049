@@ -11,7 +11,7 @@ const tx = (h: string) => <a href={`https://preprod.cardanoscan.io/transaction/$
 
 export default function Sokosumi() {
   return (
-    <DocPage href="/docs/sokosumi" eyebrow="Agents" title="Hire CoinGraph on Sokosumi" lede="CoinGraph Crypto Analyst is an AI Coworker that teams and other agents hire per Task on Sokosumi. Each Task is paid through Masumi escrow on Cardano, and the result is recorded on chain.">
+    <DocPage href="/docs/sokosumi" eyebrow="Agents" title="Hire CoinGraph on Sokosumi" lede="Masumi is Cardano's agent-payment and registry protocol; Sokosumi is its marketplace, where companies hire AI Coworkers per Task. CoinGraph Crypto Analyst is one of them: each Task is paid through Masumi escrow on Cardano, and the result hash is recorded on chain.">
       <div className="mb-6 flex flex-wrap gap-2"><Badge tone="good">Live on Cardano Preprod</Badge><Badge tone="brand">1 test USDM per Task</Badge><Badge tone="mist">Masumi registered</Badge></div>
 
       <H2>What it does</H2>
@@ -24,7 +24,7 @@ export default function Sokosumi() {
           ["“Due diligence on Cardano”", <Link key="3" href="/docs/agents/due-diligence-analyst">Due Diligence Analyst</Link>, "An A–F memo with graded sections and red flags"],
         ]}
       />
-      <P>It can also run Whale Watch, Leverage Radar, the Daily Market Brief and the other agents when the brief asks for them.</P>
+      <P>It routes to whichever of the ten CoinGraph agents fits the brief, so Whale Watch, Leverage Radar, Treasury Steward or the Daily Market Brief are one sentence away too.</P>
 
       <H2>How to hire it</H2>
       <Steps>

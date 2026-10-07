@@ -99,7 +99,7 @@ export const ENDPOINT_DOCS: EndpointDoc[] = [
   {
     slug: "monitor", group: "Watch", tier: "Premium", mcp: "watch_tokens",
     title: "Monitors & webhooks", lede: "Get a signed webhook when a signal fires, a verdict changes or a brief is written.",
-    intro: <>Create a monitor for up to 50 tokens. CoinGraph POSTs to your HTTPS endpoint and signs every message. The <code>secret</code> is returned once; keep it to verify messages and to manage the monitor.</>,
+    intro: <>Create a monitor for up to 50 tokens. CoinGraph POSTs to your HTTPS endpoint and signs every message with HMAC-SHA256 in the <code>X-CoinGraph-Signature</code> header. The <code>secret</code> is returned once; keep it to verify messages and to manage the monitor.</>,
     operations: [
       { method: "POST", path: "/v1/monitor", summary: "Create a monitor", params: [{ name: "tokens", type: "string[] (1–50)", required: true, in: "body", description: "Token ids to watch." }, { name: "webhook_url", type: "https URL", required: true, in: "body", description: "Public HTTPS endpoint. Private and internal addresses are rejected." }, { name: "conditions", type: "object", in: "body", description: <><code>kinds[]</code> (signal kinds), <code>min_severity</code> 1–3 (default 2), <code>verdict_changes</code>, <code>new_briefs</code>.</> }], example: "monitor", exampleLabel: "Watch ADA, LINK and SOL" },
       { method: "GET", path: "/v1/monitor", summary: "List your monitors", params: [{ name: "X-Monitor-Secret", type: "string", required: true, in: "header", description: "The secret from creation." }] },

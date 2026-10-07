@@ -115,7 +115,7 @@ Every response: { object, id, as_of, data, sources }. Unmeasured values are "una
 - GET /evaluate/{token} — verdict proceed/caution/avoid per dimension, with reasons and sources
 - POST /evaluate {token, size_usd?, policy?} — same, scored against your order size and rules
 - GET /explain/{token} — latest brief (why it moved), every claim cited
-- POST /explain {token, hours?} — run a fresh investigation (~60s)
+- POST /explain {token, hours?} — run a fresh investigation (30–90 s)
 - POST /ask {token, question | claim} — cited answer, or supported/contradicted/unknown
 
 ## Watch
@@ -123,7 +123,7 @@ Every response: { object, id, as_of, data, sources }. Unmeasured values are "una
 
 ## Trust
 - GET /record[/{token}] — public scorecard: every call we made and whether it was right
-- GET /verify/{id} — canonical object, sha256, Chainlink attestation, source provenance
+- GET /verify/{id} — canonical object, sha256, source provenance (Chainlink CRE attestation in progress)
 
 ## Agents
 Ready-made agents built on the data above. POST /agents/{id} with JSON input → { verdict, summary, result, reasons, run_id, verify_url }. GET /agents lists input schemas and examples.
@@ -136,7 +136,7 @@ Prompts: pre_trade_check, wallet_safety_check, token_due_diligence
 
 ## Payments and access
 Guide: ${BASE_URL}/docs/access. Agents pay per call with x402 (no account); companies hire the Coworker on Sokosumi (Masumi escrow); design partners send Authorization: Bearer cg_… (request one at ajay@coingraph.ai); MCP is free during the preview.
-${PRICING_NOTES.summary} Paid endpoints answer 402 with x402 payment details (PAYMENT-REQUIRED header); pay on Cardano and retry with the PAYMENT-SIGNATURE header, or send a design-partner key as Authorization: Bearer cg_….
+${PRICING_NOTES.summary}
 
 CoinGraph never executes, custodies or advises. The caller decides.
 `;
