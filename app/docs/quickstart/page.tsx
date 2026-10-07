@@ -10,6 +10,8 @@ const MCP_URL = API.replace("/api/v1", "/mcp");
 export default function Quickstart() {
   const ev = example("evaluate_get")?.response as { data?: { verdict?: string; confidence?: number; reasons?: unknown[]; dimensions?: Record<string, { rating: string }> }; id?: string } | undefined;
   const short = ev?.data ? JSON.stringify({ id: ev.id, verdict: ev.data.verdict, confidence: ev.data.confidence, dimensions: Object.fromEntries(Object.entries(ev.data.dimensions ?? {}).map(([k, v]) => [k, v.rating])) }, null, 2) : null;
+  const caution = example("evaluate_get_caution")?.response as { data?: { verdict?: string; dimensions?: Record<string, { rating: string; reasons?: { text: string }[] }> }; id?: string } | undefined;
+  const cautionShort = caution?.data ? JSON.stringify({ id: caution.id, verdict: caution.data.verdict, dimensions: Object.fromEntries(Object.entries(caution.data.dimensions ?? {}).map(([k, v]) => [k, v.rating])), reasons: Object.values(caution.data.dimensions ?? {}).filter((d) => d.rating !== "ok").flatMap((d) => (d.reasons ?? []).map((r) => r.text)) }, null, 2) : null;
   return (
     <DocPage href="/docs/quickstart">
       <P>No account or key is needed to start. Pick the path that fits you; each takes about two minutes.</P>
@@ -22,6 +24,9 @@ export default function Quickstart() {
         <Step title="Read the verdict">
           <P>You get a verdict (<C>proceed</C>, <C>caution</C> or <C>avoid</C>), a rating per dimension, the reasons with their sources, and an id. This is the real response, shortened:</P>
           {short && <CodeTabs title="Response (shortened)" samples={[{ label: "JSON", code: short, node: highlightJson(short) }]} />}
+          <P>The same call on PEPE, the same day, flags the contract: it can blacklist addresses and pause transfers. The verdict changes to <C>caution</C> and says why.</P>
+          <Request method="GET" path="/evaluate/pepe" />
+          {cautionShort && <CodeTabs title="Response (shortened, real)" samples={[{ label: "JSON", code: cautionShort, node: highlightJson(cautionShort) }]} />}
         </Step>
         <Step title="Size it to your order">
           <P>Add your order size and rules with <C>POST</C>. CoinGraph compares the order with order-book depth, daily volume and the best on-chain route.</P>

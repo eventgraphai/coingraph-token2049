@@ -44,6 +44,15 @@ export default function McpConnect() {
       <P>Any MCP client library works. With the official TypeScript SDK:</P>
       <CodeTabs samples={[{ label: "TypeScript", code: `import { Client } from "@modelcontextprotocol/sdk/client/index.js";\nimport { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";\n\nconst client = new Client({ name: "my-agent", version: "1.0.0" });\nawait client.connect(new StreamableHTTPClientTransport(new URL("${URL}")));\n\nconst result = await client.callTool({\n  name: "check_token",\n  arguments: { token: "solana", size_usd: 5000 },\n});\nconsole.log(result.content[0].text); // { object: "evaluation", data: { verdict, … } }` }]} />
 
+      <H2>What you will see</H2>
+      <P>A real exchange through the connector (7 October 2026, 10:55 UTC). The tool result is shortened; the full object is at <C>/proof/eval_d2efbaab9c51154d751d</C>.</P>
+      <div className="my-5 space-y-3 text-[14px]">
+        <div className="rounded-xl border border-edge bg-slab p-4"><p className="numerals text-[10px] uppercase tracking-[0.14em] text-mist">You</p><p className="mt-1 text-bone">Is it safe to buy $5K of LINK right now? Use CoinGraph.</p></div>
+        <div className="rounded-xl border border-edge bg-slab p-4"><p className="numerals text-[10px] uppercase tracking-[0.14em] text-mist">Claude calls</p><p className="mt-1"><C>check_token</C> with <C>{"{ token: \"chainlink\", size_usd: 5000 }"}</C></p></div>
+        <CodeTabs title="Tool result (shortened, real)" samples={[{ label: "JSON", ...json({ object: "evaluation", id: "eval_d2efbaab9c51154d751d", data: { verdict: "proceed", confidence: 0.95, dimensions: { momentum: "ok", liquidity: "ok", leverage: "ok", onchain: "ok", supply: "ok", context: "ok", contract: "ok" }, reasons: ["1h -0.81%, 24h -3.8%: nothing stretched", "$2.8M available within 2% of the price on tracked order books", "Funding 0.01% per 8h: leverage not crowded"], size_check: { order_usd: 5000, share_of_24h_volume_pct: 0.002, best_route_impact_pct: 0, dex_quote: { venue: "paraswap", price_impact_pct: 0.115 } }, onchain: "Net $2M withdrawn from exchanges in 24h — holders taking custody", verify_url: "https://token2049.coingraph.ai/api/v1/verify/eval_d2efbaab9c51154d751d" } }) }]} />
+        <div className="rounded-xl border border-brand/30 bg-brand/[0.06] p-4"><p className="numerals text-[10px] uppercase tracking-[0.14em] text-brand">Claude answers</p><p className="mt-1 leading-relaxed text-bone">Yes, as far as liquidity and risk go: CoinGraph rates LINK <strong>proceed</strong> with 95% confidence. A $5K buy is 0.002% of daily volume and barely moves the price on exchange order books ($2.8M available within 2%; on-chain via ParaSwap it would cost 0.115%). Funding is 0.01% per 8h, so leverage isn&apos;t crowded, $2M net left exchanges in the last 24h, and GoPlus finds no contract risks. Momentum is soft (−3.8% in 24h) but not stretched. Proof: token2049.coingraph.ai/proof/eval_d2efbaab9c51154d751d. This is information, not advice.</p></div>
+      </div>
+
       <H2>What to ask</H2>
       <Table
         head={["You ask", "CoinGraph tool used"]}

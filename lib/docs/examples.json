@@ -3575,6 +3575,216 @@
     },
     "sources": []
    }
+  },
+  "evaluate_get_caution": {
+   "request": {
+    "method": "GET",
+    "path": "/evaluate/pepe"
+   },
+   "response": {
+    "object": "evaluation",
+    "id": "eval_2e475e93c67deef1badd",
+    "as_of": "2026-10-07T10:56:00.000Z",
+    "data": {
+     "token": {
+      "id": "pepe",
+      "symbol": "PEPE",
+      "name": "Pepe",
+      "rank": 61
+     },
+     "verdict": "caution",
+     "confidence": 0.95,
+     "dimensions": {
+      "momentum": {
+       "rating": "ok",
+       "reasons": [
+        {
+         "text": "1h +0.24%, 24h -5.37%: nothing stretched",
+         "source": "coingecko:/coins/markets"
+        }
+       ]
+      },
+      "liquidity": {
+       "rating": "ok",
+       "reasons": [
+        {
+         "text": "$13.2M available within 2% of the price across exchanges (CoinGecko)",
+         "source": "coingecko:/coins/{id}/tickers",
+         "info": true
+        }
+       ]
+      },
+      "leverage": {
+       "rating": "ok",
+       "reasons": [
+        {
+         "text": "Funding -0.0181% per 8h: leverage not crowded",
+         "source": "ccxt:fetchFundingRates"
+        }
+       ]
+      },
+      "onchain": {
+       "rating": "ok",
+       "reasons": [
+        {
+         "text": "Exchange net flow $1.1M in 24h: normal",
+         "source": "nownodes:eth_getLogs",
+         "info": true
+        }
+       ]
+      },
+      "supply": {
+       "rating": "ok",
+       "reasons": [
+        {
+         "text": "FDV / market cap 1",
+         "source": "coingecko:/coins/markets",
+         "info": true
+        },
+        {
+         "text": "Top 10 holders own 20.6% of supply",
+         "source": "goplus/nownodes holders",
+         "info": true
+        },
+        "… 1 more"
+       ]
+      },
+      "context": {
+       "rating": "ok",
+       "reasons": [
+        {
+         "text": "No fundamental or mood flags",
+         "source": "coingraph"
+        }
+       ]
+      },
+      "contract": {
+       "rating": "caution",
+       "reasons": [
+        {
+         "text": "Contract can blacklist addresses (ETH)",
+         "source": "goplus:/token_security"
+        },
+        {
+         "text": "Transfers can be paused (ETH)",
+         "source": "goplus:/token_security"
+        }
+       ]
+      }
+     },
+     "reasons": [
+      {
+       "dimension": "contract",
+       "text": "Contract can blacklist addresses (ETH)",
+       "source": "goplus:/token_security"
+      },
+      {
+       "dimension": "contract",
+       "text": "Transfers can be paused (ETH)",
+       "source": "goplus:/token_security"
+      }
+     ],
+     "size_check": null,
+     "policy_check": null,
+     "watch_next": [],
+     "snapshot": {
+      "market": {
+       "price_usd": 0.00000411,
+       "market_cap_usd": 1730800302,
+       "fully_diluted_valuation_usd": 1730800302,
+       "volume_24h_usd": 221899742,
+       "rank": 61,
+       "change_pct": {
+        "15m": 0,
+        "1h": 0.24,
+        "4h": -0.48,
+        "24h": -5.37,
+        "7d": -4.7637,
+        "30d": 14.4222,
+        "200d": 18.0823,
+        "1y": -58.6077
+       },
+       "high_24h_usd": 0.00000437,
+       "low_24h_usd": 0.00000407,
+       "ath_usd": 0.00002803,
+       "ath_date": "2024-12-09T08:30:35.000Z",
+       "from_ath_pct": -85.32,
+       "atl_usd": 5.5142e-8,
+       "from_atl_pct": 7361.04,
+       "volatility_24h_pct": 4.33,
+       "…": "3 more fields"
+      },
+      "liquidity_depth": "unassessed",
+      "derivatives": {
+       "funding": [
+        {
+         "venue": "binanceusdm",
+         "symbol": "1000PEPE/USDT:USDT",
+         "rate_pct": -0.0154,
+         "next_rate_pct": null,
+         "next_at": null,
+         "annualised_pct": -16.9,
+         "mark": 0.0041129,
+         "index": 0.00411695,
+         "basis_pct": -0.1
+        },
+        {
+         "venue": "bybit",
+         "symbol": "1000PEPE/USDT:USDT",
+         "rate_pct": -0.0125,
+         "next_rate_pct": null,
+         "next_at": null,
+         "annualised_pct": -13.7,
+         "mark": 0.004111,
+         "index": 0.0041143,
+         "basis_pct": -0.08
+        },
+        "… 1 more"
+       ],
+       "open_interest_change": {
+        "1h": -0.05,
+        "4h": -1.79,
+        "24h": -9.08
+       },
+       "liquidations_1h": {
+        "count": 8,
+        "usd": 27328.7,
+        "longs_usd": 27328.7,
+        "shorts_usd": 0
+       }
+      },
+      "onchain_flows_24h": {
+       "inflow_usd": 3748070,
+       "outflow_usd": 2648220,
+       "net_usd": 1099850
+      },
+      "supply": {
+       "fdv_to_market_cap": 1,
+       "top_holders": {
+        "top10": 20.6,
+        "top20": null,
+        "as_of": "2026-10-06T20:37:00.000Z"
+       }
+      }
+     },
+     "disclaimer": "CoinGraph never executes, custodies or advises. The caller decides.",
+     "hash": "f6918a19706483a605ddd4c6657f65715d3ed818810e9b19ed4d44c029bfd9db",
+     "verify_url": "https://token2049.coingraph.ai/api/v1/verify/eval_2e475e93c67deef1badd"
+    },
+    "sources": [
+     {
+      "provider": "coingecko",
+      "endpoint": "/coins/markets",
+      "as_of": "2026-10-07T10:56:00.000Z"
+     },
+     {
+      "provider": "ccxt",
+      "endpoint": "fetchTickers",
+      "as_of": "2026-10-07T10:55:00.000Z"
+     },
+     "… 13 more"
+    ]
+   }
   }
  }
 }
