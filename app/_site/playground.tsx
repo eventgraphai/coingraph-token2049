@@ -118,7 +118,7 @@ export function Playground({ agents, base }: { agents: AgentCard[]; base: string
           </div>
           <div className="text-right">
             <p className="numerals text-[18px] font-semibold">{agent.tada} tADA <span className="text-[12px] font-normal text-mist">per run</span></p>
-            <p className="text-[11px] text-mist">{agent.tier} · mainnet ${agent.usd.toFixed(2)}{agent.masumi ? " · on Masumi" : ""}</p>
+            <p className="text-[11px] text-mist">{agent.tier} · mainnet ${agent.usd.toFixed(2)}{agent.masumi ? " · hire on Sokosumi" : ""}</p>
           </div>
         </div>
         <p className="mt-4 max-w-3xl text-[14px] leading-relaxed text-mist">{agent.description}</p>

@@ -29,7 +29,7 @@ export default async function AgentPage({ params }: { params: Promise<{ id: stri
     <DocPage href={`/docs/agents/${a.id}`} eyebrow="Agents" title={a.name} lede={a.tagline}>
       <div className="mb-6 flex flex-wrap items-center gap-2 text-[13px] text-mist">
         <Badge tone="brand">{a.tier === "pro" ? "Pro" : "Premium"} · {TIER_PRICE[a.tier].tada} tADA</Badge>
-        {a.masumi && <Badge tone="mist">Listed on Masumi</Badge>}
+        {a.masumi && <Link href="/docs/sokosumi" className="no-u"><Badge tone="mist">Hire on Sokosumi</Badge></Link>}
         <span>MCP tool <Link href={`/docs/mcp/tools#${tool}`}><C>{tool}</C></Link></span>
         <span>·</span>
         <Link href={`/agents#${a.id}`}>Run it in the playground →</Link>

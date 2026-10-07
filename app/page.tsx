@@ -297,7 +297,7 @@ export default async function Home() {
             <SectionHead id="origins" eyebrow="TOKEN2049 Origins" title="Built for the hackathon," accent="on partner rails." lede="This build adds deep on-chain coverage, ten agents, machine payments and verifiable proofs to CoinGraph." />
             <div className="mt-12 grid gap-4 lg:grid-cols-3">
               <Track name="NOWNodes" status="Live" text="Full nodes for Ethereum, BNB Chain, Bitcoin, Solana and Cardano power exchange flows and reserves, whale transfers, holder concentration, fees, and live address lookups." stat={stats ? `${compact(stats.transfers)} large transfers tracked` : undefined} />
-              <Track name="Cardano · x402 · Masumi" status="In progress" text="Agents pay per call in ADA with x402, with no account needed. Trade Gatekeeper, Wallet Guard and Due Diligence Analyst are listed on Masumi so other agents can hire them through escrow." />
+              <Track name="Cardano · Masumi · Sokosumi" status="Live" text="CoinGraph Crypto Analyst is a Masumi Coworker on Sokosumi. Teams and agents hire it per Task; each Task is paid 1 test USDM into Masumi escrow on Cardano Preprod, the result hash goes on chain, and the payout is collected and verified on chain. x402 pay-per-call for the API comes next." stat="Registered on Masumi · hosted 24/7" />
               <Track name="Chainlink CRE" status="In progress" text="A Chainlink workflow attests each answer’s fingerprint, so anyone can confirm what CoinGraph said and when, without trusting CoinGraph." />
             </div>
           </div>

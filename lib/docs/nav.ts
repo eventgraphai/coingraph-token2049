@@ -45,6 +45,7 @@ export const DOCS_NAV: DocGroup[] = [
     title: "Agents",
     links: [
       { href: "/docs/agents", title: "Overview", description: "Ten ready-made agents: how they work and how to call them." },
+      { href: "/docs/sokosumi", title: "Hire on Sokosumi", description: "CoinGraph Crypto Analyst as a paid Masumi Coworker on Cardano." },
       { href: "/docs/agents/trade-gatekeeper", title: "Trade Gatekeeper", description: "ALLOW, REDUCE or BLOCK a trade of a given size." },
       { href: "/docs/agents/wallet-guard", title: "Wallet Guard", description: "SAFE, WARN or STOP before signing a swap or send." },
       { href: "/docs/agents/due-diligence-analyst", title: "Due Diligence Analyst", description: "A graded due-diligence memo on any token." },

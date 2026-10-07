@@ -37,7 +37,7 @@ export default function Pricing() {
       <Callout kind="note">On Cardano every payment output must carry a minimum amount of ADA, which is why testnet prices start at 2 tADA. On mainnet, small calls are bought as prepaid packs.</Callout>
 
       <H2>Masumi</H2>
-      <P>Trade Gatekeeper, Wallet Guard and Due Diligence Analyst are listed on Masumi, the agent network on Cardano. Other agents can discover and hire them there, with payment held in escrow until the result is delivered.</P>
+      <P>CoinGraph Crypto Analyst is registered on Masumi, the agent network on Cardano, and hired per Task on Sokosumi: 1 test USDM per Task, held in Masumi escrow until the result is delivered, with the result hash recorded on chain. It runs Trade Gatekeeper, Wallet Guard and Due Diligence Analyst behind one plain-language brief. See <Link href="/docs/sokosumi">Hire on Sokosumi</Link>.</P>
 
       <H2>Design partners</H2>
       <P>Teams building agents, wallets or treasuries can use an API key instead of paying per call: send it as <C>Authorization: Bearer cg_…</C>. Keys also let assistants such as Claude use paid tools. Write to <a href="mailto:ajay@coingraph.ai?subject=CoinGraph%20design%20partner">ajay@coingraph.ai</a>.</P>
