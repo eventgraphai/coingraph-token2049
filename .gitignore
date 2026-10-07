@@ -45,3 +45,6 @@ next-env.d.ts
 
 # generated token data reports
 /reports
+
+# Coworker private state (journals, results, config)
+coworker/.local/

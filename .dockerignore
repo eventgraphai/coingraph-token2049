@@ -9,3 +9,4 @@ cre/secrets.yaml
 reports
 *.log
 .DS_Store
+coworker
