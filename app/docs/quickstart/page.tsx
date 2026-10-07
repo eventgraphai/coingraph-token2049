@@ -49,7 +49,7 @@ export default function Quickstart() {
       <P>Agents do a whole job in one call. Trade Gatekeeper decides whether a trade should go ahead:</P>
       <Request method="POST" path="/agents/trade-gatekeeper" body={{ token: "solana", size_usd: 5000, side: "buy" }} />
       <P>
-        It answers <C>ALLOW</C>, <C>REDUCE</C> (with a safe size) or <C>BLOCK</C>, with the reasons. Prefer clicking? Run any agent in the <Link href="/agents">playground</Link>.
+        It answers <C>ALLOW</C>, <C>REDUCE</C> (with a safe size) or <C>BLOCK</C>, with the reasons. Direct API runs are paid per call with x402 (5 tADA here); the <Link href="/agents">playground</Link> gives a few free runs a day, and <Link href="/docs/access">Get access</Link> covers every path including partner keys.
       </P>
 
       <H2 id="next">Next steps</H2>

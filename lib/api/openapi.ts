@@ -134,7 +134,8 @@ Remote MCP server (Streamable HTTP): ${BASE_URL}/mcp — Claude Code: \`claude m
 Tools: search_tokens, get_token_snapshot, get_token_timeline, check_token, get_token_brief, ask_about_token, watch_tokens, get_market_overview, lookup_address, get_track_record, get_proof, get_service_status, plus one run_<agent> tool per agent (e.g. run_trade_gatekeeper)
 Prompts: pre_trade_check, wallet_safety_check, token_due_diligence
 
-## Payments
+## Payments and access
+Guide: ${BASE_URL}/docs/access. Agents pay per call with x402 (no account); companies hire the Coworker on Sokosumi (Masumi escrow); design partners send Authorization: Bearer cg_… (request one at ajay@coingraph.ai); MCP is free during the preview.
 ${PRICING_NOTES.summary} Paid endpoints answer 402 with x402 payment details (PAYMENT-REQUIRED header); pay on Cardano and retry with the PAYMENT-SIGNATURE header, or send a design-partner key as Authorization: Bearer cg_….
 
 CoinGraph never executes, custodies or advises. The caller decides.

@@ -26,6 +26,7 @@ export const DOCS_NAV: DocGroup[] = [
     links: [
       { href: "/docs", title: "Introduction", description: "What CoinGraph is and the three ways to use it." },
       { href: "/docs/quickstart", title: "Quickstart", description: "Your first check in two minutes: API, Claude or an agent." },
+      { href: "/docs/access", title: "Get access", description: "Agents pay per call, companies hire on Sokosumi, partners use a key, MCP is free." },
       { href: "/docs/concepts", title: "Core concepts", description: "Token ids, the response envelope, sources, unassessed, verdicts and proofs." },
     ],
   },

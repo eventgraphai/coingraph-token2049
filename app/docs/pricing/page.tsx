@@ -70,7 +70,7 @@ export default function Pricing() {
       <CodeTabs title="Receipt (decoded PAYMENT-RESPONSE header, real)" samples={[{ label: "JSON", code: RECEIPT, node: highlightJson(RECEIPT) }]} />
       <P>A whole round trip takes a few seconds. <a href="https://preprod.cardanoscan.io/transaction/d3a147217859d56695edf6135e4c34c5b483efa120052e7bde4215b39bd1d477" target="_blank" rel="noreferrer">That transaction on Cardanoscan</a>.</P>
 
-      <H3>Pay from code</H3>
+      <H3 id="pay-from-code">Pay from code</H3>
       <P>Packages: <C>@x402/fetch</C>, <C>@x402/cardano</C> and <C>@x402/core</C>, version 2.26.0.</P>
       <CodeTabs samples={[{ label: "TypeScript", code: BUYER }]} />
       <P>The same buyer is in the repository as <C>scripts/x402-buyer.ts</C>.</P>

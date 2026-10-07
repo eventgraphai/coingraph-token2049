@@ -275,7 +275,8 @@ export default async function Home() {
             <Tier name="Pro" price="10 tADA" usd="$0.25" items={["Due Diligence Analyst", "Opportunity Scout", "Portfolio Checkup", "Treasury Steward"]} />
           </div>
           <p className="mt-4 text-[13px] text-mist">
-            Live on Cardano preprod: paid calls answer 402 and settle in tADA via x402. Mainnet equivalents shown in USD. Design partners use an API key instead of paying per call.
+            Live on Cardano preprod: paid calls answer 402 and settle in tADA via x402. Mainnet equivalents shown in USD. Design partners use an API key instead of paying per call.{" "}
+            <Link href="/docs/access" className="text-brand hover:underline">How to get access →</Link>
           </p>
           <div className="mt-10 grid gap-3 md:grid-cols-3">
             {[
